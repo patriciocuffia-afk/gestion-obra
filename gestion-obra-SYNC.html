@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Gestión de Obra — Estudio Cuffia</title>
+<meta name="theme-color" content="#1a4a6b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Gestión Obra">
+<link rel="manifest" href="data:application/json,{%22name%22:%22Gesti%C3%B3n+de+Obra%22,%22short_name%22:%22Obra%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%231a4a6b%22,%22theme_color%22:%22%231a4a6b%22}">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --primary: #1a4a6b; --primary-light: #2d6a9f; --accent: #e8a020;
+    --danger: #c0392b; --success: #27ae60; --bg: #f5f7fa;
+    --card: #ffffff; --border: #dde3ea; --text: #2c3e50; --text-muted: #7f8c8d;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  .header { background: var(--primary); color: white; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+  .header h1 { font-size: 17px; font-weight: 600; }
+  .header-sub { font-size: 11px; opacity: 0.75; }
+  .sync-badge { font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 700; margin-left: 6px; }
+  .sync-ok { background: var(--success); color: white; }
+  .sync-off { background: #e74c3c; color: white; }
+  .btn-obra { background: var(--accent); color: white; border: none; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .tabs { display: flex; background: white; border-bottom: 2px solid var(--border); position: sticky; top: 57px; z-index: 90; overflow-x: auto; }
+  .tab { padding: 11px 16px; font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; color: var(--text-muted); border-bottom: 3px solid transparent; margin-bottom: -2px; }
+  .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 700; }
+  .content { padding: 16px; max-width: 900px; margin: 0 auto; }
+  .card { background: var(--card); border-radius: 10px; border: 1px solid var(--border); padding: 16px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .card-title { font-size: 14px; font-weight: 700; color: var(--primary); margin-bottom: 12px; }
+  .cotiz-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .cotiz-item label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; text-transform: uppercase; }
+  .cotiz-item input { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; font-weight: 600; }
+  .resumen-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .resumen-box { background: var(--bg); border-radius: 8px; padding: 12px; text-align: center; }
+  .resumen-box .monto { font-size: 18px; font-weight: 700; color: var(--primary); }
+  .resumen-box .label { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .form-row.tres { grid-template-columns: 2fr 1fr 1fr; }
+  .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
+  .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 9px 11px; border: 1px solid var(--border); border-radius: 7px; font-size: 14px; color: var(--text); background: white; }
+  .form-group textarea { resize: vertical; min-height: 60px; }
+  .btn-primary { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 7px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 4px; }
+  .btn-primary:hover { background: var(--primary-light); }
+  .btn-danger { background: var(--danger); color: white; border: none; padding: 5px 10px; border-radius: 5px; font-size: 12px; cursor: pointer; }
+  .btn-usar { background: var(--accent); color: white; border: none; padding: 4px 10px; border-radius: 5px; font-size: 11px; font-weight: 600; cursor: pointer; }
+  .tabla-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: var(--primary); color: white; padding: 9px 10px; text-align: left; font-size: 12px; white-space: nowrap; }
+  td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f8f9fa; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-pesos { background: #e8f5e9; color: #2e7d32; }
+  .badge-oficial { background: #e3f2fd; color: #1565c0; }
+  .badge-blue { background: #f3e5f5; color: #6a1b9a; }
+  .balance-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .balance-socio { background: var(--bg); border-radius: 10px; padding: 16px; border: 2px solid var(--border); }
+  .balance-socio.winner { border-color: var(--accent); background: #fffbf0; }
+  .balance-socio h3 { font-size: 15px; font-weight: 700; margin-bottom: 10px; color: var(--primary); }
+  .balance-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px; border-bottom: 1px solid var(--border); }
+  .balance-row:last-child { border-bottom: none; font-weight: 700; }
+  .favor-badge { display: inline-block; background: var(--accent); color: white; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-top: 8px; }
+  .stock-ok { color: var(--success); font-weight: 700; }
+  .stock-low { color: var(--danger); font-weight: 700; }
+  .empty { text-align: center; padding: 32px; color: var(--text-muted); font-size: 14px; }
+  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; padding: 16px; }
+  .modal-bg.show { display: flex; }
+  .modal { background: white; border-radius: 12px; padding: 24px; width: 100%; max-width: 420px; }
+  .modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--primary); }
+  .modal-btns { display: flex; gap: 10px; margin-top: 16px; }
+  .btn-sec { background: white; color: var(--text); border: 1px solid var(--border); padding: 10px 20px; border-radius: 7px; font-size: 14px; cursor: pointer; flex: 1; }
+  .obra-selector { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 13px; font-weight: 600; color: var(--primary); cursor: pointer; max-width: 180px; }
+  .consumir-row { display: flex; align-items: center; gap: 5px; }
+  .consumir-input { width: 60px; padding: 4px 6px; border: 1px solid var(--border); border-radius: 5px; font-size: 12px; }
+  .loading { position: fixed; inset: 0; background: var(--primary); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 999; color: white; }
+  .loading h2 { font-size: 20px; margin-top: 16px; }
+  .loading p { font-size: 13px; opacity: 0.8; margin-top: 8px; }
+  .spinner { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (max-width: 600px) {
+    .cotiz-grid { grid-template-columns: 1fr 1fr; }
+    .resumen-grid { grid-template-columns: 1fr 1fr; }
+    .form-row, .form-row.tres { grid-template-columns: 1fr; }
+    .balance-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- PANTALLA DE CARGA -->
+<div class="loading" id="loading">
+  <div class="spinner"></div>
+  <h2>Gestión de Obras</h2>
+  <p>Estudio Jurídico Cuffia — Conectando...</p>
+</div>
+
+<div id="app" style="display:none">
+
+<div class="header">
+  <div>
+    <div class="header-sub">Estudio Jurídico Cuffia</div>
+    <div style="display:flex;align-items:center">
+      <h1>Gestión de Obras</h1>
+      <span class="sync-badge sync-ok" id="sync-badge">● SYNC</span>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <select class="obra-selector" id="selectorObra" onchange="cambiarObra(this.value)"></select>
+    <button class="btn-obra" onclick="abrirModalObra()">+ Obra</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('resumen',this)">Resumen</div>
+  <div class="tab" onclick="showTab('gastos',this)">Gastos</div>
+  <div class="tab" onclick="showTab('stock',this)">Stock</div>
+  <div class="tab" onclick="showTab('categorias',this)">Categorías</div>
+  <div class="tab" onclick="showTab('socios',this)">Socios</div>
+  <div class="tab" onclick="showTab('cotizacion',this)">Cotización</div>
+</div>
+
+<div class="content">
+
+  <!-- RESUMEN -->
+  <div id="tab-resumen">
+    <div class="card">
+      <div class="card-title">Total gastado</div>
+      <div class="resumen-grid">
+        <div class="resumen-box"><div class="monto" id="r-pesos">$0</div><div class="label">Pesos</div></div>
+        <div class="resumen-box"><div class="monto" id="r-oficial">USD 0</div><div class="label">Dólar Oficial</div></div>
+        <div class="resumen-box"><div class="monto" id="r-blue">USD 0</div><div class="label">Dólar Blue</div></div>
+      </div>
+    </div>
+    <div class="card"><div class="card-title">Por categoría</div><div id="resumen-categorias"></div></div>
+    <div class="card"><div class="card-title">Últimos gastos</div><div id="resumen-ultimos" class="tabla-wrap"></div></div>
+  </div>
+
+  <!-- GASTOS -->
+  <div id="tab-gastos" style="display:none">
+    <div class="card">
+      <div class="card-title">Nuevo gasto</div>
+      <div class="form-row tres">
+        <div class="form-group"><label>Descripción</label><input type="text" id="g-desc" placeholder="Ej: Cemento portland"></div>
+        <div class="form-group"><label>Monto</label><input type="number" id="g-monto" placeholder="0" step="0.01"></div>
+        <div class="form-group"><label>Moneda</label>
+          <select id="g-moneda"><option value="pesos">Pesos</option><option value="oficial">Dólar Oficial</option><option value="blue">Dólar Blue</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Categoría</label><select id="g-cat"></select></div>
+        <div class="form-group"><label>Pagado por</label><select id="g-socio"></select></div>
+      </div>
+      <div class="form-group" style="margin-bottom:10px"><label>Fecha</label><input type="date" id="g-fecha"></div>
+      <div class="form-group" style="margin-bottom:10px"><label>Nota (opcional)</label><textarea id="g-nota" placeholder="Observaciones..."></textarea></div>
+      <button class="btn-primary" onclick="agregarGasto()">Registrar gasto</button>
+    </div>
+    <div class="card"><div class="card-title">Historial</div><div class="tabla-wrap" id="tabla-gastos"></div></div>
+  </div>
+
+  <!-- STOCK -->
+  <div id="tab-stock" style="display:none">
+    <div class="card">
+      <div class="card-title">Agregar material</div>
+      <div class="form-row tres">
+        <div class="form-group"><label>Material</label><input type="text" id="st-mat" placeholder="Ej: Cemento"></div>
+        <div class="form-group"><label>Cantidad</label><input type="number" id="st-cant" placeholder="0" step="0.01"></div>
+        <div class="form-group"><label>Unidad</label><input type="text" id="st-unidad" placeholder="kg, m², bolsa"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Stock mínimo (alerta)</label><input type="number" id="st-min" placeholder="0"></div>
+        <div class="form-group" style="display:flex;align-items:flex-end;"><button class="btn-primary" onclick="agregarStock()">Agregar</button></div>
+      </div>
+    </div>
+    <div class="card"><div class="card-title">Inventario actual</div><div class="tabla-wrap" id="tabla-stock"></div></div>
+  </div>
+
+  <!-- CATEGORIAS -->
+  <div id="tab-categorias" style="display:none">
+    <div class="card">
+      <div class="card-title">Nueva categoría</div>
+      <div class="form-row">
+        <div class="form-group"><label>Nombre</label><input type="text" id="cat-nombre" placeholder="Ej: Electricista"></div>
+        <div class="form-group" style="display:flex;align-items:flex-end;"><button class="btn-primary" onclick="agregarCategoria()">Agregar</button></div>
+      </div>
+    </div>
+    <div class="card"><div class="card-title">Categorías</div><div id="lista-categorias"></div></div>
+  </div>
+
+  <!-- SOCIOS -->
+  <div id="tab-socios" style="display:none">
+    <div class="card">
+      <div class="card-title">Agregar socio</div>
+      <div class="form-row">
+        <div class="form-group"><label>Nombre</label><input type="text" id="socio-nombre" placeholder="Ej: Benjamín"></div>
+        <div class="form-group" style="display:flex;align-items:flex-end;"><button class="btn-primary" onclick="agregarSocio()">Agregar</button></div>
+      </div>
+    </div>
+    <div class="card"><div class="card-title">Balance entre socios</div><div id="balance-socios" class="balance-grid"></div></div>
+    <div id="deuda-socios"></div>
+  </div>
+
+  <!-- COTIZACIÓN -->
+  <div id="tab-cotizacion" style="display:none">
+    <div class="card">
+      <div class="card-title">Cotización del día</div>
+      <div class="cotiz-grid">
+        <div class="cotiz-item"><label>Dólar Oficial ($)</label><input type="number" id="cot-oficial" placeholder="0"></div>
+        <div class="cotiz-item"><label>Dólar Blue ($)</label><input type="number" id="cot-blue" placeholder="0"></div>
+        <div class="cotiz-item"><label>Fecha</label><input type="date" id="cot-fecha"></div>
+      </div>
+      <button class="btn-primary" style="margin-top:12px" onclick="guardarCotizacion()">Guardar cotización</button>
+    </div>
+    <div class="card"><div class="card-title">Historial</div><div id="historial-cotiz" class="tabla-wrap"></div></div>
+  </div>
+
+</div>
+</div>
+
+<!-- MODAL NUEVA OBRA -->
+<div class="modal-bg" id="modal-obra">
+  <div class="modal">
+    <h2>Nueva Obra</h2>
+    <div class="form-group" style="margin-bottom:12px">
+      <label>Nombre de la obra</label>
+      <input type="text" id="nueva-obra-nombre" placeholder="Ej: Casa Rodríguez - Oncativo">
+    </div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label>Dirección (opcional)</label>
+      <input type="text" id="nueva-obra-dir" placeholder="Calle y número">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-sec" onclick="cerrarModalObra()">Cancelar</button>
+      <button class="btn-primary" onclick="crearObra()" style="flex:1">Crear obra</button>
+    </div>
+  </div>
+</div>
+
+<!-- FIREBASE SDK -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, query, orderBy, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAPdA7YCLWMQw4KNJXb0ZdictnqWHe5ebk",
+  authDomain: "costo-de-obras.firebaseapp.com",
+  projectId: "costo-de-obras",
+  storageBucket: "costo-de-obras.firebasestorage.app",
+  messagingSenderId: "485000953207",
+  appId: "1:485000953207:web:bb1989f259434d6edb7572"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// ============ ESTADO LOCAL ============
+let obras = [];
+let obraActualId = null;
+let cotizaciones = [];
+let unsubObras = null;
+let unsubCotiz = null;
+
+function obraActual() { return obras.find(o => o.id === obraActualId); }
+
+function cotizHoy() {
+  if (!cotizaciones || cotizaciones.length === 0) return { oficial: 1000, blue: 1200 };
+  return cotizaciones[cotizaciones.length - 1];
+}
+
+function montoEnPesos(gasto) {
+  const c = cotizHoy();
+  if (gasto.moneda === 'pesos') return gasto.monto;
+  if (gasto.moneda === 'oficial') return gasto.monto * (c.oficial || 0);
+  if (gasto.moneda === 'blue') return gasto.monto * (c.blue || 0);
+  return 0;
+}
+
+function fmt(n) { return '$' + parseFloat(n).toLocaleString('es-AR', {maximumFractionDigits:2}); }
+function fmtUSD(n) { return 'USD ' + parseFloat(n).toLocaleString('es-AR', {maximumFractionDigits:2}); }
+
+function setSyncBadge(ok) {
+  const b = document.getElementById('sync-badge');
+  if (!b) return;
+  b.className = 'sync-badge ' + (ok ? 'sync-ok' : 'sync-off');
+  b.textContent = ok ? '● SYNC' : '● SIN CONEXIÓN';
+}
+
+// ============ FIREBASE LISTENERS ============
+function iniciarListeners() {
+  // Listener de obras
+  if (unsubObras) unsubObras();
+  unsubObras = onSnapshot(collection(db, 'obras'), snap => {
+    obras = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (!obraActualId && obras.length > 0) obraActualId = obras[0].id;
+    setSyncBadge(true);
+    renderizarTodo();
+  }, err => { setSyncBadge(false); });
+
+  // Listener de cotizaciones
+  if (unsubCotiz) unsubCotiz();
+  unsubCotiz = onSnapshot(collection(db, 'cotizaciones'), snap => {
+    cotizaciones = snap.docs.map(d => d.data()).sort((a,b) => a.fecha.localeCompare(b.fecha));
+    renderResumen();
+    renderCotizacion();
+  });
+}
+
+// ============ OBRAS ============
+window.abrirModalObra = () => document.getElementById('modal-obra').classList.add('show');
+window.cerrarModalObra = () => document.getElementById('modal-obra').classList.remove('show');
+
+window.crearObra = async () => {
+  const nombre = document.getElementById('nueva-obra-nombre').value.trim();
+  if (!nombre) { alert('Ingresá un nombre'); return; }
+  const id = Date.now().toString();
+  const obra = {
+    nombre,
+    direccion: document.getElementById('nueva-obra-dir').value.trim(),
+    gastos: [],
+    categorias: ['Gastos Generales', 'Albañil', 'Electricista', 'Plomero', 'Carpintero', 'Pintor', 'Materiales'],
+    socios: ['Patricio'],
+    stock: [],
+    creadoEn: new Date().toISOString()
+  };
+  await setDoc(doc(db, 'obras', id), obra);
+  obraActualId = id;
+  cerrarModalObra();
+  document.getElementById('nueva-obra-nombre').value = '';
+  document.getElementById('nueva-obra-dir').value = '';
+};
+
+window.cambiarObra = (id) => { obraActualId = id; renderizarTodo(); };
+
+function renderSelectorObra() {
+  const sel = document.getElementById('selectorObra');
+  sel.innerHTML = '';
+  if (obras.length === 0) { sel.innerHTML = '<option value="">Sin obras</option>'; return; }
+  obras.forEach(o => {
+    const opt = document.createElement('option');
+    opt.value = o.id; opt.textContent = o.nombre;
+    if (o.id === obraActualId) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+// ============ TABS ============
+window.showTab = (tab, el) => {
+  document.querySelectorAll('[id^="tab-"]').forEach(t => t.style.display = 'none');
+  document.getElementById('tab-' + tab).style.display = 'block';
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
+  if (tab === 'resumen') renderResumen();
+  if (tab === 'gastos') renderGastos();
+  if (tab === 'stock') renderStock();
+  if (tab === 'categorias') renderCategorias();
+  if (tab === 'socios') renderSocios();
+  if (tab === 'cotizacion') renderCotizacion();
+};
+
+// ============ GASTOS ============
+window.agregarGasto = async () => {
+  const obra = obraActual();
+  if (!obra) { alert('Creá una obra primero'); return; }
+  const desc = document.getElementById('g-desc').value.trim();
+  const monto = parseFloat(document.getElementById('g-monto').value);
+  if (!desc || isNaN(monto) || monto <= 0) { alert('Completá descripción y monto'); return; }
+  const gasto = {
+    id: Date.now().toString(), desc, monto,
+    moneda: document.getElementById('g-moneda').value,
+    categoria: document.getElementById('g-cat').value,
+    socio: document.getElementById('g-socio').value,
+    fecha: document.getElementById('g-fecha').value || new Date().toISOString().split('T')[0],
+    nota: document.getElementById('g-nota').value.trim()
+  };
+  const gastos = [...(obra.gastos || []), gasto];
+  await setDoc(doc(db, 'obras', obraActualId), { ...obra, gastos }, { merge: true });
+  document.getElementById('g-desc').value = '';
+  document.getElementById('g-monto').value = '';
+  document.getElementById('g-nota').value = '';
+};
+
+window.eliminarGasto = async (id) => {
+  const obra = obraActual();
+  if (!obra || !confirm('¿Eliminar este gasto?')) return;
+  const gastos = (obra.gastos || []).filter(g => g.id !== id);
+  await setDoc(doc(db, 'obras', obraActualId), { ...obra, gastos }, { merge: true });
+};
+
+function renderGastos() {
+  const obra = obraActual();
+  const catSel = document.getElementById('g-cat');
+  const socioSel = document.getElementById('g-socio');
+  catSel.innerHTML = ''; socioSel.innerHTML = '';
+  if (obra) {
+    (obra.categorias || []).forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; catSel.appendChild(o); });
+    (obra.socios || []).forEach(s => { const o = document.createElement('option'); o.value = s; o.textContent = s; socioSel.appendChild(o); });
+  }
+  const cont = document.getElementById('tabla-gastos');
+  if (!obra || !obra.gastos || obra.gastos.length === 0) { cont.innerHTML = '<div class="empty">Sin gastos registrados</div>'; return; }
+  const gastos = [...obra.gastos].sort((a,b) => b.fecha.localeCompare(a.fecha));
+  cont.innerHTML = `<table>
+    <thead><tr><th>Fecha</th><th>Descripción</th><th>Categoría</th><th>Pagó</th><th>Monto</th><th>≈ Pesos</th><th></th></tr></thead>
+    <tbody>${gastos.map(g => `<tr>
+      <td style="white-space:nowrap">${g.fecha}</td>
+      <td>${g.desc}${g.nota ? `<br><small style="color:var(--text-muted)">${g.nota}</small>` : ''}</td>
+      <td>${g.categoria}</td><td>${g.socio}</td>
+      <td><span class="badge badge-${g.moneda === 'pesos' ? 'pesos' : g.moneda === 'oficial' ? 'oficial' : 'blue'}">${g.moneda === 'pesos' ? fmt(g.monto) : fmtUSD(g.monto) + ' (' + g.moneda + ')'}</span></td>
+      <td>${fmt(montoEnPesos(g))}</td>
+      <td><button class="btn-danger" onclick="eliminarGasto('${g.id}')">✕</button></td>
+    </tr>`).join('')}</tbody></table>`;
+}
+
+// ============ RESUMEN ============
+function renderResumen() {
+  const obra = obraActual();
+  if (!obra) {
+    ['r-pesos','r-oficial','r-blue'].forEach(id => document.getElementById(id).textContent = '$0');
+    document.getElementById('resumen-categorias').innerHTML = '<div class="empty">Creá una obra para comenzar</div>';
+    document.getElementById('resumen-ultimos').innerHTML = '';
+    return;
+  }
+  const totalPesos = (obra.gastos || []).reduce((s,g) => s + montoEnPesos(g), 0);
+  const c = cotizHoy();
+  document.getElementById('r-pesos').textContent = fmt(totalPesos);
+  document.getElementById('r-oficial').textContent = fmtUSD(c.oficial ? totalPesos / c.oficial : 0);
+  document.getElementById('r-blue').textContent = fmtUSD(c.blue ? totalPesos / c.blue : 0);
+  const porCat = {};
+  (obra.gastos || []).forEach(g => { if (!porCat[g.categoria]) porCat[g.categoria] = 0; porCat[g.categoria] += montoEnPesos(g); });
+  document.getElementById('resumen-categorias').innerHTML = Object.entries(porCat).sort((a,b) => b[1]-a[1]).map(([cat, total]) =>
+    `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;"><span>${cat}</span><span style="font-weight:700">${fmt(total)}</span></div>`
+  ).join('') || '<div class="empty">Sin gastos</div>';
+  const ultimos = [...(obra.gastos || [])].sort((a,b) => b.fecha.localeCompare(a.fecha)).slice(0,5);
+  document.getElementById('resumen-ultimos').innerHTML = ultimos.length === 0 ? '<div class="empty">Sin gastos</div>' :
+    `<table><thead><tr><th>Fecha</th><th>Descripción</th><th>Monto</th></tr></thead>
+    <tbody>${ultimos.map(g => `<tr><td>${g.fecha}</td><td>${g.desc}</td><td>${fmt(montoEnPesos(g))}</td></tr>`).join('')}</tbody></table>`;
+}
+
+// ============ STOCK ============
+window.agregarStock = async () => {
+  const obra = obraActual();
+  if (!obra) { alert('Creá una obra primero'); return; }
+  const mat = document.getElementById('st-mat').value.trim();
+  const cant = parseFloat(document.getElementById('st-cant').value);
+  if (!mat || isNaN(cant)) { alert('Completá material y cantidad'); return; }
+  const stock = [...(obra.stock || [])];
+  const existente = stock.find(s => s.material.toLowerCase() === mat.toLowerCase());
+  if (existente) { existente.cantidad += cant; }
+  else { stock.push({ id: Date.now().toString(), material: mat, cantidad: cant, unidad: document.getElementById('st-unidad').value.trim() || 'unidad', minimo: parseFloat(document.getElementById('st-min').value) || 0 }); }
+  await setDoc(doc(db, 'obras', obraActualId), { ...obra, stock }, { merge: true });
+  document.getElementById('st-mat').value = '';
+  document.getElementById('st-cant').value = '';
+  document.getElementById('st-unidad').value = '';
+  document.getElementById('st-min').value = '';
+};
+
+window.actualizarCantidadStock = async (id, val) => {
+  const obra = obraActual();
+  if (!obra) return;
+  const stock = (obra.stock || []).map(s => s.id === id ? { ...s, cantidad: Math.max(0, parseFloat(val) || 0) } : s);
+  await setDoc(doc(db, 'obras', obraActualId), { ...obra, stock }, { merge: true });
+};
+
+window.consumirStock = async (id) => {
+  const obra = obraActual();
+  if (!obra) return;
+  const item = (obra.stock || []).find(s => s.id === id);
+  if (!item) return;
+  const c = parseFloat(document.getElementById('consumo-' + id).value);
+  if (isNaN(c) || c <= 0) { alert('Ingresá una cantidad válida'); return; }
+  if (c > item.cantidad) { alert('No hay suficiente stock'); return; }
+  const stock = (obra.stock || []).map(s => s.id === id ? { ...s, cantidad: Math.round((s.cantidad - c) * 1000) / 1000 } : s);
+  await setDoc(doc(db, 'obras', obraActualId), { ...obra, stock }, { merge: true });
+  document.getElementById('consumo-' + id).value = '';
+};
+
+window.eliminarStock = async (id) => {
+  const obra = obraActual();
+  if (!obra || !confirm('¿Eliminar este material?')) return;
+  const stock = (obra.stock || []).filter(s => s.id !== id);
+  await setDoc(doc(db, 'obras', obraActualId), { ...obra, stock }, { merge: true });
+};
+
+function renderStock() {
+  const obra = obraActual();
+  const cont = document.getElementById('tabla-stock');
+  if (!obra || !obra.stock || obra.stock.length === 0) { cont.innerHTML = '<div class="empty">Sin materiales en inventario</div>'; return; }
+  cont.innerHTML = `<table>
+    <thead><tr><th>Material</th><th>Existencia</th><th>Unidad</th><th>Mínimo</th><th>Estado</th><th>Consumir</th><th></th></tr></thead>
+    <tbody>${obra.stock.map(s => {
+      const ok = s.cantidad >= s.minimo;
+      return `<tr>
+        <td><strong>${s.material}</strong></td>
+        <td><input type="number" value="${s.cantidad}" min="0" step="0.01" style="width:80px;padding:4px 8px;border:1px solid var(--border);border-radius:5px;font-weight:700;" onchange="actualizarCantidadStock('${s.id}',this.value)"></td>
+        <td>${s.unidad}</td><td>${s.minimo}</td>
+        <td><span class="${ok ? 'stock-ok' : 'stock-low'}">${ok ? '✓ OK' : '⚠ Bajo'}</span></td>
+        <td><div class="consumir-row">
+          <input type="number" id="consumo-${s.id}" class="consumir-input" placeholder="0" min="0" step="0.01">
+          <button class="btn-usar" onclick="consumirStock('${s.id}')">Usar</button>
+        </div></td>
+        <td><button class="btn-danger" onclick="eliminarStock('${s.id}')">✕</button></td>
+      </tr>`;
+    }).join('')}</tbody></table>`;
+}
+
+// ============ CATEGORIAS ============
+window.agregarCategoria = async () => {
+  const obra = obraActual();
+  if (!obra) { alert('Creá una obra primero'); return; }
+  const nombre = document.getElementById('cat-nombre').value.trim();
+  if (!nombre) return;
+  if ((obra.categorias || []).includes(nombre)) { alert('Ya existe'); return; }
+  const categorias = [...(obra.categorias || []), nombre];
+  await setDoc(doc(db, 'obras', obraActualId), { ...obra, categorias }, { merge: true });
+  document.getElementById('cat-nombre').value = '';
+};
+
+window.eliminarCategoria = async (nombre) => {
+  const obra = obraActual();
+  if (!obra) return;
+  if ((obra.gastos || []).some(g => g.categoria === nombre)) { alert('No podés eliminar una categoría con gastos'); return; }
+  const categorias = (obra.categorias || []).filter(c => c !== nombre);
+  await setDoc(doc(db, 'obras', obraActualId), { ...obra, categorias }, { merge: true });
+};
+
+function renderCategorias() {
+  const obra = obraActual();
+  const cont = document.getElementById('lista-categorias');
+  if (!obra || !obra.categorias || obra.categorias.length === 0) { cont.innerHTML = '<div class="empty">Sin categorías</div>'; return; }
+  cont.innerHTML = obra.categorias.map(c => {
+    const total = (obra.gastos || []).filter(g => g.categoria === c).reduce((s,g) => s + montoEnPesos(g), 0);
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+      <div><strong>${c}</strong><br><small style="color:var(--text-muted)">Total: ${fmt(total)}</small></div>
+      <button class="btn-danger" onclick="eliminarCategoria('${c}')">✕</button>
+    </div>`;
+  }).join('');
+}
+
+// ============ SOCIOS ============
+window.agregarSocio = async () => {
+  const obra = obraActual();
+  if (!obra) { alert('Creá una obra primero'); return; }
+  const nombre = document.getElementById('socio-nombre').value.trim();
+  if (!nombre) return;
+  if ((obra.socios || []).includes(nombre)) { alert('Ya existe'); return; }
+  const socios = [...(obra.socios || []), nombre];
+  await setDoc(doc(db, 'obras', obraActualId), { ...obra, socios }, { merge: true });
+  document.getElementById('socio-nombre').value = '';
+};
+
+function renderSocios() {
+  const obra = obraActual();
+  const cont = document.getElementById('balance-socios');
+  const deudaCont = document.getElementById('deuda-socios');
+  deudaCont.innerHTML = '';
+  if (!obra || !obra.socios || obra.socios.length === 0) { cont.innerHTML = '<div class="empty">Sin socios</div>'; return; }
+  const c = cotizHoy();
+  const balances = obra.socios.map(s => {
+    const gastos = (obra.gastos || []).filter(g => g.socio === s);
+    const totalPesos = gastos.reduce((sum, g) => sum + montoEnPesos(g), 0);
+    return { nombre: s, totalPesos, totalOficial: c.oficial ? totalPesos/c.oficial : 0, totalBlue: c.blue ? totalPesos/c.blue : 0 };
+  });
+  const maxSocio = balances.reduce((a,b) => a.totalPesos > b.totalPesos ? a : b, {totalPesos:-1});
+  cont.innerHTML = balances.map(b => `
+    <div class="balance-socio ${b.nombre === maxSocio.nombre && balances.length > 1 ? 'winner' : ''}">
+      <h3>${b.nombre} ${b.nombre === maxSocio.nombre && balances.length > 1 ? '↑' : ''}</h3>
+      <div class="balance-row"><span>En Pesos</span><span>${fmt(b.totalPesos)}</span></div>
+      <div class="balance-row"><span>Dólar Oficial</span><span>${fmtUSD(b.totalOficial)}</span></div>
+      <div class="balance-row"><span>Dólar Blue</span><span>${fmtUSD(b.totalBlue)}</span></div>
+      ${b.nombre === maxSocio.nombre && balances.length > 1 ? '<span class="favor-badge">Pagó más</span>' : ''}
+    </div>`).join('');
+  if (balances.length >= 2) {
+    const sorted = [...balances].sort((a,b) => b.totalPesos - a.totalPesos);
+    const diff = sorted[0].totalPesos - sorted[1].totalPesos;
+    if (diff > 0) {
+      deudaCont.innerHTML = `<div class="card" style="text-align:center;background:#fffbf0;border-color:var(--accent);margin-top:14px">
+        <strong>${sorted[1].nombre}</strong> le debe a <strong>${sorted[0].nombre}</strong>: 
+        <span style="font-size:18px;font-weight:700;color:var(--primary)">${fmt(diff/2)}</span>
+        <span style="color:var(--text-muted);font-size:12px"> (para igualar)</span>
+      </div>`;
+    }
+  }
+}
+
+// ============ COTIZACIÓN ============
+window.guardarCotizacion = async () => {
+  const oficial = parseFloat(document.getElementById('cot-oficial').value);
+  const blue = parseFloat(document.getElementById('cot-blue').value);
+  const fecha = document.getElementById('cot-fecha').value;
+  if (!oficial || !blue || !fecha) { alert('Completá todos los campos'); return; }
+  await setDoc(doc(db, 'cotizaciones', fecha), { fecha, oficial, blue });
+};
+
+function renderCotizacion() {
+  const fechaInput = document.getElementById('cot-fecha');
+  if (!fechaInput.value) fechaInput.value = new Date().toISOString().split('T')[0];
+  const cotHoy = cotizaciones.find(x => x.fecha === fechaInput.value);
+  if (cotHoy) { document.getElementById('cot-oficial').value = cotHoy.oficial; document.getElementById('cot-blue').value = cotHoy.blue; }
+  const cont = document.getElementById('historial-cotiz');
+  if (cotizaciones.length === 0) { cont.innerHTML = '<div class="empty">Sin cotizaciones cargadas</div>'; return; }
+  cont.innerHTML = `<table><thead><tr><th>Fecha</th><th>Oficial</th><th>Blue</th></tr></thead>
+    <tbody>${[...cotizaciones].reverse().map(c => `<tr><td>${c.fecha}</td><td>${fmt(c.oficial)}</td><td>${fmt(c.blue)}</td></tr>`).join('')}</tbody></table>`;
+}
+
+// ============ RENDER TOTAL ============
+function renderizarTodo() {
+  renderSelectorObra();
+  const fechaGasto = document.getElementById('g-fecha');
+  if (!fechaGasto.value) fechaGasto.value = new Date().toISOString().split('T')[0];
+  renderResumen(); renderGastos(); renderCategorias(); renderSocios(); renderStock(); renderCotizacion();
+}
+
+// ============ INICIO ============
+signInAnonymously(auth).then(() => {
+  iniciarListeners();
+  setTimeout(() => {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+  }, 1500);
+}).catch(err => {
+  document.getElementById('loading').innerHTML = `<div style="text-align:center;padding:32px;color:white"><h2>❌ Error de conexión</h2><p style="margin-top:12px">${err.message}</p><p style="margin-top:8px;opacity:0.7">Verificá tu conexión a internet</p></div>`;
+});
+</script>
+</body>
+</html>
