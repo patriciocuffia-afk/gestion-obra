@@ -194,7 +194,7 @@
     </div>
   </div>
 </div>
-<script type="module">
+<script>
 const PROJECT='costo-de-obras';
 const BASE='https://firestore.googleapis.com/v1/projects/'+PROJECT+'/databases/(default)/documents';
 async function fsList(col){const r=await fetch(BASE+'/'+col);if(!r.ok)return[];const d=await r.json();return d.documents||[];}
