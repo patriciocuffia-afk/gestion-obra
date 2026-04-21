@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestion de Obra - Estudio Cuffia</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Obra Cuffia">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--p:#1a4a6b;--pl:#2d6a9f;--a:#e8a020;--d:#c0392b;--s:#27ae60;--bg:#f5f7fa;--c:#fff;--b:#dde3ea;--t:#2c3e50;--m:#7f8c8d}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--t)}
+.hdr{background:var(--p);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.hdr h1{font-size:17px;font-weight:600}
+.hdr-sub{font-size:11px;opacity:.75}
+.sdot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-left:6px;background:var(--s);vertical-align:middle}
+.sdot.off{background:#e74c3c}
+.btn-o{background:var(--a);color:#fff;border:none;padding:7px 14px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer}
+.tabs{display:flex;background:#fff;border-bottom:2px solid var(--b);position:sticky;top:57px;z-index:90;overflow-x:auto}
+.tab{padding:11px 16px;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;color:var(--m);border-bottom:3px solid transparent;margin-bottom:-2px}
+.tab.active{color:var(--p);border-bottom-color:var(--p);font-weight:700}
+.content{padding:16px;max-width:900px;margin:0 auto}
+.card{background:var(--c);border-radius:10px;border:1px solid var(--b);padding:16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.ct{font-size:14px;font-weight:700;color:var(--p);margin-bottom:12px}
+.rg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.rb{background:var(--bg);border-radius:8px;padding:12px;text-align:center}
+.rb .mn{font-size:18px;font-weight:700;color:var(--p)}
+.rb .lb{font-size:11px;color:var(--m);margin-top:3px}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.fr.t3{grid-template-columns:2fr 1fr 1fr}
+.fg label{display:block;font-size:12px;font-weight:600;color:var(--m);margin-bottom:4px}
+.fg input,.fg select,.fg textarea{width:100%;padding:9px 11px;border:1px solid var(--b);border-radius:7px;font-size:14px;color:var(--t);background:#fff}
+.fg textarea{resize:vertical;min-height:60px}
+.btn{background:var(--p);color:#fff;border:none;padding:10px 20px;border-radius:7px;font-size:14px;font-weight:600;cursor:pointer;width:100%;margin-top:4px}
+.btn:hover{background:var(--pl)}
+.btnd{background:var(--d);color:#fff;border:none;padding:5px 10px;border-radius:5px;font-size:12px;cursor:pointer}
+.btnu{background:var(--a);color:#fff;border:none;padding:4px 10px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--p);color:#fff;padding:9px 10px;text-align:left;font-size:12px;white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid var(--b);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f8f9fa}
+.bdg{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.bp{background:#e8f5e9;color:#2e7d32}
+.bo{background:#e3f2fd;color:#1565c0}
+.bb{background:#f3e5f5;color:#6a1b9a}
+.bg2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.bs{background:var(--bg);border-radius:10px;padding:16px;border:2px solid var(--b)}
+.bs.win{border-color:var(--a);background:#fffbf0}
+.bs h3{font-size:15px;font-weight:700;margin-bottom:10px;color:var(--p)}
+.br{display:flex;justify-content:space-between;padding:4px 0;font-size:13px;border-bottom:1px solid var(--b)}
+.br:last-child{border-bottom:none;font-weight:700}
+.fb{display:inline-block;background:var(--a);color:#fff;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;margin-top:8px}
+.sok{color:var(--s);font-weight:700}
+.slow{color:var(--d);font-weight:700}
+.empty{text-align:center;padding:32px;color:var(--m);font-size:14px}
+.mb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;padding:16px}
+.mb.show{display:flex}
+.md{background:#fff;border-radius:12px;padding:24px;width:100%;max-width:420px}
+.md h2{font-size:18px;font-weight:700;margin-bottom:16px;color:var(--p)}
+.mdb{display:flex;gap:10px;margin-top:16px}
+.btns{background:#fff;color:var(--t);border:1px solid var(--b);padding:10px 20px;border-radius:7px;font-size:14px;cursor:pointer;flex:1}
+.osel{background:#fff;border:1px solid var(--b);border-radius:8px;padding:8px 10px;font-size:13px;font-weight:600;color:var(--p);cursor:pointer;max-width:180px}
+.cr{display:flex;align-items:center;gap:5px}
+.ci{width:60px;padding:4px 6px;border:1px solid var(--b);border-radius:5px;font-size:12px}
+.cg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.cg label{display:block;font-size:11px;color:var(--m);margin-bottom:4px;font-weight:600;text-transform:uppercase}
+.cg input{width:100%;padding:8px 10px;border:1px solid var(--b);border-radius:6px;font-size:14px;font-weight:600}
+@media(max-width:600px){.rg,.cg{grid-template-columns:1fr 1fr}.fr,.fr.t3{grid-template-columns:1fr}.bg2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div>
+    <div class="hdr-sub">Estudio Juridico Cuffia</div>
+    <div style="display:flex;align-items:center">
+      <h1>Gestion de Obras</h1>
+      <span class="sdot" id="sdot"></span>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <select class="osel" id="selObra"></select>
+    <button class="btn-o" id="btnNueva">+ Obra</button>
+  </div>
+</div>
+
+<div class="tabs" id="tabs">
+  <div class="tab active" data-tab="res">Resumen</div>
+  <div class="tab" data-tab="gas">Gastos</div>
+  <div class="tab" data-tab="stk">Stock</div>
+  <div class="tab" data-tab="cat">Categorias</div>
+  <div class="tab" data-tab="soc">Socios</div>
+  <div class="tab" data-tab="cot">Cotizacion</div>
+</div>
+
+<div class="content">
+  <div id="tab-res">
+    <div class="card"><div class="ct">Total gastado</div>
+      <div class="rg">
+        <div class="rb"><div class="mn" id="rp">$0</div><div class="lb">Pesos</div></div>
+        <div class="rb"><div class="mn" id="ro">USD 0</div><div class="lb">Dolar Oficial</div></div>
+        <div class="rb"><div class="mn" id="rb2">USD 0</div><div class="lb">Dolar Blue</div></div>
+      </div>
+    </div>
+    <div class="card"><div class="ct">Por categoria</div><div id="rcat"></div></div>
+    <div class="card"><div class="ct">Ultimos gastos</div><div id="rult" class="tw"></div></div>
+  </div>
+
+  <div id="tab-gas" style="display:none">
+    <div class="card"><div class="ct">Nuevo gasto</div>
+      <div class="fr t3">
+        <div class="fg"><label>Descripcion</label><input type="text" id="gd" placeholder="Ej: Cemento"></div>
+        <div class="fg"><label>Monto</label><input type="number" id="gm" placeholder="0" step="0.01"></div>
+        <div class="fg"><label>Moneda</label><select id="gmon"><option value="pesos">Pesos</option><option value="oficial">Dolar Oficial</option><option value="blue">Dolar Blue</option></select></div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>Categoria</label><select id="gcat"></select></div>
+        <div class="fg"><label>Pagado por</label><select id="gsoc"></select></div>
+      </div>
+      <div class="fg" style="margin-bottom:10px"><label>Fecha</label><input type="date" id="gfec"></div>
+      <div class="fg" style="margin-bottom:10px"><label>Nota</label><textarea id="gnot" placeholder="Observaciones..."></textarea></div>
+      <button class="btn" id="btnGasto">Registrar gasto</button>
+    </div>
+    <div class="card"><div class="ct">Historial</div><div class="tw" id="tgas"></div></div>
+  </div>
+
+  <div id="tab-stk" style="display:none">
+    <div class="card"><div class="ct">Agregar material</div>
+      <div class="fr t3">
+        <div class="fg"><label>Material</label><input type="text" id="sm" placeholder="Ej: Cemento"></div>
+        <div class="fg"><label>Cantidad</label><input type="number" id="sc" placeholder="0" step="0.01"></div>
+        <div class="fg"><label>Unidad</label><input type="text" id="su" placeholder="kg, bolsa"></div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>Stock minimo</label><input type="number" id="smin" placeholder="0"></div>
+        <div class="fg" style="display:flex;align-items:flex-end"><button class="btn" id="btnStock">Agregar</button></div>
+      </div>
+    </div>
+    <div class="card"><div class="ct">Inventario</div><div class="tw" id="tstk"></div></div>
+  </div>
+
+  <div id="tab-cat" style="display:none">
+    <div class="card"><div class="ct">Nueva categoria</div>
+      <div class="fr">
+        <div class="fg"><label>Nombre</label><input type="text" id="cn" placeholder="Ej: Electricista"></div>
+        <div class="fg" style="display:flex;align-items:flex-end"><button class="btn" id="btnCat">Agregar</button></div>
+      </div>
+    </div>
+    <div class="card"><div class="ct">Categorias</div><div id="lcat"></div></div>
+  </div>
+
+  <div id="tab-soc" style="display:none">
+    <div class="card"><div class="ct">Agregar socio</div>
+      <div class="fr">
+        <div class="fg"><label>Nombre</label><input type="text" id="sn" placeholder="Ej: Benjamin"></div>
+        <div class="fg" style="display:flex;align-items:flex-end"><button class="btn" id="btnSocio">Agregar</button></div>
+      </div>
+    </div>
+    <div class="card"><div class="ct">Balance</div><div id="bsoc" class="bg2"></div></div>
+    <div id="dsoc"></div>
+  </div>
+
+  <div id="tab-cot" style="display:none">
+    <div class="card"><div class="ct">Cotizacion del dia</div>
+      <div class="cg">
+        <div><label>Dolar Oficial ($)</label><input type="number" id="co" placeholder="0"></div>
+        <div><label>Dolar Blue ($)</label><input type="number" id="cb" placeholder="0"></div>
+        <div><label>Fecha</label><input type="date" id="cf"></div>
+      </div>
+      <button class="btn" style="margin-top:12px" id="btnCotiz">Guardar cotizacion</button>
+    </div>
+    <div class="card"><div class="ct">Historial</div><div id="hcot" class="tw"></div></div>
+  </div>
+</div>
+
+<div class="mb" id="mo">
+  <div class="md">
+    <h2>Nueva Obra</h2>
+    <div class="fg" style="margin-bottom:12px"><label>Nombre</label><input type="text" id="on" placeholder="Ej: Casa Rodriguez"></div>
+    <div class="fg" style="margin-bottom:12px"><label>Direccion (opcional)</label><input type="text" id="od" placeholder="Calle y numero"></div>
+    <div class="mdb">
+      <button class="btns" id="btnCancelar">Cancelar</button>
+      <button class="btn" id="btnCrear" style="flex:1">Crear obra</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var FS = 'https://firestore.googleapis.com/v1/projects/costo-de-obras/databases/(default)/documents';
+var obras = [];
+var obraId = localStorage.getItem('obraId') || null;
+var cotiz = [];
+
+function fsList(col) {
+  return fetch(FS + '/' + col).then(function(r) { return r.json(); }).then(function(d) { return d.documents || []; });
+}
+
+function fsPut(path, data) {
+  return fetch(FS + '/' + path, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fields: toF(data) })
+  }).then(function(r) { return r.ok; });
+}
+
+function toF(obj) {
+  var f = {};
+  var keys = Object.keys(obj);
+  for (var i = 0; i < keys.length; i++) {
+    var k = keys[i];
+    var v = obj[k];
+    if (v === null || v === undefined) continue;
+    if (typeof v === 'string') f[k] = { stringValue: v };
+    else if (typeof v === 'number') f[k] = { doubleValue: v };
+    else if (typeof v === 'boolean') f[k] = { booleanValue: v };
+    else if (Array.isArray(v)) {
+      var vals = [];
+      for (var j = 0; j < v.length; j++) {
+        var it = v[j];
+        if (typeof it === 'object') vals.push({ mapValue: { fields: toF(it) } });
+        else if (typeof it === 'string') vals.push({ stringValue: it });
+        else vals.push({ doubleValue: it });
+      }
+      f[k] = { arrayValue: { values: vals } };
+    }
+    else if (typeof v === 'object') f[k] = { mapValue: { fields: toF(v) } };
+  }
+  return f;
+}
+
+function fromF(fields) {
+  if (!fields) return {};
+  var o = {};
+  var keys = Object.keys(fields);
+  for (var i = 0; i < keys.length; i++) {
+    var k = keys[i];
+    var v = fields[k];
+    if (v.stringValue !== undefined) o[k] = v.stringValue;
+    else if (v.doubleValue !== undefined) o[k] = v.doubleValue;
+    else if (v.integerValue !== undefined) o[k] = parseInt(v.integerValue);
+    else if (v.booleanValue !== undefined) o[k] = v.booleanValue;
+    else if (v.arrayValue) {
+      var arr = [];
+      var vals = v.arrayValue.values || [];
+      for (var j = 0; j < vals.length; j++) {
+        var it = vals[j];
+        if (it.mapValue) arr.push(fromF(it.mapValue.fields));
+        else if (it.stringValue !== undefined) arr.push(it.stringValue);
+        else arr.push(it.doubleValue);
+      }
+      o[k] = arr;
+    }
+    else if (v.mapValue) o[k] = fromF(v.mapValue.fields);
+  }
+  return o;
+}
+
+function docId(d) { return d.name.split('/').pop(); }
+function obra() { for (var i = 0; i < obras.length; i++) if (obras[i].id === obraId) return obras[i]; return null; }
+function cotizH() { return cotiz.length ? cotiz[cotiz.length - 1] : { oficial: 1000, blue: 1200 }; }
+function enP(g) {
+  var c = cotizH();
+  if (g.moneda === 'pesos') return g.monto;
+  if (g.moneda === 'oficial') return g.monto * (c.oficial || 0);
+  if (g.moneda === 'blue') return g.monto * (c.blue || 0);
+  return 0;
+}
+function fmt(n) { return '$' + parseFloat(n).toLocaleString('es-AR', { maximumFractionDigits: 2 }); }
+function fmtU(n) { return 'USD ' + parseFloat(n).toLocaleString('es-AR', { maximumFractionDigits: 2 }); }
+function dot(ok) { var d = document.getElementById('sdot'); if (d) d.className = 'sdot' + (ok ? '' : ' off'); }
+function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+
+function cargar() {
+  return Promise.all([fsList('obras'), fsList('cotizaciones')]).then(function(res) {
+    obras = res[0].map(function(d) { var o = fromF(d.fields); o.id = docId(d); return o; });
+    cotiz = res[1].map(function(d) { return fromF(d.fields); }).sort(function(a, b) { return a.fecha.localeCompare(b.fecha); });
+    if (!obraId && obras.length > 0) { obraId = obras[0].id; localStorage.setItem('obraId', obraId); }
+    dot(true);
+    renderAll();
+  }).catch(function(e) { dot(false); console.error('Error carga:', e); });
+}
+
+function abrirMO() { document.getElementById('mo').className = 'mb show'; }
+function cerrarMO() { document.getElementById('mo').className = 'mb'; }
+
+function crearObra() {
+  var n = document.getElementById('on').value.trim();
+  if (!n) { alert('Ingresa un nombre'); return; }
+  var id = Date.now().toString();
+  var o = {
+    nombre: n,
+    direccion: document.getElementById('od').value.trim(),
+    gastos: [],
+    categorias: ['Gastos Generales', 'Albanileria', 'Electricista', 'Plomero', 'Carpintero', 'Pintor', 'Materiales'],
+    socios: ['Patricio'],
+    stock: []
+  };
+  fsPut('obras/' + id, o).then(function() {
+    obraId = id;
+    localStorage.setItem('obraId', id);
+    cerrarMO();
+    document.getElementById('on').value = '';
+    document.getElementById('od').value = '';
+    cargar();
+  });
+}
+
+function renderSel() {
+  var s = document.getElementById('selObra');
+  s.innerHTML = '';
+  if (obras.length === 0) { s.innerHTML = '<option>Sin obras</option>'; return; }
+  for (var i = 0; i < obras.length; i++) {
+    var o = obras[i];
+    var op = document.createElement('option');
+    op.value = o.id;
+    op.textContent = o.nombre;
+    if (o.id === obraId) op.selected = true;
+    s.appendChild(op);
+  }
+}
+
+function showTab(t) {
+  var divs = document.querySelectorAll('[id^="tab-"]');
+  for (var i = 0; i < divs.length; i++) divs[i].style.display = 'none';
+  document.getElementById('tab-' + t).style.display = 'block';
+  var tabs = document.querySelectorAll('.tab');
+  for (var j = 0; j < tabs.length; j++) tabs[j].classList.remove('active');
+  var active = document.querySelector('.tab[data-tab="' + t + '"]');
+  if (active) active.classList.add('active');
+  if (t === 'res') renderRes();
+  if (t === 'gas') renderGas();
+  if (t === 'stk') renderStk();
+  if (t === 'cat') renderCat();
+  if (t === 'soc') renderSoc();
+  if (t === 'cot') renderCot();
+}
+
+function agregarGasto() {
+  var o = obra();
+  if (!o) { alert('Crea una obra primero'); return; }
+  var d = document.getElementById('gd').value.trim();
+  var m = parseFloat(document.getElementById('gm').value);
+  if (!d || isNaN(m) || m <= 0) { alert('Completa descripcion y monto'); return; }
+  var g = {
+    id: Date.now().toString(),
+    desc: d,
+    monto: m,
+    moneda: document.getElementById('gmon').value,
+    categoria: document.getElementById('gcat').value,
+    socio: document.getElementById('gsoc').value,
+    fecha: document.getElementById('gfec').value || new Date().toISOString().split('T')[0],
+    nota: document.getElementById('gnot').value.trim()
+  };
+  var gastos = (o.gastos || []).slice();
+  gastos.push(g);
+  var up = {};
+  var keys = Object.keys(o);
+  for (var i = 0; i < keys.length; i++) up[keys[i]] = o[keys[i]];
+  up.gastos = gastos;
+  fsPut('obras/' + obraId, up).then(function() {
+    document.getElementById('gd').value = '';
+    document.getElementById('gm').value = '';
+    document.getElementById('gnot').value = '';
+    for (var j = 0; j < obras.length; j++) if (obras[j].id === obraId) obras[j] = up;
+    up.id = obraId;
+    renderGas();
+    renderRes();
+  });
+}
+
+function eliminarGasto(id) {
+  var o = obra();
+  if (!o || !confirm('Eliminar?')) return;
+  var gastos = (o.gastos || []).filter(function(g) { return g.id !== id; });
+  var up = {};
+  var keys = Object.keys(o);
+  for (var i = 0; i < keys.length; i++) up[keys[i]] = o[keys[i]];
+  up.gastos = gastos;
+  fsPut('obras/' + obraId, up).then(function() {
+    for (var j = 0; j < obras.length; j++) if (obras[j].id === obraId) obras[j] = up;
+    up.id = obraId;
+    renderGas();
+    renderRes();
+  });
+}
+
+function renderGas() {
+  var o = obra();
+  var cs = document.getElementById('gcat');
+  var ss = document.getElementById('gsoc');
+  cs.innerHTML = '';
+  ss.innerHTML = '';
+  if (o) {
+    var cats = o.categorias || [];
+    for (var i = 0; i < cats.length; i++) { var op = document.createElement('option'); op.value = cats[i]; op.textContent = cats[i]; cs.appendChild(op); }
+    var socs = o.socios || [];
+    for (var j = 0; j < socs.length; j++) { var op2 = document.createElement('option'); op2.value = socs[j]; op2.textContent = socs[j]; ss.appendChild(op2); }
+  }
+  var c = document.getElementById('tgas');
+  if (!o || !(o.gastos || []).length) { c.innerHTML = '<div class="empty">Sin gastos</div>'; return; }
+  var gs = (o.gastos || []).slice().sort(function(a, b) { return b.fecha.localeCompare(a.fecha); });
+  var html = '<table><thead><tr><th>Fecha</th><th>Descripcion</th><th>Categoria</th><th>Pago</th><th>Monto</th><th>Pesos</th><th></th></tr></thead><tbody>';
+  for (var k = 0; k < gs.length; k++) {
+    var g = gs[k];
+    var cls = g.moneda === 'pesos' ? 'bp' : (g.moneda === 'oficial' ? 'bo' : 'bb');
+    var montoTxt = g.moneda === 'pesos' ? fmt(g.monto) : fmtU(g.monto) + ' (' + g.moneda + ')';
+    html += '<tr><td>' + esc(g.fecha) + '</td><td>' + esc(g.desc) + (g.nota ? '<br><small style="color:var(--m)">' + esc(g.nota) + '</small>' : '') + '</td><td>' + esc(g.categoria) + '</td><td>' + esc(g.socio) + '</td><td><span class="bdg ' + cls + '">' + montoTxt + '</span></td><td>' + fmt(enP(g)) + '</td><td><button class="btnd" data-del-gasto="' + esc(g.id) + '">X</button></td></tr>';
+  }
+  html += '</tbody></table>';
+  c.innerHTML = html;
+}
+
+function renderRes() {
+  var o = obra();
+  if (!o) {
+    document.getElementById('rp').textContent = '$0';
+    document.getElementById('ro').textContent = 'USD 0';
+    document.getElementById('rb2').textContent = 'USD 0';
+    document.getElementById('rcat').innerHTML = '<div class="empty">Crea una obra para comenzar</div>';
+    document.getElementById('rult').innerHTML = '';
+    return;
+  }
+  var gastos = o.gastos || [];
+  var tp = 0;
+  for (var i = 0; i < gastos.length; i++) tp += enP(gastos[i]);
+  var c = cotizH();
+  document.getElementById('rp').textContent = fmt(tp);
+  document.getElementById('ro').textContent = fmtU(c.oficial ? tp / c.oficial : 0);
+  document.getElementById('rb2').textContent = fmtU(c.blue ? tp / c.blue : 0);
+  var pc = {};
+  for (var j = 0; j < gastos.length; j++) { var g = gastos[j]; if (!pc[g.categoria]) pc[g.categoria] = 0; pc[g.categoria] += enP(g); }
+  var catKeys = Object.keys(pc).sort(function(a, b) { return pc[b] - pc[a]; });
+  var catHtml = '';
+  for (var n = 0; n < catKeys.length; n++) catHtml += '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--b);font-size:13px"><span>' + esc(catKeys[n]) + '</span><span style="font-weight:700">' + fmt(pc[catKeys[n]]) + '</span></div>';
+  document.getElementById('rcat').innerHTML = catHtml || '<div class="empty">Sin gastos</div>';
+  var ul = gastos.slice().sort(function(a, b) { return b.fecha.localeCompare(a.fecha); }).slice(0, 5);
+  if (!ul.length) { document.getElementById('rult').innerHTML = '<div class="empty">Sin gastos</div>'; return; }
+  var ulHtml = '<table><thead><tr><th>Fecha</th><th>Descripcion</th><th>Monto</th></tr></thead><tbody>';
+  for (var m = 0; m < ul.length; m++) ulHtml += '<tr><td>' + esc(ul[m].fecha) + '</td><td>' + esc(ul[m].desc) + '</td><td>' + fmt(enP(ul[m])) + '</td></tr>';
+  ulHtml += '</tbody></table>';
+  document.getElementById('rult').innerHTML = ulHtml;
+}
+
+function agregarStock() {
+  var o = obra();
+  if (!o) { alert('Crea una obra'); return; }
+  var m = document.getElementById('sm').value.trim();
+  var c = parseFloat(document.getElementById('sc').value);
+  if (!m || isNaN(c)) { alert('Completa material y cantidad'); return; }
+  var st = (o.stock || []).slice();
+  var ex = null;
+  for (var i = 0; i < st.length; i++) if (st[i].material.toLowerCase() === m.toLowerCase()) { ex = st[i]; break; }
+  if (ex) { ex.cantidad += c; }
+  else st.push({ id: Date.now().toString(), material: m, cantidad: c, unidad: document.getElementById('su').value.trim() || 'unidad', minimo: parseFloat(document.getElementById('smin').value) || 0 });
+  var up = {};
+  var keys = Object.keys(o);
+  for (var j = 0; j < keys.length; j++) up[keys[j]] = o[keys[j]];
+  up.stock = st;
+  fsPut('obras/' + obraId, up).then(function() {
+    document.getElementById('sm').value = '';
+    document.getElementById('sc').value = '';
+    document.getElementById('su').value = '';
+    document.getElementById('smin').value = '';
+    for (var k = 0; k < obras.length; k++) if (obras[k].id === obraId) obras[k] = up;
+    up.id = obraId;
+    renderStk();
+  });
+}
+
+function actStock(id, v) {
+  var o = obra();
+  if (!o) return;
+  var st = (o.stock || []).map(function(s) {
+    if (s.id === id) { var cp = {}; for (var k in s) cp[k] = s[k]; cp.cantidad = Math.max(0, parseFloat(v) || 0); return cp; }
+    return s;
+  });
+  var up = {};
+  var keys = Object.keys(o);
+  for (var j = 0; j < keys.length; j++) up[keys[j]] = o[keys[j]];
+  up.stock = st;
+  fsPut('obras/' + obraId, up).then(function() {
+    for (var k = 0; k < obras.length; k++) if (obras[k].id === obraId) obras[k] = up;
+    up.id = obraId;
+  });
+}
+
+function usarStock(id) {
+  var o = obra();
+  if (!o) return;
+  var c = parseFloat(document.getElementById('u' + id).value);
+  if (isNaN(c) || c <= 0) { alert('Ingresa cantidad'); return; }
+  var item = null;
+  var stk = o.stock || [];
+  for (var i = 0; i < stk.length; i++) if (stk[i].id === id) { item = stk[i]; break; }
+  if (!item) return;
+  if (c > item.cantidad) { alert('No hay suficiente stock'); return; }
+  var st = stk.map(function(s) {
+    if (s.id === id) { var cp = {}; for (var k in s) cp[k] = s[k]; cp.cantidad = Math.round((s.cantidad - c) * 1000) / 1000; return cp; }
+    return s;
+  });
+  var up = {};
+  var keys = Object.keys(o);
+  for (var j = 0; j < keys.length; j++) up[keys[j]] = o[keys[j]];
+  up.stock = st;
+  fsPut('obras/' + obraId, up).then(function() {
+    document.getElementById('u' + id).value = '';
+    for (var k = 0; k < obras.length; k++) if (obras[k].id === obraId) obras[k] = up;
+    up.id = obraId;
+    renderStk();
+  });
+}
+
+function eliminarStock(id) {
+  var o = obra();
+  if (!o || !confirm('Eliminar?')) return;
+  var st = (o.stock || []).filter(function(s) { return s.id !== id; });
+  var up = {};
+  var keys = Object.keys(o);
+  for (var j = 0; j < keys.length; j++) up[keys[j]] = o[keys[j]];
+  up.stock = st;
+  fsPut('obras/' + obraId, up).then(function() {
+    for (var k = 0; k < obras.length; k++) if (obras[k].id === obraId) obras[k] = up;
+    up.id = obraId;
+    renderStk();
+  });
+}
+
+function renderStk() {
+  var o = obra();
+  var c = document.getElementById('tstk');
+  if (!o || !(o.stock || []).length) { c.innerHTML = '<div class="empty">Sin materiales</div>'; return; }
+  var html = '<table><thead><tr><th>Material</th><th>Existencia</th><th>Unidad</th><th>Min</th><th>Estado</th><th>Usar</th><th></th></tr></thead><tbody>';
+  for (var i = 0; i < o.stock.length; i++) {
+    var s = o.stock[i];
+    var ok = s.cantidad >= s.minimo;
+    html += '<tr><td><strong>' + esc(s.material) + '</strong></td><td><input type="number" value="' + s.cantidad + '" min="0" step="0.01" data-act-stock="' + esc(s.id) + '" style="width:80px;padding:4px 8px;border:1px solid var(--b);border-radius:5px;font-weight:700"></td><td>' + esc(s.unidad) + '</td><td>' + s.minimo + '</td><td><span class="' + (ok ? 'sok' : 'slow') + '">' + (ok ? 'OK' : 'Bajo') + '</span></td><td><div class="cr"><input type="number" id="u' + esc(s.id) + '" class="ci" placeholder="0" min="0" step="0.01"><button class="btnu" data-use-stock="' + esc(s.id) + '">Usar</button></div></td><td><button class="btnd" data-del-stock="' + esc(s.id) + '">X</button></td></tr>';
+  }
+  html += '</tbody></table>';
+  c.innerHTML = html;
+}
+
+function agregarCat() {
+  var o = obra();
+  if (!o) { alert('Crea una obra'); return; }
+  var n = document.getElementById('cn').value.trim();
+  if (!n) return;
+  if ((o.categorias || []).indexOf(n) >= 0) { alert('Ya existe'); return; }
+  var cats = (o.categorias || []).slice();
+  cats.push(n);
+  var up = {};
+  var keys = Object.keys(o);
+  for (var j = 0; j < keys.length; j++) up[keys[j]] = o[keys[j]];
+  up.categorias = cats;
+  fsPut('obras/' + obraId, up).then(function() {
+    document.getElementById('cn').value = '';
+    for (var k = 0; k < obras.length; k++) if (obras[k].id === obraId) obras[k] = up;
+    up.id = obraId;
+    renderCat();
+  });
+}
+
+function eliminarCat(n) {
+  var o = obra();
+  if (!o) return;
+  var gastos = o.gastos || [];
+  for (var i = 0; i < gastos.length; i++) if (gastos[i].categoria === n) { alert('Tiene gastos asociados'); return; }
+  var up = {};
+  var keys = Object.keys(o);
+  for (var j = 0; j < keys.length; j++) up[keys[j]] = o[keys[j]];
+  up.categorias = (o.categorias || []).filter(function(c) { return c !== n; });
+  fsPut('obras/' + obraId, up).then(function() {
+    for (var k = 0; k < obras.length; k++) if (obras[k].id === obraId) obras[k] = up;
+    up.id = obraId;
+    renderCat();
+  });
+}
+
+function renderCat() {
+  var o = obra();
+  var c = document.getElementById('lcat');
+  if (!o || !(o.categorias || []).length) { c.innerHTML = '<div class="empty">Sin categorias</div>'; return; }
+  var html = '';
+  for (var i = 0; i < o.categorias.length; i++) {
+    var cat = o.categorias[i];
+    var t = 0;
+    var gs = o.gastos || [];
+    for (var j = 0; j < gs.length; j++) if (gs[j].categoria === cat) t += enP(gs[j]);
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--b)"><div><strong>' + esc(cat) + '</strong><br><small style="color:var(--m)">Total: ' + fmt(t) + '</small></div><button class="btnd" data-del-cat="' + esc(cat) + '">X</button></div>';
+  }
+  c.innerHTML = html;
+}
+
+function agregarSocio() {
+  var o = obra();
+  if (!o) { alert('Crea una obra'); return; }
+  var n = document.getElementById('sn').value.trim();
+  if (!n) return;
+  if ((o.socios || []).indexOf(n) >= 0) { alert('Ya existe'); return; }
+  var socs = (o.socios || []).slice();
+  socs.push(n);
+  var up = {};
+  var keys = Object.keys(o);
+  for (var j = 0; j < keys.length; j++) up[keys[j]] = o[keys[j]];
+  up.socios = socs;
+  fsPut('obras/' + obraId, up).then(function() {
+    document.getElementById('sn').value = '';
+    for (var k = 0; k < obras.length; k++) if (obras[k].id === obraId) obras[k] = up;
+    up.id = obraId;
+    renderSoc();
+  });
+}
+
+function renderSoc() {
+  var o = obra();
+  var c = document.getElementById('bsoc');
+  var dc = document.getElementById('dsoc');
+  dc.innerHTML = '';
+  if (!o || !(o.socios || []).length) { c.innerHTML = '<div class="empty">Sin socios</div>'; return; }
+  var ct = cotizH();
+  var bs = [];
+  for (var i = 0; i < o.socios.length; i++) {
+    var s = o.socios[i];
+    var tp = 0;
+    var gs = o.gastos || [];
+    for (var j = 0; j < gs.length; j++) if (gs[j].socio === s) tp += enP(gs[j]);
+    bs.push({ nombre: s, tp: tp, to: ct.oficial ? tp / ct.oficial : 0, tb: ct.blue ? tp / ct.blue : 0 });
+  }
+  var mx = { tp: -1 };
+  for (var k = 0; k < bs.length; k++) if (bs[k].tp > mx.tp) mx = bs[k];
+  var html = '';
+  for (var l = 0; l < bs.length; l++) {
+    var b = bs[l];
+    var isWin = b.nombre === mx.nombre && bs.length > 1;
+    html += '<div class="bs ' + (isWin ? 'win' : '') + '"><h3>' + esc(b.nombre) + ' ' + (isWin ? '&#8593;' : '') + '</h3><div class="br"><span>En Pesos</span><span>' + fmt(b.tp) + '</span></div><div class="br"><span>Dolar Oficial</span><span>' + fmtU(b.to) + '</span></div><div class="br"><span>Dolar Blue</span><span>' + fmtU(b.tb) + '</span></div>' + (isWin ? '<span class="fb">Pago mas</span>' : '') + '</div>';
+  }
+  c.innerHTML = html;
+  if (bs.length >= 2) {
+    var sr = bs.slice().sort(function(a, b) { return b.tp - a.tp; });
+    var df = sr[0].tp - sr[1].tp;
+    if (df > 0) dc.innerHTML = '<div class="card" style="text-align:center;background:#fffbf0;border-color:var(--a);margin-top:14px"><strong>' + esc(sr[1].nombre) + '</strong> le debe a <strong>' + esc(sr[0].nombre) + '</strong>: <span style="font-size:18px;font-weight:700;color:var(--p)">' + fmt(df / 2) + '</span><span style="color:var(--m);font-size:12px"> (para igualar)</span></div>';
+  }
+}
+
+function guardarCotiz() {
+  var of = parseFloat(document.getElementById('co').value);
+  var bl = parseFloat(document.getElementById('cb').value);
+  var fe = document.getElementById('cf').value;
+  if (!of || !bl || !fe) { alert('Completa todos los campos'); return; }
+  fsPut('cotizaciones/' + fe, { fecha: fe, oficial: of, blue: bl }).then(function() {
+    var idx = -1;
+    for (var i = 0; i < cotiz.length; i++) if (cotiz[i].fecha === fe) { idx = i; break; }
+    if (idx >= 0) cotiz[idx] = { fecha: fe, oficial: of, blue: bl };
+    else cotiz.push({ fecha: fe, oficial: of, blue: bl });
+    cotiz.sort(function(a, b) { return a.fecha.localeCompare(b.fecha); });
+    dot(true);
+    renderCot();
+    renderRes();
+  });
+}
+
+function renderCot() {
+  var fi = document.getElementById('cf');
+  if (!fi.value) fi.value = new Date().toISOString().split('T')[0];
+  var ch = null;
+  for (var i = 0; i < cotiz.length; i++) if (cotiz[i].fecha === fi.value) { ch = cotiz[i]; break; }
+  if (ch) { document.getElementById('co').value = ch.oficial; document.getElementById('cb').value = ch.blue; }
+  var c = document.getElementById('hcot');
+  if (!cotiz.length) { c.innerHTML = '<div class="empty">Sin cotizaciones</div>'; return; }
+  var arr = cotiz.slice().reverse();
+  var html = '<table><thead><tr><th>Fecha</th><th>Oficial</th><th>Blue</th></tr></thead><tbody>';
+  for (var j = 0; j < arr.length; j++) html += '<tr><td>' + esc(arr[j].fecha) + '</td><td>' + fmt(arr[j].oficial) + '</td><td>' + fmt(arr[j].blue) + '</td></tr>';
+  html += '</tbody></table>';
+  c.innerHTML = html;
+}
+
+function renderAll() {
+  renderSel();
+  var fg = document.getElementById('gfec');
+  if (!fg.value) fg.value = new Date().toISOString().split('T')[0];
+  renderRes();
+  renderGas();
+  renderCat();
+  renderSoc();
+  renderStk();
+  renderCot();
+}
+
+// Event listeners
+document.getElementById('btnNueva').addEventListener('click', abrirMO);
+document.getElementById('btnCancelar').addEventListener('click', cerrarMO);
+document.getElementById('btnCrear').addEventListener('click', crearObra);
+document.getElementById('btnGasto').addEventListener('click', agregarGasto);
+document.getElementById('btnStock').addEventListener('click', agregarStock);
+document.getElementById('btnCat').addEventListener('click', agregarCat);
+document.getElementById('btnSocio').addEventListener('click', agregarSocio);
+document.getElementById('btnCotiz').addEventListener('click', guardarCotiz);
+
+document.getElementById('selObra').addEventListener('change', function(e) {
+  obraId = e.target.value;
+  localStorage.setItem('obraId', obraId);
+  renderAll();
+});
+
+var tabEls = document.querySelectorAll('.tab');
+for (var ti = 0; ti < tabEls.length; ti++) {
+  tabEls[ti].addEventListener('click', function(e) {
+    showTab(e.target.getAttribute('data-tab'));
+  });
+}
+
+// Delegación de eventos para botones dinámicos
+document.body.addEventListener('click', function(e) {
+  var t = e.target;
+  var del = t.getAttribute('data-del-gasto');
+  if (del) { eliminarGasto(del); return; }
+  var use = t.getAttribute('data-use-stock');
+  if (use) { usarStock(use); return; }
+  var dst = t.getAttribute('data-del-stock');
+  if (dst) { eliminarStock(dst); return; }
+  var dc = t.getAttribute('data-del-cat');
+  if (dc) { eliminarCat(dc); return; }
+});
+
+document.body.addEventListener('change', function(e) {
+  var t = e.target;
+  var act = t.getAttribute('data-act-stock');
+  if (act) actStock(act, t.value);
+});
+
+// Iniciar
+cargar();
+setInterval(cargar, 30000);
+</script>
+</body>
+</html>
