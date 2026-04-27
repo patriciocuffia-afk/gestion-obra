@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Obra Cuffia">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0}h
 :root{--p:#1a4a6b;--pl:#2d6a9f;--a:#e8a020;--d:#c0392b;--s:#27ae60;--bg:#f5f7hhfa;--c:#fff;--b:#dde3ea;--t:#2c3e50;--m:#7f8c8d}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--t)}
 .hdr{background:var(--p);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2)}
@@ -67,6 +67,7 @@ tr:hover td{background:#f8f9fa}
 .cg input{width:100%;padding:8px 10px;border:1px solid var(--b);border-radius:6px;font-size:14px;font-weight:600}
 @media(max-width:600px){.rg,.cg{grid-template-columns:1fr 1fr}.fr,.fr.t3{grid-template-columns:1fr}.bg2{grid-template-columns:1fr}}
 </style>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
@@ -77,6 +78,7 @@ tr:hover td{background:#f8f9fa}
       <h1>Gestion de Obras</h1>
       <span class="sdot" id="sdot"></span>
     </div>
+    <button id="gdrive-btn" style="background:var(--a);color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;margin-left:8px">Drive</button>
   </div>
   <div style="display:flex;align-items:center;gap:8px">
     <select class="osel" id="selObra" onchange="cambiarObra(this.value)"></select>
@@ -186,6 +188,12 @@ tr:hover td{background:#f8f9fa}
 </div>
 
 <script>
+// === GOOGLE CONFIG ===
+var FIREBASE_API_KEY = 'AIzaSyDay2mZxofi3O27Q7h2UJDunOjLRXOWkP8';
+var OAUTH_CLIENT_ID = '485000953207-g3r6kjptl4dvoc8p0u1aj20nket5mdrm.apps.googleusercontent.com';
+var DRIVE_FOLDER_NAME = 'Gestion de Obras Cuffia';
+var AUTH_TOKEN = null;
+// === FIN GOOGLE CONFIG ===
 // === FIRESTORE REST ===
 var FS='https://firestore.googleapis.com/v1/projects/costo-de-obras/databases/(default)/documents';
 function fsList(col){return fetch(FS+'/'+col).then(function(r){return r.json();}).then(function(d){return d.documents||[];});}
@@ -420,6 +428,44 @@ function renderCot(){
   c.innerHTML=cotiz.length?'<table><thead><tr><th>Fecha</th><th>Oficial</th><th>Blue</th></tr></thead><tbody>'+[].concat(cotiz).reverse().map(function(ct){return'<tr><td>'+ct.fecha+'</td><td>'+fmt(ct.oficial)+'</td><td>'+fmt(ct.blue)+'</td></tr>';}).join('')+'</tbody></table>':'<div class="empty">Sin cotizaciones</div>';
 }
 
+// === DRIVE ===
+function initGoogleAuth(){
+  if(!window.google||!window.google.accounts) return;
+  var tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: OAUTH_CLIENT_ID,
+    scope: 'https://www.googleapis.com/auth/drive.file',
+    callback: function(resp){
+      if(resp.error) return alert('Error OAuth: '+resp.error);
+      AUTH_TOKEN = resp.access_token;
+      document.getElementById('gdrive-btn').textContent = 'Drive: Conectado';
+      document.getElementById('gdrive-btn').style.background = '#27ae60';
+    }
+  });
+  document.getElementById('gdrive-btn').onclick = function(){
+    if(!AUTH_TOKEN) { tokenClient.requestAccessToken(); }
+    else { exportToDrive(); }
+  };
+}
+function exportToDrive(){
+  if(!AUTH_TOKEN){ alert('Conectá con Google Drive primero'); return; }
+  var o=obra();
+  if(!o){ alert('Seleccioná una obra'); return; }
+  var data=JSON.stringify({obra:o,cotizaciones:cotiz},null,2);
+  var blob=new Blob([data],{type:'application/json'});
+  var meta=JSON.stringify({name:o.nombre+'_backup.json',mimeType:'application/json'});
+  var form=new FormData();
+  form.append('metadata',new Blob([meta],{type:'application/json'}));
+  form.append('file',blob);
+  fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{
+    method:'POST',
+    headers:{Authorization:'Bearer '+AUTH_TOKEN},
+    body:form
+  }).then(function(r){return r.json();}).then(function(d){
+    if(d.id) alert('Guardado en Drive: '+d.name);
+    else alert('Error al guardar en Drive');
+  }).catch(function(e){ alert('Error: '+e.message); });
+}
+// === FIN DRIVE ===
 // === INIT ===
 function renderAll(){
   renderSel();
@@ -429,6 +475,7 @@ function renderAll(){
 
 // Cargar datos al inicio
 cargar();
+initGoogleAuth();
 </script>
 </body>
 <!-- build:1776707765388 -->
