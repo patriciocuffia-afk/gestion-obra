@@ -307,7 +307,7 @@ function renderGas(){
   var c=document.getElementById('tgas');
   if(!o||!(o.gastos||[]).length){c.innerHTML='<div class="empty">Sin gastos</div>';return;}
   var gs=[].concat(o.gastos).sort(function(a,b){return b.fecha.localeCompare(a.fecha);});
-  c.innerHTML='<table><thead><tr><th>Fecha</th><th>Descripcion</th><th>Categoria</th><th>Pago</th><th>Monto</th><th>Pesos</th><th></th></tr></thead><tbody>'+gs.map(function(g){return'<tr><td>'+g.fecha+'</td><td>'+g.desc+(g.nota?'<br><small style="color:var(--m)">'+g.nota+'</small>':'')+'</td><td>'+g.categoria+'</td><td>'+g.socio+'</td><td><span class="bdg '+(g.moneda==='pesos'?'bp':g.moneda==='oficial'?'bo':'bb')+'">'+(g.moneda==='pesos'?fmt(g.monto):fmtU(g.monto)+' ('+g.moneda+')')+'</span></td><td>'+fmt(enP(g))+'</td><td><button class="btnd" onclick="eliminarGasto(\''+g.id+'\'')">X</button></td></tr>';}).join('')+'</tbody></table>';
+  c.innerHTML='<table><thead><tr><th>Fecha</th><th>Descripcion</th><th>Categoria</th><th>Pago</th><th>Monto</th><th>Pesos</th><th></th></tr></thead><tbody>'+gs.map(function(g){return'<tr><td>'+g.fecha+'</td><td>'+g.desc+(g.nota?'<br><small style="color:var(--m)">'+g.nota+'</small>':'')+'</td><td>'+g.categoria+'</td><td>'+g.socio+'</td><td><span class="bdg '+(g.moneda==='pesos'?'bp':g.moneda==='oficial'?'bo':'bb')+'">'+(g.moneda==='pesos'?fmt(g.monto):fmtU(g.monto)+' ('+g.moneda+')')+'</span></td><td>'+fmt(enP(g))+'</td><td><button class="btnd" onclick="eliminarGasto(\x27'+g.id+'\x27)">X</button></td></tr>';}).join('')+'</tbody></table>';
 }
 
 // === RESUMEN ===
@@ -428,44 +428,44 @@ function renderCot(){
   c.innerHTML=cotiz.length?'<table><thead><tr><th>Fecha</th><th>Oficial</th><th>Blue</th></tr></thead><tbody>'+[].concat(cotiz).reverse().map(function(ct){return'<tr><td>'+ct.fecha+'</td><td>'+fmt(ct.oficial)+'</td><td>'+fmt(ct.blue)+'</td></tr>';}).join('')+'</tbody></table>':'<div class="empty">Sin cotizaciones</div>';
 }
 
-// === DRIVE ===
-function initGoogleAuth(){
-  if(!window.google||!window.google.accounts) return;
-  var tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: OAUTH_CLIENT_ID,
-    scope: 'https://www.googleapis.com/auth/drive.file',
-    callback: function(resp){
-      if(resp.error) return alert('Error OAuth: '+resp.error);
-      AUTH_TOKEN = resp.access_token;
-      document.getElementById('gdrive-btn').textContent = 'Drive: Conectado';
-      document.getElementById('gdrive-btn').style.background = '#27ae60';
-    }
-  });
-  document.getElementById('gdrive-btn').onclick = function(){
-    if(!AUTH_TOKEN) { tokenClient.requestAccessToken(); }
-    else { exportToDrive(); }
-  };
-}
-function exportToDrive(){
-  if(!AUTH_TOKEN){ alert('Conectá con Google Drive primero'); return; }
-  var o=obra();
-  if(!o){ alert('Seleccioná una obra'); return; }
-  var data=JSON.stringify({obra:o,cotizaciones:cotiz},null,2);
-  var blob=new Blob([data],{type:'application/json'});
-  var meta=JSON.stringify({name:o.nombre+'_backup.json',mimeType:'application/json'});
-  var form=new FormData();
-  form.append('metadata',new Blob([meta],{type:'application/json'}));
-  form.append('file',blob);
-  fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{
-    method:'POST',
-    headers:{Authorization:'Bearer '+AUTH_TOKEN},
-    body:form
-  }).then(function(r){return r.json();}).then(function(d){
-    if(d.id) alert('Guardado en Drive: '+d.name);
-    else alert('Error al guardar en Drive');
-  }).catch(function(e){ alert('Error: '+e.message); });
-}
-// === FIN DRIVE ===
+  // === DRIVE ===
+  function initGoogleAuth(){
+    if(!window.google||!window.google.accounts) return;
+    var tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: OAUTH_CLIENT_ID,
+      scope: 'https://www.googleapis.com/auth/drive.file',
+      callback: function(resp){
+        if(resp.error) return alert('Error OAuth: '+resp.error);
+        AUTH_TOKEN = resp.access_token;
+        document.getElementById('gdrive-btn').textContent = 'Drive: OK';
+        document.getElementById('gdrive-btn').style.background = '#27ae60';
+      }
+    });
+    document.getElementById('gdrive-btn').onclick = function(){
+      if(!AUTH_TOKEN) { tokenClient.requestAccessToken(); }
+      else { exportToDrive(); }
+    };
+  }
+  function exportToDrive(){
+    if(!AUTH_TOKEN){ alert('Conecta con Google Drive primero'); return; }
+    var o=obra();
+    if(!o){ alert('Selecciona una obra'); return; }
+    var data=JSON.stringify({obra:o,cotizaciones:cotiz},null,2);
+    var blob=new Blob([data],{type:'application/json'});
+    var meta=JSON.stringify({name:o.nombre+'_backup.json',mimeType:'application/json'});
+    var form=new FormData();
+    form.append('metadata',new Blob([meta],{type:'application/json'}));
+    form.append('file',blob);
+    fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{
+      method:'POST',
+      headers:{Authorization:'Bearer '+AUTH_TOKEN},
+      body:form
+    }).then(function(r){return r.json();}).then(function(d){
+      if(d.id) alert('Guardado en Drive: '+d.name);
+      else alert('Error al guardar en Drive');
+    }).catch(function(e){ alert('Error: '+e.message); });
+  }
+  // === FIN DRIVE ===
 // === INIT ===
 function renderAll(){
   renderSel();
