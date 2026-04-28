@@ -734,6 +734,9 @@ window.addEventListener('load', function() {
   // Intentar restaurar sesion previa
   setTimeout(checkSavedToken, 300);
 });
+  if('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/gestion-obra/sw.js');
+}
 </script>
 </body>
 </html>
