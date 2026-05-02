@@ -161,7 +161,26 @@ tr:hover td{background:#f8f9fa}
 /* Modal presupuesto input */
 .pres-input{width:100%;padding:7px 10px;border:1px solid var(--b);border-radius:6px;font-size:13px;margin-top:4px}
 
-/* Documentos */
+/* Manual de ayuda */
+.help-section{margin-bottom:8px;border:1px solid var(--b);border-radius:10px;overflow:hidden}
+.help-header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer;background:#fff;user-select:none}
+.help-header:hover{background:#f8f9fa}
+.help-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;margin-right:10px;flex-shrink:0}
+.help-title{font-size:14px;font-weight:700;color:var(--t)}
+.help-sub{font-size:12px;color:var(--m);margin-top:2px}
+.help-toggle{font-size:16px;color:var(--m);transition:transform .2s}
+.help-toggle.open{transform:rotate(180deg)}
+.help-body{display:none;border-top:1px solid var(--b);padding:16px;background:#fafbfc;font-size:13px;line-height:1.7;color:var(--t)}
+.help-body.open{display:block}
+.help-step{display:flex;gap:10px;margin-bottom:12px;align-items:flex-start}
+.help-num{width:24px;height:24px;border-radius:50%;background:var(--p);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.help-tip{background:#fffbf0;border-left:3px solid var(--a);padding:10px 12px;border-radius:0 6px 6px 0;margin:10px 0;font-size:12px}
+.help-tip strong{color:var(--a)}
+.help-warn{background:#fdf0f0;border-left:3px solid var(--d);padding:10px 12px;border-radius:0 6px 6px 0;margin:10px 0;font-size:12px}
+.help-warn strong{color:var(--d)}
+.help-badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;background:var(--p);color:#fff;margin:0 2px}
+
+/* Manual de ayuda */
 .doc-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--b)}
 .doc-item:last-child{border-bottom:none}
 .doc-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px}
@@ -210,6 +229,7 @@ tr:hover td{background:#f8f9fa}
   <div class="tab" onclick="showTab('cat',this)">Categorias</div>
   <div class="tab" onclick="showTab('soc',this)">Socios</div>
   <div class="tab" onclick="showTab('cot',this)">Cotizacion</div>
+  <div class="tab" onclick="showTab('help',this)">? Ayuda</div>
 </div>
 
 <!-- AUTH -->
@@ -363,6 +383,204 @@ tr:hover td{background:#f8f9fa}
         </select>
       </div>
       <div id="tdoc"></div>
+    </div>
+  </div>
+
+  <!-- AYUDA -->
+  <div id="tab-help" style="display:none">
+    <div class="card" style="background:linear-gradient(135deg,var(--p),var(--pl));color:#fff;border:none">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="width:50px;height:50px;background:rgba(255,255,255,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px">📋</div>
+        <div>
+          <div style="font-size:18px;font-weight:700">Guia de uso — OBRICK</div>
+          <div style="font-size:13px;opacity:.8;margin-top:2px">Estudio Juridico Cuffia · Gestion de Obras</div>
+        </div>
+      </div>
+      <div style="margin-top:14px;font-size:13px;opacity:.9;line-height:1.6">
+        Esta guia explica como usar cada seccion de la aplicacion. Hace clic en cada tema para expandirlo.
+      </div>
+    </div>
+
+    <!-- PRIMEROS PASOS -->
+    <div class="help-section">
+      <div class="help-header" onclick="toggleHelp('h0')">
+        <div style="display:flex;align-items:center">
+          <div class="help-icon" style="background:#e8f5e9">🚀</div>
+          <div><div class="help-title">Primeros pasos</div><div class="help-sub">Como comenzar a usar la aplicacion</div></div>
+        </div>
+        <span class="help-toggle" id="ht0">▼</span>
+      </div>
+      <div class="help-body" id="hb0">
+        <div class="help-step"><div class="help-num">1</div><div><strong>Iniciar sesion:</strong> Al abrir la app, hace clic en "Continuar con Google". Usas tu cuenta de Gmail para acceder. Los datos quedan guardados en la nube y son accesibles desde cualquier dispositivo.</div></div>
+        <div class="help-step"><div class="help-num">2</div><div><strong>Crear una obra:</strong> Hace clic en el boton amarillo <span class="help-badge">+ Obra</span> en el encabezado. Ingresa el nombre y la direccion (opcional). Cada obra tiene sus propios gastos, stock y documentos.</div></div>
+        <div class="help-step"><div class="help-num">3</div><div><strong>Cargar la cotizacion:</strong> Antes de registrar gastos en dolares, anda a la pestana <span class="help-badge">Cotizacion</span> y carga los valores del dia para Dolar Oficial y Blue. Esto permite que todos los montos se conviertan automaticamente.</div></div>
+        <div class="help-step"><div class="help-num">4</div><div><strong>Registrar el primer gasto:</strong> Anda a <span class="help-badge">Gastos</span>, completa el formulario y hace clic en "Registrar gasto". El gasto aparecera en el historial y en el resumen.</div></div>
+        <div class="help-tip"><strong>Consejo:</strong> Si usas la app desde el celular, instala el icono en tu pantalla de inicio. Cuando estes en el navegador, busca la opcion "Agregar a pantalla de inicio" en el menu del navegador.</div>
+      </div>
+    </div>
+
+    <!-- RESUMEN -->
+    <div class="help-section">
+      <div class="help-header" onclick="toggleHelp('h1')">
+        <div style="display:flex;align-items:center">
+          <div class="help-icon" style="background:#e3f2fd">📊</div>
+          <div><div class="help-title">Resumen</div><div class="help-sub">Vista general de la obra</div></div>
+        </div>
+        <span class="help-toggle" id="ht1">▼</span>
+      </div>
+      <div class="help-body" id="hb1">
+        <p style="margin-bottom:12px">El Resumen es la pantalla principal. Muestra de un vistazo el estado financiero completo de la obra.</p>
+        <div class="help-step"><div class="help-num">1</div><div><strong>Total gastado:</strong> Tres tarjetas muestran el total acumulado en Pesos, Dolar Oficial y Dolar Blue. Los valores en dolares se calculan automaticamente segun la ultima cotizacion cargada.</div></div>
+        <div class="help-step"><div class="help-num">2</div><div><strong>Grafico de torta:</strong> Muestra la distribucion porcentual del gasto por categoria. Permite ver de un vistazo donde se concentra el dinero.</div></div>
+        <div class="help-step"><div class="help-num">3</div><div><strong>Por categoria:</strong> Lista detallada con el total de cada categoria en las tres monedas.</div></div>
+        <div class="help-step"><div class="help-num">4</div><div><strong>Presupuesto por categoria:</strong> Barras de progreso que muestran cuanto del presupuesto asignado se ejecuto. Verde = normal, Amarillo = cerca del limite, Rojo = excedido.</div></div>
+        <div class="help-step"><div class="help-num">5</div><div><strong>Evolucion mensual:</strong> Muestra cuanto se gasto cada mes desde el inicio de la obra.</div></div>
+        <div class="help-step"><div class="help-num">6</div><div><strong>Exportar PDF:</strong> El boton rojo arriba del todo genera un PDF con el resumen completo, listo para compartir con el contador o los socios.</div></div>
+        <div class="help-tip"><strong>Consejo:</strong> Para asignar presupuestos, hace clic en "Editar presupuestos" dentro de la card de presupuesto. Ingresas el monto estimado en pesos para cada categoria.</div>
+      </div>
+    </div>
+
+    <!-- GASTOS -->
+    <div class="help-section">
+      <div class="help-header" onclick="toggleHelp('h2')">
+        <div style="display:flex;align-items:center">
+          <div class="help-icon" style="background:#fff3e0">💰</div>
+          <div><div class="help-title">Gastos</div><div class="help-sub">Registrar, editar y filtrar gastos</div></div>
+        </div>
+        <span class="help-toggle" id="ht2">▼</span>
+      </div>
+      <div class="help-body" id="hb2">
+        <div class="help-step"><div class="help-num">1</div><div><strong>Gasto rapido (panel naranja):</strong> Para registros urgentes desde la obra. Solo requiere descripcion, monto y moneda. Se asigna automaticamente a la primera categoria y socio. Ideal para usar desde el celular.</div></div>
+        <div class="help-step"><div class="help-num">2</div><div><strong>Nuevo gasto (formulario completo):</strong> Permite ingresar todos los datos: descripcion, monto, moneda (Pesos / Dolar Oficial / Dolar Blue), categoria, quien pago, fecha y notas adicionales.</div></div>
+        <div class="help-step"><div class="help-num">3</div><div><strong>Historial con filtros:</strong> Podes filtrar por descripcion (buscador), categoria, fecha desde y fecha hasta. Hace clic en "Limpiar" para quitar todos los filtros.</div></div>
+        <div class="help-step"><div class="help-num">4</div><div><strong>Editar un gasto:</strong> Hace clic en el boton <strong>✎</strong> de cualquier fila para abrir el formulario de edicion. Podes modificar cualquier campo y guardar.</div></div>
+        <div class="help-step"><div class="help-num">5</div><div><strong>Duplicar un gasto:</strong> El boton <strong>⧉</strong> crea una copia del gasto con la fecha de hoy. Util cuando se repite el mismo proveedor o concepto.</div></div>
+        <div class="help-step"><div class="help-num">6</div><div><strong>Eliminar un gasto:</strong> El boton <strong>✕</strong> elimina el gasto previa confirmacion. Esta accion no se puede deshacer.</div></div>
+        <div class="help-tip"><strong>Monedas:</strong> Cuando cargas un gasto en dolares, el sistema lo convierte automaticamente a pesos usando la ultima cotizacion guardada. Por eso es importante mantener la cotizacion actualizada.</div>
+        <div class="help-warn"><strong>Atencion:</strong> Si eliminas un gasto por error, no hay forma de recuperarlo. Antes de eliminar, verifica que sea el correcto.</div>
+      </div>
+    </div>
+
+    <!-- DOCUMENTOS -->
+    <div class="help-section">
+      <div class="help-header" onclick="toggleHelp('h3')">
+        <div style="display:flex;align-items:center">
+          <div class="help-icon" style="background:#f3e5f5">📁</div>
+          <div><div class="help-title">Documentos</div><div class="help-sub">Planos, permisos, facturas y mas</div></div>
+        </div>
+        <span class="help-toggle" id="ht3">▼</span>
+      </div>
+      <div class="help-body" id="hb3">
+        <p style="margin-bottom:12px">La pestaña Documentos permite guardar archivos vinculados a la obra directamente en tu Google Drive, organizados por categoria.</p>
+        <div class="help-step"><div class="help-num">1</div><div><strong>Subir un documento:</strong> Selecciona la categoria (Planos, Permisos, Facturas, Renders, Contratos u Otros), ingresa una descripcion opcional, elige el archivo y hace clic en "Subir a Google Drive".</div></div>
+        <div class="help-step"><div class="help-num">2</div><div><strong>Donde se guardan:</strong> Los archivos se guardan en una carpeta llamada "OBRICK — [nombre de la obra]" en tu Google Drive. Podes acceder a ellos tambien directamente desde Drive.</div></div>
+        <div class="help-step"><div class="help-num">3</div><div><strong>Ver un documento:</strong> Hace clic en el boton "Ver" de cualquier archivo. Se abre en Google Drive en una nueva pestaña.</div></div>
+        <div class="help-step"><div class="help-num">4</div><div><strong>Filtrar por categoria:</strong> Usa el selector de la derecha para ver solo los documentos de una categoria especifica.</div></div>
+        <div class="help-step"><div class="help-num">5</div><div><strong>Eliminar un documento:</strong> El boton ✕ elimina el documento tanto de la app como de Google Drive.</div></div>
+        <div class="help-tip"><strong>Formatos aceptados:</strong> PDF, JPG, PNG, Word (DOC/DOCX), Excel (XLS/XLSX), DWG y otros formatos comunes.</div>
+        <div class="help-tip"><strong>Espacio:</strong> El almacenamiento usa tu Google Drive personal. Si tenes el plan gratuito, tenes 15GB disponibles.</div>
+      </div>
+    </div>
+
+    <!-- STOCK -->
+    <div class="help-section">
+      <div class="help-header" onclick="toggleHelp('h4')">
+        <div style="display:flex;align-items:center">
+          <div class="help-icon" style="background:#e8f5e9">📦</div>
+          <div><div class="help-title">Stock</div><div class="help-sub">Control de materiales e inventario</div></div>
+        </div>
+        <span class="help-toggle" id="ht4">▼</span>
+      </div>
+      <div class="help-body" id="hb4">
+        <div class="help-step"><div class="help-num">1</div><div><strong>Agregar material:</strong> Ingresa el nombre, cantidad, unidad (kg, bolsa, litro, unidad, etc.) y el stock minimo. El stock minimo es la cantidad por debajo de la cual el sistema muestra una alerta.</div></div>
+        <div class="help-step"><div class="help-num">2</div><div><strong>Actualizar cantidad:</strong> En la tabla de inventario, el campo de cantidad es editable. Hace clic, modifica el numero y el sistema guarda automaticamente.</div></div>
+        <div class="help-step"><div class="help-num">3</div><div><strong>Registrar uso:</strong> En la columna "Usar", ingresa la cantidad consumida y hace clic en "Usar". El sistema descuenta esa cantidad del inventario.</div></div>
+        <div class="help-step"><div class="help-num">4</div><div><strong>Estado del stock:</strong> Cada material muestra "OK" en verde si esta por encima del minimo, o "Bajo" en rojo si se alcanzo o supero el nivel minimo de alerta.</div></div>
+        <div class="help-tip"><strong>Consejo:</strong> Usa el stock minimo para materiales criticos como cemento o hierro. Cuando aparezca "Bajo", es la señal para hacer el proximo pedido.</div>
+      </div>
+    </div>
+
+    <!-- CATEGORIAS -->
+    <div class="help-section">
+      <div class="help-header" onclick="toggleHelp('h5')">
+        <div style="display:flex;align-items:center">
+          <div class="help-icon" style="background:#fce4ec">🏷️</div>
+          <div><div class="help-title">Categorias</div><div class="help-sub">Organizar los gastos por rubro</div></div>
+        </div>
+        <span class="help-toggle" id="ht5">▼</span>
+      </div>
+      <div class="help-body" id="hb5">
+        <p style="margin-bottom:12px">Las categorias permiten clasificar cada gasto por rubro de obra. La aplicacion viene con categorias predefinidas pero podes personalizarlas.</p>
+        <div class="help-step"><div class="help-num">1</div><div><strong>Categorias predefinidas:</strong> Gastos Generales, Albanil, Electricista, Plomero, Carpintero, Pintor y Materiales.</div></div>
+        <div class="help-step"><div class="help-num">2</div><div><strong>Agregar categoria:</strong> Ingresa el nombre en el campo y hace clic en "Agregar". Por ejemplo: "Arquitecto", "Hormigon", "Herreria".</div></div>
+        <div class="help-step"><div class="help-num">3</div><div><strong>Ver historial por categoria:</strong> Hace clic en cualquier categoria para expandirla y ver todos los gastos asociados, con sus valores en las tres monedas.</div></div>
+        <div class="help-step"><div class="help-num">4</div><div><strong>Editar gastos desde la categoria:</strong> Dentro del detalle expandido, cada gasto tiene los botones de editar y eliminar.</div></div>
+        <div class="help-step"><div class="help-num">5</div><div><strong>Eliminar categoria:</strong> Solo se puede eliminar si no tiene gastos asociados. Si tiene gastos, primero hay que reasignarlos o eliminarlos.</div></div>
+        <div class="help-tip"><strong>Consejo:</strong> Crea categorias especificas para cada gremio o proveedor importante. Asi podes ver rapidamente cuanto le pagaste a cada uno.</div>
+      </div>
+    </div>
+
+    <!-- SOCIOS -->
+    <div class="help-section">
+      <div class="help-header" onclick="toggleHelp('h6')">
+        <div style="display:flex;align-items:center">
+          <div class="help-icon" style="background:#e8eaf6">👥</div>
+          <div><div class="help-title">Socios</div><div class="help-sub">Balance entre personas que pagan gastos</div></div>
+        </div>
+        <span class="help-toggle" id="ht6">▼</span>
+      </div>
+      <div class="help-body" id="hb6">
+        <p style="margin-bottom:12px">La pestana Socios permite llevar un balance entre las personas que adelantan dinero para la obra.</p>
+        <div class="help-step"><div class="help-num">1</div><div><strong>Agregar socio:</strong> Ingresa el nombre de la persona. Por ejemplo: "Patricio", "Benjamin".</div></div>
+        <div class="help-step"><div class="help-num">2</div><div><strong>Asignar gastos:</strong> Al registrar un gasto, el campo "Pagado por" indica quien adelanto el dinero.</div></div>
+        <div class="help-step"><div class="help-num">3</div><div><strong>Balance:</strong> La app muestra cuanto pago cada socio en pesos, dolar oficial y blue. La tarjeta con la flecha ↑ indica quien pago mas.</div></div>
+        <div class="help-step"><div class="help-num">4</div><div><strong>Deuda para igualar:</strong> Si hay dos o mas socios, la app calcula automaticamente cuanto le debe uno al otro para que queden a mano.</div></div>
+        <div class="help-tip"><strong>Ejemplo:</strong> Si Patricio pago $100.000 y Benjamin $60.000, la app indica que Benjamin le debe $20.000 a Patricio para que cada uno haya aportado $80.000.</div>
+      </div>
+    </div>
+
+    <!-- COTIZACION -->
+    <div class="help-section">
+      <div class="help-header" onclick="toggleHelp('h7')">
+        <div style="display:flex;align-items:center">
+          <div class="help-icon" style="background:#fff8e1">💵</div>
+          <div><div class="help-title">Cotizacion</div><div class="help-sub">Actualizar los valores del dolar</div></div>
+        </div>
+        <span class="help-toggle" id="ht7">▼</span>
+      </div>
+      <div class="help-body" id="hb7">
+        <div class="help-step"><div class="help-num">1</div><div><strong>Cargar cotizacion:</strong> Ingresa el valor del Dolar Oficial y el Dolar Blue del dia, selecciona la fecha y hace clic en "Guardar cotizacion".</div></div>
+        <div class="help-step"><div class="help-num">2</div><div><strong>Frecuencia:</strong> Se recomienda actualizar la cotizacion cada vez que registras gastos en dolares, para que las conversiones sean precisas.</div></div>
+        <div class="help-step"><div class="help-num">3</div><div><strong>Historial de cotizaciones:</strong> La app guarda todas las cotizaciones cargadas. Podes ver la evolucion del tipo de cambio a lo largo del tiempo.</div></div>
+        <div class="help-step"><div class="help-num">4</div><div><strong>Como afecta los calculos:</strong> Todos los totales en el Resumen y en el Historial usan la ultima cotizacion guardada para convertir los montos en dolares a pesos.</div></div>
+        <div class="help-warn"><strong>Importante:</strong> Si no hay cotizacion cargada, el sistema usa valores por defecto (Oficial $1000 / Blue $1200). Carga siempre la cotizacion del dia antes de registrar gastos en dolares.</div>
+      </div>
+    </div>
+
+    <!-- SINCRONIZACION -->
+    <div class="help-section">
+      <div class="help-header" onclick="toggleHelp('h8')">
+        <div style="display:flex;align-items:center">
+          <div class="help-icon" style="background:#e0f7fa">🔄</div>
+          <div><div class="help-title">Sincronizacion y acceso</div><div class="help-sub">Como funciona el guardado en la nube</div></div>
+        </div>
+        <span class="help-toggle" id="ht8">▼</span>
+      </div>
+      <div class="help-body" id="hb8">
+        <div class="help-step"><div class="help-num">1</div><div><strong>Guardado automatico:</strong> Cada vez que registras o modificas algo, la app guarda automaticamente en la nube. El punto verde en el encabezado indica que todo esta guardado.</div></div>
+        <div class="help-step"><div class="help-num">2</div><div><strong>Punto de color:</strong> Verde = guardado, Amarillo = sincronizando, Rojo = error de conexion.</div></div>
+        <div class="help-step"><div class="help-num">3</div><div><strong>Acceso desde cualquier dispositivo:</strong> La misma cuenta de Google da acceso a los mismos datos desde la PC, el celular o cualquier navegador.</div></div>
+        <div class="help-step"><div class="help-num">4</div><div><strong>Actualizacion automatica:</strong> La app se sincroniza cada 60 segundos para mostrar cambios que hiciste desde otro dispositivo.</div></div>
+        <div class="help-step"><div class="help-num">5</div><div><strong>Multiples obras:</strong> Podes tener varias obras. Usa el selector del encabezado para cambiar entre ellas. Cada obra es independiente.</div></div>
+        <div class="help-tip"><strong>Sin internet:</strong> Si perdiste la conexion, la app muestra el punto rojo. Los datos cargados siguen visibles pero no se guardan hasta recuperar la conexion.</div>
+      </div>
+    </div>
+
+    <div class="card" style="text-align:center;margin-top:6px">
+      <div style="font-size:13px;color:var(--m);line-height:1.7">
+        <strong style="color:var(--p)">OBRICK</strong> — Desarrollado para Estudio Juridico Cuffia<br>
+        Ante cualquier consulta o problema, contacta al administrador del sistema.
+      </div>
     </div>
   </div>
 
@@ -728,6 +946,7 @@ function showTab(t, el){
   if(t==='cat') renderCat();
   if(t==='soc') renderSoc();
   if(t==='cot') renderCot();
+  if(t==='help') {} // contenido estatico
 }
 
 // ═══════════════════════════════════════════
@@ -1515,6 +1734,18 @@ function exportarPDF(){
 
   doc.save('obra-' + o.nombre.replace(/\s/g,'-') + '.pdf');
   showToast('PDF generado correctamente');
+}
+
+// ═══════════════════════════════════════════
+// AYUDA — ACCORDION
+// ═══════════════════════════════════════════
+function toggleHelp(id){
+  var body=document.getElementById('hb'+id.substring(1));
+  var toggle=document.getElementById('ht'+id.substring(1));
+  if(!body||!toggle) return;
+  var isOpen=body.classList.contains('open');
+  body.classList.toggle('open',!isOpen);
+  toggle.classList.toggle('open',!isOpen);
 }
 
 // ═══════════════════════════════════════════
