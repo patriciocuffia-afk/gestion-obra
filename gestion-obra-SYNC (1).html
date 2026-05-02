@@ -414,68 +414,25 @@ function setStatus(state, label){
 }
 
 // ═══════════════════════════════════════════
-// AUTH — usa redirect flow para máxima compatibilidad
+// AUTH
 // ═══════════════════════════════════════════
-var REDIRECT_URI = 'https://patriciocuffia-afk.github.io/gestion-obra/gestion-obra-SYNC%20(1).html';
-
 function loginGoogle(){
-  // Intentar primero con token silencioso (sesión existente)
   if(!window.google||!window.google.accounts){ setTimeout(loginGoogle,500); return; }
   if(!tokenClient){
     tokenClient = google.accounts.oauth2.initTokenClient({
       client_id: OAUTH_CLIENT_ID, scope: SCOPES,
       callback: function(resp){
-        if(resp.error){
-          // Si falla silencioso, usar redirect
-          loginGoogleRedirect();
-          return;
-        }
+        if(resp.error){ setStatus('','Error: '+resp.error); return; }
         AUTH_TOKEN = resp.access_token;
         sessionStorage.setItem('gob_token', AUTH_TOKEN);
         mostrarApp(); cargar();
       }
     });
   }
-  // Intentar sin prompt primero (si hay sesión activa)
-  try {
-    tokenClient.requestAccessToken({prompt:'none'});
-  } catch(e) {
-    loginGoogleRedirect();
-  }
-}
-
-function loginGoogleRedirect(){
-  // Construir URL de autorización de Google manualmente (sin popup)
-  var params = [
-    'client_id=' + OAUTH_CLIENT_ID,
-    'redirect_uri=' + encodeURIComponent(REDIRECT_URI),
-    'response_type=token',
-    'scope=' + encodeURIComponent(SCOPES),
-    'include_granted_scopes=true',
-    'state=auth'
-  ].join('&');
-  window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params;
+  tokenClient.requestAccessToken({prompt:''});
 }
 
 function checkSavedToken(){
-  // Verificar si venimos de un redirect de Google (token en el hash)
-  var hash = window.location.hash;
-  if(hash && hash.indexOf('access_token') !== -1){
-    var params = {};
-    hash.substring(1).split('&').forEach(function(p){
-      var kv = p.split('=');
-      params[kv[0]] = decodeURIComponent(kv[1]||'');
-    });
-    if(params.access_token){
-      AUTH_TOKEN = params.access_token;
-      sessionStorage.setItem('gob_token', AUTH_TOKEN);
-      // Limpiar el hash de la URL
-      history.replaceState(null, '', window.location.pathname);
-      mostrarApp(); cargar();
-      return;
-    }
-  }
-  // Verificar token guardado en sessionStorage
   var t = sessionStorage.getItem('gob_token');
   if(t){ AUTH_TOKEN=t; mostrarApp(); cargar(); }
 }
