@@ -161,7 +161,22 @@ tr:hover td{background:#f8f9fa}
 /* Modal presupuesto input */
 .pres-input{width:100%;padding:7px 10px;border:1px solid var(--b);border-radius:6px;font-size:13px;margin-top:4px}
 
-@media(max-width:600px){.rg,.cg{grid-template-columns:1fr 1fr}.fr,.fr.t3{grid-template-columns:1fr}.bg2{grid-template-columns:1fr}.rcat-vals{gap:8px}.chart-wrap{flex-direction:column}}
+/* Documentos */
+.doc-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--b)}
+.doc-item:last-child{border-bottom:none}
+.doc-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px}
+.doc-icon.pdf{background:#fde8e8}.doc-icon.img{background:#e8f5e9}.doc-icon.doc{background:#e3f2fd}.doc-icon.xls{background:#e8f5e9}.doc-icon.other{background:#f3e5f5}
+.doc-info{flex:1;min-width:0}
+.doc-name{font-size:13px;font-weight:700;color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.doc-meta{font-size:11px;color:var(--m);margin-top:2px}
+.doc-cat{display:inline-block;padding:1px 8px;border-radius:20px;font-size:10px;font-weight:700;background:#e3f2fd;color:#1565c0;margin-right:6px}
+.doc-actions{display:flex;gap:6px;flex-shrink:0}
+
+/* Mejoras gasto rapido */
+.gasto-rapido{background:#fffbf0;border:2px dashed var(--a);border-radius:10px;padding:14px;margin-bottom:14px}
+.gasto-rapido .ct{color:var(--a)}
+
+@media(max-width:600px){.rg,.cg{grid-template-columns:1fr 1fr}.fr,.fr.t3{grid-template-columns:1fr}.bg2{grid-template-columns:1fr}.rcat-vals{gap:8px}.chart-wrap{flex-direction:column}.doc-actions{flex-direction:column}}
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -190,6 +205,7 @@ tr:hover td{background:#f8f9fa}
 <div class="tabs" id="main-tabs" style="display:none">
   <div class="tab active" onclick="showTab('res',this)">Resumen</div>
   <div class="tab" onclick="showTab('gas',this)">Gastos</div>
+  <div class="tab" onclick="showTab('doc',this)">Documentos</div>
   <div class="tab" onclick="showTab('stk',this)">Stock</div>
   <div class="tab" onclick="showTab('cat',this)">Categorias</div>
   <div class="tab" onclick="showTab('soc',this)">Socios</div>
@@ -250,6 +266,10 @@ tr:hover td{background:#f8f9fa}
       <div id="rpres"></div>
     </div>
     <div class="card">
+      <div class="ct">Evolucion mensual</div>
+      <div id="revolucion"></div>
+    </div>
+    <div class="card">
       <div class="ct">Ultimos gastos</div>
       <div id="rult" class="tw"></div>
     </div>
@@ -257,6 +277,15 @@ tr:hover td{background:#f8f9fa}
 
   <!-- GASTOS -->
   <div id="tab-gas" style="display:none">
+    <div class="gasto-rapido">
+      <div class="ct">⚡ Gasto rapido</div>
+      <div class="fr t3">
+        <div class="fg"><label>Descripcion</label><input type="text" id="qd" placeholder="Ej: Cemento"></div>
+        <div class="fg"><label>Monto</label><input type="number" id="qm" placeholder="0" step="0.01"></div>
+        <div class="fg"><label>Moneda</label><select id="qmon"><option value="pesos">Pesos</option><option value="oficial">Dolar Oficial</option><option value="blue">Dolar Blue</option></select></div>
+      </div>
+      <button class="btn" style="background:var(--a)" onclick="gastoRapido()">Registrar rapido</button>
+    </div>
     <div class="card">
       <div class="ct">Nuevo gasto</div>
       <div class="fr t3">
@@ -282,6 +311,58 @@ tr:hover td{background:#f8f9fa}
         <button class="btns" onclick="limpiarFiltros()" style="padding:6px 12px;font-size:12px;border-radius:6px">Limpiar</button>
       </div>
       <div class="tw" id="tgas"></div>
+    </div>
+  </div>
+
+  <!-- DOCUMENTOS -->
+  <div id="tab-doc" style="display:none">
+    <div class="card">
+      <div class="ct">Subir documento</div>
+      <div class="fr">
+        <div class="fg">
+          <label>Categoria</label>
+          <select id="docCat">
+            <option value="Planos">Planos</option>
+            <option value="Permisos">Permisos municipales</option>
+            <option value="Facturas">Facturas</option>
+            <option value="Renders">Renders / Imagenes</option>
+            <option value="Contratos">Contratos</option>
+            <option value="Otros">Otros</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Descripcion (opcional)</label>
+          <input type="text" id="docDesc" placeholder="Ej: Plano planta baja">
+        </div>
+      </div>
+      <div class="fg" style="margin-bottom:12px">
+        <label>Archivo</label>
+        <input type="file" id="docFile" accept=".pdf,.jpg,.jpeg,.png,.dwg,.doc,.docx,.xls,.xlsx" style="padding:8px">
+      </div>
+      <button class="btn" onclick="subirDocumento()">
+        <span id="docBtnTxt">Subir a Google Drive</span>
+      </button>
+      <div id="docProgress" style="display:none;margin-top:10px">
+        <div style="height:6px;background:var(--b);border-radius:3px;overflow:hidden">
+          <div id="docProgressBar" style="height:100%;background:var(--p);border-radius:3px;width:0%;transition:width .3s"></div>
+        </div>
+        <div style="font-size:12px;color:var(--m);margin-top:4px" id="docProgressTxt">Subiendo...</div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div class="ct" style="margin-bottom:0">Documentos de la obra</div>
+        <select id="docFiltro" onchange="renderDoc()" style="padding:6px 10px;border:1px solid var(--b);border-radius:6px;font-size:13px">
+          <option value="">Todas las categorias</option>
+          <option value="Planos">Planos</option>
+          <option value="Permisos">Permisos municipales</option>
+          <option value="Facturas">Facturas</option>
+          <option value="Renders">Renders / Imagenes</option>
+          <option value="Contratos">Contratos</option>
+          <option value="Otros">Otros</option>
+        </select>
+      </div>
+      <div id="tdoc"></div>
     </div>
   </div>
 
@@ -642,6 +723,7 @@ function showTab(t, el){
   if(el) el.classList.add('active');
   if(t==='res') renderRes();
   if(t==='gas') renderGas();
+  if(t==='doc') renderDoc();
   if(t==='stk') renderStk();
   if(t==='cat') renderCat();
   if(t==='soc') renderSoc();
@@ -782,7 +864,7 @@ function renderGas(){
         '<td style="font-weight:600">'+fmt(p)+'</td>'+
         '<td><span class="bdg bo">'+fmtU(uOf)+'</span></td>'+
         '<td><span class="bdg bb">'+fmtU(uBl)+'</span></td>'+
-        '<td style="white-space:nowrap"><button class="btne" onclick="abrirEdit(\''+g.id+'\')" style="margin-right:4px">✎</button><button class="btnd" onclick="eliminarGasto(\''+g.id+'\')">✕</button></td></tr>';
+        '<td style="white-space:nowrap"><button class="btne" onclick="abrirEdit(\''+g.id+'\')" style="margin-right:4px">✎</button><button class="btne" onclick="duplicarGasto(\''+g.id+'\')" style="margin-right:4px;background:var(--a);color:#fff;border-color:var(--a)" title="Duplicar">⧉</button><button class="btnd" onclick="eliminarGasto(\''+g.id+'\')">✕</button></td></tr>';
     }).join('')+'</tbody></table>';
 }
 
@@ -817,6 +899,9 @@ function renderRes(){
 
   // Presupuesto
   renderPres(o, pc);
+
+  // Evolucion mensual
+  renderEvolucion(o.gastos||[]);
 
   var cats=Object.keys(pc).sort(function(a,b){ return pc[b]-pc[a]; });
   document.getElementById('rcat').innerHTML=cats.length ? cats.map(function(k){
@@ -1057,7 +1142,210 @@ function renderCot(){
 function renderAll(){
   renderSel();
   var fg=document.getElementById('gfec'); if(fg&&!fg.value) fg.value=new Date().toISOString().split('T')[0];
-  renderRes(); renderGas(); renderCat(); renderSoc(); renderStk(); renderCot();
+  renderRes(); renderGas(); renderCat(); renderSoc(); renderStk(); renderCot(); renderDoc();
+}
+
+// ═══════════════════════════════════════════
+// GASTO RAPIDO
+// ═══════════════════════════════════════════
+function gastoRapido(){
+  var o=obra(); if(!o){ alert('Crea una obra primero'); return; }
+  var d=document.getElementById('qd').value.trim();
+  var m=parseFloat(document.getElementById('qm').value);
+  if(!d||isNaN(m)||m<=0){ alert('Completa descripcion y monto'); return; }
+  var g={
+    id:Date.now().toString(), desc:d, monto:m,
+    moneda:document.getElementById('qmon').value,
+    categoria:(o.categorias||['Gastos Generales'])[0],
+    socio:(o.socios||['Patricio'])[0],
+    fecha:new Date().toISOString().split('T')[0],
+    nota:'Gasto rapido'
+  };
+  var up=Object.assign({},o,{gastos:(o.gastos||[]).concat([g])});
+  guardarObra(up).then(function(){
+    document.getElementById('qd').value='';
+    document.getElementById('qm').value='';
+    showToast('Gasto rapido registrado');
+    renderGas(); renderRes();
+  });
+}
+
+// ═══════════════════════════════════════════
+// DUPLICAR GASTO
+// ═══════════════════════════════════════════
+function duplicarGasto(id){
+  var o=obra(); if(!o) return;
+  var g=(o.gastos||[]).find(function(x){ return x.id===id; });
+  if(!g) return;
+  var nuevo=Object.assign({},g,{
+    id:Date.now().toString(),
+    fecha:new Date().toISOString().split('T')[0],
+    nota:(g.nota?g.nota+' (copia)':'copia')
+  });
+  var up=Object.assign({},o,{gastos:(o.gastos||[]).concat([nuevo])});
+  guardarObra(up).then(function(){
+    showToast('Gasto duplicado');
+    renderGas(); renderRes();
+  });
+}
+
+// ═══════════════════════════════════════════
+// DOCUMENTOS — GOOGLE DRIVE
+// ═══════════════════════════════════════════
+var DRIVE_UPLOAD = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+var DRIVE_FILES = 'https://www.googleapis.com/drive/v3/files';
+var driveFolder = null;
+
+function driveHeaders(ct){
+  var h={'Authorization':'Bearer '+AUTH_TOKEN};
+  if(ct) h['Content-Type']=ct;
+  return h;
+}
+
+function obtenerOCrearCarpeta(){
+  if(driveFolder) return Promise.resolve(driveFolder);
+  var o=obra(); if(!o) return Promise.reject('Sin obra');
+  var nombre='OBRICK — '+o.nombre;
+  return fetch(DRIVE_FILES+'?q=name%3D%22'+encodeURIComponent(nombre)+'%22+and+mimeType%3D%22application%2Fvnd.google-apps.folder%22+and+trashed%3Dfalse',{headers:driveHeaders()})
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d.files&&d.files.length>0){ driveFolder=d.files[0].id; return driveFolder; }
+      return fetch(DRIVE_FILES,{
+        method:'POST', headers:driveHeaders('application/json'),
+        body:JSON.stringify({name:nombre,mimeType:'application/vnd.google-apps.folder'})
+      }).then(function(r){ return r.json(); }).then(function(f){ driveFolder=f.id; return driveFolder; });
+    });
+}
+
+function subirDocumento(){
+  var o=obra(); if(!o){ alert('Crea una obra primero'); return; }
+  var fileInput=document.getElementById('docFile');
+  var file=fileInput.files[0];
+  if(!file){ alert('Selecciona un archivo'); return; }
+  var cat=document.getElementById('docCat').value;
+  var desc=document.getElementById('docDesc').value.trim()||file.name;
+  var btn=document.getElementById('docBtnTxt');
+  var prog=document.getElementById('docProgress');
+  var bar=document.getElementById('docProgressBar');
+  var txt=document.getElementById('docProgressTxt');
+  btn.textContent='Subiendo...';
+  prog.style.display='block'; bar.style.width='20%'; txt.textContent='Creando carpeta en Drive...';
+
+  obtenerOCrearCarpeta().then(function(folderId){
+    bar.style.width='40%'; txt.textContent='Subiendo archivo...';
+    var meta={name:file.name,parents:[folderId],description:cat+'|'+desc+'|'+new Date().toISOString().split('T')[0]};
+    var form=new FormData();
+    form.append('metadata',new Blob([JSON.stringify(meta)],{type:'application/json'}));
+    form.append('file',file);
+    return fetch(DRIVE_UPLOAD,{method:'POST',headers:{'Authorization':'Bearer '+AUTH_TOKEN},body:form});
+  }).then(function(r){ return r.json(); })
+  .then(function(f){
+    bar.style.width='80%'; txt.textContent='Guardando referencia...';
+    var doc={id:f.id,name:file.name,desc:desc,cat:cat,fecha:new Date().toISOString().split('T')[0],size:file.size,driveId:f.id};
+    var up=Object.assign({},o,{documentos:(o.documentos||[]).concat([doc])});
+    return guardarObra(up).then(function(){ return doc; });
+  }).then(function(){
+    bar.style.width='100%'; txt.textContent='Listo';
+    setTimeout(function(){
+      prog.style.display='none'; bar.style.width='0%';
+      btn.textContent='Subir a Google Drive';
+      fileInput.value=''; document.getElementById('docDesc').value='';
+    },1000);
+    showToast('Documento subido correctamente');
+    renderDoc();
+  }).catch(function(e){
+    console.error(e); prog.style.display='none';
+    btn.textContent='Subir a Google Drive';
+    alert('Error al subir el archivo. Verificá tu conexion.');
+  });
+}
+
+function eliminarDocumento(id){
+  confirmar('¿Eliminar este documento? Se eliminara tambien de Google Drive.').then(function(ok){
+    if(!ok) return;
+    var o=obra(); if(!o) return;
+    var doc=(o.documentos||[]).find(function(d){ return d.id===id; });
+    if(doc&&doc.driveId){
+      fetch(DRIVE_FILES+'/'+doc.driveId,{method:'DELETE',headers:driveHeaders()});
+    }
+    var up=Object.assign({},o,{documentos:(o.documentos||[]).filter(function(d){ return d.id!==id; })});
+    guardarObra(up).then(function(){ showToast('Documento eliminado'); renderDoc(); });
+  });
+}
+
+function iconoDoc(nombre){
+  var ext=(nombre||'').split('.').pop().toLowerCase();
+  if(ext==='pdf') return {cls:'pdf',ico:'📄'};
+  if(['jpg','jpeg','png','gif','webp'].indexOf(ext)>=0) return {cls:'img',ico:'🖼'};
+  if(['doc','docx'].indexOf(ext)>=0) return {cls:'doc',ico:'📝'};
+  if(['xls','xlsx'].indexOf(ext)>=0) return {cls:'xls',ico:'📊'};
+  if(['dwg','dxf'].indexOf(ext)>=0) return {cls:'other',ico:'📐'};
+  return {cls:'other',ico:'📎'};
+}
+
+function fmtSize(b){
+  if(!b) return '';
+  if(b<1024) return b+'B';
+  if(b<1048576) return Math.round(b/1024)+'KB';
+  return (b/1048576).toFixed(1)+'MB';
+}
+
+function renderDoc(){
+  var o=obra(); var c=document.getElementById('tdoc'); if(!c) return;
+  if(!o){ c.innerHTML='<div class="empty">Crea una obra para comenzar</div>'; return; }
+  driveFolder=null;
+  var docs=o.documentos||[];
+  var filtro=document.getElementById('docFiltro').value||'';
+  if(filtro) docs=docs.filter(function(d){ return d.cat===filtro; });
+  if(!docs.length){ c.innerHTML='<div class="empty">Sin documentos'+(filtro?' en esta categoria':'')+'</div>'; return; }
+  var sorted=[].concat(docs).sort(function(a,b){ return (b.fecha||'').localeCompare(a.fecha||''); });
+  c.innerHTML=sorted.map(function(d){
+    var ic=iconoDoc(d.name);
+    return '<div class="doc-item">'+
+      '<div class="doc-icon '+ic.cls+'">'+ic.ico+'</div>'+
+      '<div class="doc-info">'+
+        '<div class="doc-name">'+d.desc+'</div>'+
+        '<div class="doc-meta"><span class="doc-cat">'+d.cat+'</span>'+d.fecha+(d.size?' · '+fmtSize(d.size):'')+'</div>'+
+      '</div>'+
+      '<div class="doc-actions">'+
+        '<a href="https://drive.google.com/file/d/'+d.driveId+'/view" target="_blank" class="btne" style="text-decoration:none;padding:5px 10px">Ver</a>'+
+        '<button class="btnd" onclick="eliminarDocumento(\''+d.id+'\')">✕</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// EVOLUCION MENSUAL (en renderRes)
+// ═══════════════════════════════════════════
+function renderEvolucion(gastos){
+  var c=document.getElementById('revolucion'); if(!c) return;
+  if(!gastos||!gastos.length){ c.innerHTML='<div class="empty">Sin gastos</div>'; return; }
+  var meses={};
+  gastos.forEach(function(g){
+    var mes=(g.fecha||'').substring(0,7);
+    if(!mes) return;
+    if(!meses[mes]) meses[mes]=0;
+    meses[mes]+=enP(g);
+  });
+  var keys=Object.keys(meses).sort();
+  if(!keys.length){ c.innerHTML='<div class="empty">Sin datos</div>'; return; }
+  var max=Math.max.apply(null,keys.map(function(k){ return meses[k]; }));
+  c.innerHTML='<div style="overflow-x:auto"><table style="width:100%;font-size:12px"><thead><tr>'+
+    '<th>Mes</th><th>Gastado</th><th style="width:50%">Distribucion</th>'+
+    '</tr></thead><tbody>'+
+    keys.map(function(k){
+      var pct=max>0?Math.round(meses[k]/max*100):0;
+      var label=k.split('-');
+      var mesesNombres=['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+      var nombre=mesesNombres[parseInt(label[1])]||label[1]+'/'+label[0];
+      return '<tr><td>'+nombre+' '+label[0]+'</td>'+
+        '<td style="font-weight:700">'+fmt(meses[k])+'</td>'+
+        '<td><div style="height:8px;background:var(--b);border-radius:4px;overflow:hidden">'+
+          '<div style="height:100%;width:'+pct+'%;background:var(--p);border-radius:4px"></div>'+
+        '</div></td></tr>';
+    }).join('')+
+    '</tbody></table></div>';
 }
 
 // ═══════════════════════════════════════════
