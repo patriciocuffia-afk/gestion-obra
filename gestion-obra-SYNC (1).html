@@ -133,9 +133,38 @@ tr:hover td{background:#f8f9fa}
 .confirm-box p{font-size:15px;margin-bottom:20px;color:var(--t);line-height:1.5}
 .confirm-btns{display:flex;gap:10px;justify-content:center}
 
-@media(max-width:600px){.rg,.cg{grid-template-columns:1fr 1fr}.fr,.fr.t3{grid-template-columns:1fr}.bg2{grid-template-columns:1fr}.rcat-vals{gap:8px}}
+/* Grafico torta */
+.chart-wrap{display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin-top:8px}
+.chart-svg{flex-shrink:0}
+.chart-legend{flex:1;min-width:160px}
+.legend-item{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px}
+.legend-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.legend-label{flex:1;color:var(--t);font-weight:600}
+.legend-val{color:var(--m);font-size:11px}
+
+/* Presupuesto por categoria */
+.pres-row{padding:12px 0;border-bottom:1px solid var(--b)}
+.pres-row:last-child{border-bottom:none}
+.pres-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.pres-name{font-size:13px;font-weight:700}
+.pres-nums{font-size:12px;color:var(--m);text-align:right}
+.pres-nums span{font-weight:700;color:var(--t)}
+.pres-bar{height:8px;background:var(--b);border-radius:4px;overflow:hidden}
+.pres-fill{height:100%;border-radius:4px;transition:width .5s}
+.pres-ok{background:var(--s)}.pres-warn{background:var(--a)}.pres-over{background:var(--d)}
+.pres-pct{font-size:11px;margin-top:3px;font-weight:700}
+
+/* Boton PDF */
+.btn-pdf{background:var(--d);color:#fff;border:none;padding:8px 16px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px}
+.btn-pdf:hover{background:#a93226}
+
+/* Modal presupuesto input */
+.pres-input{width:100%;padding:7px 10px;border:1px solid var(--b);border-radius:6px;font-size:13px;margin-top:4px}
+
+@media(max-width:600px){.rg,.cg{grid-template-columns:1fr 1fr}.fr,.fr.t3{grid-template-columns:1fr}.bg2{grid-template-columns:1fr}.rcat-vals{gap:8px}.chart-wrap{flex-direction:column}}
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -191,6 +220,12 @@ tr:hover td{background:#f8f9fa}
 
   <!-- RESUMEN -->
   <div id="tab-res">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+      <button class="btn-pdf" onclick="exportarPDF()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Exportar PDF
+      </button>
+    </div>
     <div class="card">
       <div class="ct">Total gastado</div>
       <div class="rg">
@@ -200,8 +235,19 @@ tr:hover td{background:#f8f9fa}
       </div>
     </div>
     <div class="card">
+      <div class="ct">Distribucion por categoria</div>
+      <div id="rchart"><div class="empty">Sin gastos</div></div>
+    </div>
+    <div class="card">
       <div class="ct">Por categoria</div>
       <div id="rcat"></div>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div class="ct" style="margin-bottom:0">Presupuesto por categoria</div>
+        <button class="btne" onclick="abrirPres()" style="font-size:12px;padding:5px 12px">Editar presupuestos</button>
+      </div>
+      <div id="rpres"></div>
     </div>
     <div class="card">
       <div class="ct">Ultimos gastos</div>
@@ -325,6 +371,19 @@ tr:hover td{background:#f8f9fa}
     <div class="mdb">
       <button class="btns" onclick="cerrarEdit()">Cancelar</button>
       <button class="btn" onclick="guardarEdit()" style="flex:1;margin-top:0">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PRESUPUESTO -->
+<div class="mb" id="modalPres">
+  <div class="md">
+    <h2>Presupuesto por categoria</h2>
+    <p style="font-size:13px;color:var(--m);margin-bottom:16px">Ingresa el presupuesto estimado en pesos para cada categoria. Deja en 0 si no tenes presupuesto asignado.</p>
+    <div id="presInputs"></div>
+    <div class="mdb">
+      <button class="btns" onclick="cerrarPres()">Cancelar</button>
+      <button class="btn" onclick="guardarPres()" style="flex:1;margin-top:0">Guardar</button>
     </div>
   </div>
 </div>
@@ -753,6 +812,12 @@ function renderRes(){
     pc[g.categoria]+=enP(g);
   });
 
+  // Grafico
+  renderChart(pc);
+
+  // Presupuesto
+  renderPres(o, pc);
+
   var cats=Object.keys(pc).sort(function(a,b){ return pc[b]-pc[a]; });
   document.getElementById('rcat').innerHTML=cats.length ? cats.map(function(k){
     var p=pc[k];
@@ -993,6 +1058,175 @@ function renderAll(){
   renderSel();
   var fg=document.getElementById('gfec'); if(fg&&!fg.value) fg.value=new Date().toISOString().split('T')[0];
   renderRes(); renderGas(); renderCat(); renderSoc(); renderStk(); renderCot();
+}
+
+// ═══════════════════════════════════════════
+// GRAFICO DE TORTA SVG
+// ═══════════════════════════════════════════
+var CHART_COLORS = ['#1a4a6b','#e8a020','#27ae60','#c0392b','#8e44ad','#2980b9','#e67e22','#16a085','#d35400','#2c3e50','#f39c12','#1abc9c'];
+
+function renderChart(pc){
+  var c = document.getElementById('rchart');
+  if(!c) return;
+  var cats = Object.keys(pc);
+  if(!cats.length){ c.innerHTML='<div class="empty">Sin gastos</div>'; return; }
+  var total = cats.reduce(function(s,k){ return s+pc[k]; }, 0);
+  if(!total){ c.innerHTML='<div class="empty">Sin gastos</div>'; return; }
+
+  var size = 160, cx = size/2, cy = size/2, r = 60, ri = 30;
+  var paths = '', startAngle = -Math.PI/2;
+
+  cats.forEach(function(cat, i){
+    var slice = (pc[cat]/total) * Math.PI * 2;
+    var endAngle = startAngle + slice;
+    var x1 = cx + r * Math.cos(startAngle), y1 = cy + r * Math.sin(startAngle);
+    var x2 = cx + r * Math.cos(endAngle), y2 = cy + r * Math.sin(endAngle);
+    var xi1 = cx + ri * Math.cos(startAngle), yi1 = cy + ri * Math.sin(startAngle);
+    var xi2 = cx + ri * Math.cos(endAngle), yi2 = cy + ri * Math.sin(endAngle);
+    var large = slice > Math.PI ? 1 : 0;
+    var color = CHART_COLORS[i % CHART_COLORS.length];
+    paths += '<path d="M '+xi1+' '+yi1+' L '+x1+' '+y1+' A '+r+' '+r+' 0 '+large+' 1 '+x2+' '+y2+' L '+xi2+' '+yi2+' A '+ri+' '+ri+' 0 '+large+' 0 '+xi1+' '+yi1+' Z" fill="'+color+'" opacity="0.9"/>';
+    startAngle = endAngle;
+  });
+
+  var legend = cats.map(function(cat, i){
+    var pct = Math.round(pc[cat]/total*100);
+    return '<div class="legend-item"><div class="legend-dot" style="background:'+CHART_COLORS[i%CHART_COLORS.length]+'"></div><div class="legend-label">'+cat+'</div><div class="legend-val">'+pct+'%</div></div>';
+  }).join('');
+
+  c.innerHTML = '<div class="chart-wrap">'+
+    '<svg class="chart-svg" width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'">'+paths+'</svg>'+
+    '<div class="chart-legend">'+legend+'</div>'+
+  '</div>';
+}
+
+// ═══════════════════════════════════════════
+// PRESUPUESTO POR CATEGORIA
+// ═══════════════════════════════════════════
+function abrirPres(){
+  var o = obra(); if(!o) return;
+  var pres = o.presupuestos || {};
+  var inputs = (o.categorias||[]).map(function(cat){
+    return '<div class="fg" style="margin-bottom:10px">'+
+      '<label>'+cat+'</label>'+
+      '<input type="number" class="pres-input" id="pi_'+cat.replace(/\s/g,'_')+'" placeholder="0" value="'+(pres[cat]||0)+'">'+
+    '</div>';
+  }).join('');
+  document.getElementById('presInputs').innerHTML = inputs;
+  document.getElementById('modalPres').className = 'mb show';
+}
+
+function cerrarPres(){ document.getElementById('modalPres').className = 'mb'; }
+
+function guardarPres(){
+  var o = obra(); if(!o) return;
+  var pres = {};
+  (o.categorias||[]).forEach(function(cat){
+    var id = 'pi_'+cat.replace(/\s/g,'_');
+    var inp = document.getElementById(id);
+    if(inp) pres[cat] = parseFloat(inp.value)||0;
+  });
+  var up = Object.assign({}, o, {presupuestos: pres});
+  guardarObra(up).then(function(){
+    cerrarPres();
+    showToast('Presupuestos guardados');
+    renderRes();
+  });
+}
+
+function renderPres(o, pc){
+  var c = document.getElementById('rpres'); if(!c) return;
+  var pres = o.presupuestos || {};
+  var cats = o.categorias || [];
+  var conPres = cats.filter(function(cat){ return pres[cat] > 0; });
+  if(!conPres.length){
+    c.innerHTML = '<div class="empty" style="padding:16px">Sin presupuestos asignados. Hacé clic en "Editar presupuestos" para comenzar.</div>';
+    return;
+  }
+  c.innerHTML = conPres.map(function(cat){
+    var gasto = pc[cat] || 0;
+    var budget = pres[cat] || 0;
+    var pct = budget > 0 ? Math.min(Math.round(gasto/budget*100), 100) : 0;
+    var real = budget > 0 ? Math.round(gasto/budget*100) : 0;
+    var cls = real < 75 ? 'pres-ok' : real < 100 ? 'pres-warn' : 'pres-over';
+    var ct = cotizH();
+    return '<div class="pres-row">'+
+      '<div class="pres-header">'+
+        '<div class="pres-name">'+cat+'</div>'+
+        '<div class="pres-nums">Gastado: <span>'+fmt(gasto)+'</span> / Ppto: <span>'+fmt(budget)+'</span></div>'+
+      '</div>'+
+      '<div class="pres-bar"><div class="pres-fill '+cls+'" style="width:'+pct+'%"></div></div>'+
+      '<div class="pres-pct" style="color:'+(real<75?'var(--s)':real<100?'var(--a)':'var(--d)')+'">'+real+'% ejecutado'+(real>100?' — Excedido en '+fmt(gasto-budget):'')+'</div>'+
+    '</div>';
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// EXPORTAR PDF
+// ═══════════════════════════════════════════
+function exportarPDF(){
+  var o = obra();
+  if(!o){ alert('No hay obra seleccionada'); return; }
+  if(typeof window.jspdf === 'undefined'){ alert('PDF no disponible aun, intenta en unos segundos'); return; }
+
+  var doc = new window.jspdf.jsPDF();
+  var ct = cotizH();
+  var tp = (o.gastos||[]).reduce(function(s,g){ return s+enP(g); }, 0);
+  var y = 20;
+
+  // Titulo
+  doc.setFontSize(18); doc.setTextColor(26,74,107);
+  doc.text('Gestion de Obra', 14, y); y+=8;
+  doc.setFontSize(12); doc.setTextColor(100,100,100);
+  doc.text(o.nombre + (o.direccion?' — '+o.direccion:''), 14, y); y+=6;
+  doc.text('Fecha: ' + new Date().toLocaleDateString('es-AR'), 14, y); y+=10;
+
+  // Linea separadora
+  doc.setDrawColor(200,200,200); doc.line(14, y, 196, y); y+=8;
+
+  // Totales
+  doc.setFontSize(13); doc.setTextColor(26,74,107);
+  doc.text('Total gastado', 14, y); y+=7;
+  doc.setFontSize(11); doc.setTextColor(50,50,50);
+  doc.text('Pesos: ' + fmt(tp), 14, y); y+=5;
+  doc.text('Dolar Oficial: ' + fmtU(ct.oficial?tp/ct.oficial:0), 14, y); y+=5;
+  doc.text('Dolar Blue: ' + fmtU(ct.blue?tp/ct.blue:0), 14, y); y+=10;
+
+  // Por categoria
+  doc.setDrawColor(200,200,200); doc.line(14, y, 196, y); y+=8;
+  doc.setFontSize(13); doc.setTextColor(26,74,107);
+  doc.text('Gastos por categoria', 14, y); y+=7;
+
+  var pc = {};
+  (o.gastos||[]).forEach(function(g){ if(!pc[g.categoria])pc[g.categoria]=0; pc[g.categoria]+=enP(g); });
+  var pres = o.presupuestos || {};
+
+  Object.keys(pc).sort(function(a,b){ return pc[b]-pc[a]; }).forEach(function(cat){
+    if(y > 270){ doc.addPage(); y = 20; }
+    doc.setFontSize(11); doc.setTextColor(50,50,50);
+    var linea = cat + ': ' + fmt(pc[cat]);
+    if(pres[cat]) linea += ' / Ppto: ' + fmt(pres[cat]) + ' (' + Math.round(pc[cat]/pres[cat]*100) + '%)';
+    doc.text(linea, 14, y); y+=5;
+  });
+
+  y+=5;
+  // Historial
+  if(y > 250){ doc.addPage(); y = 20; }
+  doc.setDrawColor(200,200,200); doc.line(14, y, 196, y); y+=8;
+  doc.setFontSize(13); doc.setTextColor(26,74,107);
+  doc.text('Historial de gastos', 14, y); y+=7;
+
+  var gs = [].concat(o.gastos||[]).sort(function(a,b){ return b.fecha.localeCompare(a.fecha); });
+  doc.setFontSize(9); doc.setTextColor(50,50,50);
+  gs.forEach(function(g){
+    if(y > 275){ doc.addPage(); y = 20; }
+    var p = enP(g);
+    var linea = g.fecha + '  ' + g.desc.substring(0,35) + '  ' + g.categoria + '  ' + fmt(p);
+    doc.text(linea, 14, y); y+=5;
+  });
+
+  doc.save('obra-' + o.nombre.replace(/\s/g,'-') + '.pdf');
+  showToast('PDF generado correctamente');
 }
 
 // ═══════════════════════════════════════════
