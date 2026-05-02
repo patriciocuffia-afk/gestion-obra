@@ -183,6 +183,36 @@ tr:hover td{background:#f8f9fa}
 /* Manual de ayuda */
 .doc-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--b)}
 .doc-item:last-child{border-bottom:none}
+
+/* IA Stock Scanner */
+.ia-panel{background:linear-gradient(135deg,#1a4a6b,#2d6a9f);border-radius:10px;padding:16px;margin-bottom:14px;color:#fff}
+.ia-panel .ct{color:#fff;opacity:.9;margin-bottom:10px}
+.ia-drop{border:2px dashed rgba(255,255,255,.4);border-radius:8px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:10px}
+.ia-drop:hover,.ia-drop.dragover{border-color:#fff;background:rgba(255,255,255,.1)}
+.ia-drop-icon{font-size:28px;margin-bottom:6px}
+.ia-drop-txt{font-size:13px;opacity:.85}
+.ia-drop-sub{font-size:11px;opacity:.6;margin-top:3px}
+.ia-preview{background:rgba(255,255,255,.1);border-radius:8px;padding:10px;margin-bottom:10px}
+.ia-preview img{max-width:100%;max-height:140px;border-radius:6px;display:block;margin:0 auto}
+.ia-result{background:#fff;border-radius:8px;padding:14px;margin-top:10px}
+.ia-result-title{font-size:13px;font-weight:700;color:var(--p);margin-bottom:10px}
+.ia-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--b)}
+.ia-item:last-child{border-bottom:none}
+.ia-item-check{accent-color:var(--p);width:16px;height:16px}
+.ia-item-info{flex:1}
+.ia-item-name{font-size:13px;font-weight:700;color:var(--t)}
+.ia-item-det{font-size:11px;color:var(--m);margin-top:1px}
+.ia-item-qty input{width:70px;padding:4px 8px;border:1px solid var(--b);border-radius:5px;font-size:13px;font-weight:700}
+.ia-item-unit{font-size:12px;color:var(--m);min-width:36px}
+.btn-ia{background:#fff;color:var(--p);border:none;padding:10px 20px;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;width:100%}
+.btn-ia:hover{background:#f0f4f8}
+.btn-ia-ok{background:var(--s);color:#fff;border:none;padding:10px 20px;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;width:100%;margin-top:8px}
+.ia-processing{text-align:center;padding:16px;color:rgba(255,255,255,.85);font-size:13px}
+.ia-spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;margin-right:8px;vertical-align:middle}
+.ia-type-sel{display:flex;gap:8px;margin-bottom:10px}
+.ia-type-btn{flex:1;padding:8px;border:2px solid rgba(255,255,255,.3);border-radius:7px;background:transparent;color:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
+.ia-type-btn.active{background:rgba(255,255,255,.2);border-color:#fff}
+@keyframes spin{to{transform:rotate(360deg)}}
 .doc-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px}
 .doc-icon.pdf{background:#fde8e8}.doc-icon.img{background:#e8f5e9}.doc-icon.doc{background:#e3f2fd}.doc-icon.xls{background:#e8f5e9}.doc-icon.other{background:#f3e5f5}
 .doc-info{flex:1;min-width:0}
@@ -586,6 +616,37 @@ tr:hover td{background:#f8f9fa}
 
   <!-- STOCK -->
   <div id="tab-stk" style="display:none">
+
+    <!-- PANEL IA -->
+    <div class="ia-panel">
+      <div class="ct">🤖 Carga inteligente con IA
+        <span style="float:right;font-size:11px;opacity:.7;cursor:pointer;font-weight:400" onclick="iaConfigurarClave()">⚙ Configurar clave</span>
+      </div>
+      <div class="ia-type-sel">
+        <button class="ia-type-btn active" id="iaBtnFact" onclick="setIaTipo('factura')">📄 Factura de compra</button>
+        <button class="ia-type-btn" id="iaBtnRem" onclick="setIaTipo('remito')">📋 Remito / Entrega</button>
+      </div>
+      <div class="ia-drop" id="iaDrop" onclick="document.getElementById('iaFile').click()" ondragover="iaDragOver(event)" ondragleave="iaDragLeave(event)" ondrop="iaDrop(event)">
+        <div class="ia-drop-icon">📸</div>
+        <div class="ia-drop-txt">Toca para subir foto o PDF</div>
+        <div class="ia-drop-sub">JPG, PNG o PDF · Max 5MB</div>
+      </div>
+      <input type="file" id="iaFile" accept="image/*,.pdf" style="display:none" onchange="iaCargarArchivo(this)">
+      <div class="ia-preview" id="iaPreview" style="display:none">
+        <img id="iaImg" src="" alt="preview">
+        <div style="text-align:center;margin-top:8px;font-size:12px;opacity:.8" id="iaFileName"></div>
+      </div>
+      <div class="ia-processing" id="iaProcessing" style="display:none">
+        <span class="ia-spinner"></span>Analizando con IA...
+      </div>
+      <button class="btn-ia" id="iaBtnAnalizar" style="display:none" onclick="iaAnalizar()">🔍 Analizar con IA</button>
+      <div class="ia-result" id="iaResult" style="display:none">
+        <div class="ia-result-title" id="iaResultTitle">Productos detectados — selecciona los que queres agregar:</div>
+        <div id="iaItems"></div>
+        <button class="btn-ia-ok" id="iaBtnConfirmar" onclick="iaConfirmar()">✓ Confirmar y actualizar stock</button>
+        <button class="btn-ia" style="margin-top:6px;background:#f5f5f5;color:var(--m)" onclick="iaReset()">Cancelar</button>
+      </div>
+    </div>
     <div class="card"><div class="ct">Agregar material</div>
       <div class="fr t3">
         <div class="fg"><label>Material</label><input type="text" id="sm" placeholder="Ej: Cemento"></div>
@@ -1362,6 +1423,221 @@ function renderAll(){
   renderSel();
   var fg=document.getElementById('gfec'); if(fg&&!fg.value) fg.value=new Date().toISOString().split('T')[0];
   renderRes(); renderGas(); renderCat(); renderSoc(); renderStk(); renderCot(); renderDoc();
+}
+
+// ═══════════════════════════════════════════
+// IA — SCANNER DE FACTURAS Y REMITOS
+// ═══════════════════════════════════════════
+var iaTipo = 'factura';
+var iaFileData = null;
+var iaFileType = null;
+var iaDetectados = [];
+
+function getIaKey(){
+  return localStorage.getItem('obrick_ia_key')||'';
+}
+
+function setIaKey(k){
+  localStorage.setItem('obrick_ia_key', k);
+}
+
+function verificarIaKey(){
+  var k = getIaKey();
+  if(k && k.startsWith('sk-ant-')) return true;
+  var nueva = prompt('Para usar la carga inteligente con IA, ingresa tu clave API de Anthropic (empieza con sk-ant-):');
+  if(!nueva||!nueva.startsWith('sk-ant-')){ alert('Clave invalida. Obtene tu clave en console.anthropic.com'); return false; }
+  setIaKey(nueva.trim());
+  return true;
+}
+
+function iaConfigurarClave(){
+  var actual = getIaKey();
+  var msg = actual ? 'Clave actual: ...'+actual.slice(-6)+'\n\nIngresa una nueva clave (o cancelar para mantener la actual):' : 'Ingresa tu clave API de Anthropic (empieza con sk-ant-):';
+  var nueva = prompt(msg);
+  if(!nueva) return;
+  if(!nueva.startsWith('sk-ant-')){ alert('Clave invalida'); return; }
+  setIaKey(nueva.trim());
+  showToast('Clave guardada correctamente');
+}
+
+function setIaTipo(tipo){
+  iaTipo = tipo;
+  document.getElementById('iaBtnFact').classList.toggle('active', tipo==='factura');
+  document.getElementById('iaBtnRem').classList.toggle('active', tipo==='remito');
+  iaReset();
+}
+
+function iaDragOver(e){ e.preventDefault(); document.getElementById('iaDrop').classList.add('dragover'); }
+function iaDragLeave(e){ document.getElementById('iaDrop').classList.remove('dragover'); }
+function iaDrop(e){
+  e.preventDefault();
+  document.getElementById('iaDrop').classList.remove('dragover');
+  var file = e.dataTransfer.files[0];
+  if(file) procesarArchivoIA(file);
+}
+
+function iaCargarArchivo(input){
+  var file = input.files[0];
+  if(file) procesarArchivoIA(file);
+}
+
+function procesarArchivoIA(file){
+  if(file.size > 5*1024*1024){ alert('El archivo es muy grande. Maximo 5MB.'); return; }
+  iaFileType = file.type;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    iaFileData = e.target.result.split(',')[1];
+    var prev = document.getElementById('iaPreview');
+    var img = document.getElementById('iaImg');
+    var fname = document.getElementById('iaFileName');
+    prev.style.display = 'block';
+    fname.textContent = file.name;
+    if(file.type.indexOf('image') >= 0){
+      img.src = e.target.result; img.style.display='block';
+    } else {
+      img.style.display='none';
+      prev.innerHTML='<div style="text-align:center;padding:10px;font-size:13px;opacity:.8">📄 '+file.name+'</div>';
+    }
+    document.getElementById('iaDrop').style.display='none';
+    document.getElementById('iaBtnAnalizar').style.display='block';
+    document.getElementById('iaResult').style.display='none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function iaAnalizar(){
+  if(!iaFileData){ alert('Primero selecciona un archivo'); return; }
+  if(!verificarIaKey()) return;
+  var o = obra();
+  var stockActual = (o&&o.stock||[]).map(function(s){ return s.material; }).join(', ');
+  var prompt = iaTipo === 'factura'
+    ? 'Analiza esta imagen de una factura de compra de materiales de construccion. Extrae TODOS los productos/materiales con su cantidad y unidad de medida. El stock actual de la obra es: '+stockActual+'. Responde UNICAMENTE con un JSON valido sin markdown, con este formato exacto: {"tipo":"factura","proveedor":"nombre del proveedor o vacio","items":[{"nombre":"nombre del material","cantidad":0,"unidad":"kg/bolsa/litro/m2/m3/unidad/etc","es_nuevo":true,"stock_actual_id":"id si coincide con stock existente o vacio"}]}'
+    : 'Analiza esta imagen de un remito o nota de entrega/uso de materiales de construccion. Extrae los productos entregados o usados con cantidad y unidad. El stock actual de la obra es: '+stockActual+'. Responde UNICAMENTE con un JSON valido sin markdown, con este formato exacto: {"tipo":"remito","proveedor":"nombre o vacio","items":[{"nombre":"nombre del material","cantidad":0,"unidad":"unidad","es_nuevo":false,"stock_actual_id":"vacio o nombre exacto del material si coincide con el stock"}]}';
+
+  document.getElementById('iaBtnAnalizar').style.display='none';
+  document.getElementById('iaProcessing').style.display='block';
+
+  var mediaType = iaFileType === 'application/pdf' ? 'application/pdf' : 'image/jpeg';
+  if(iaFileType === 'image/png') mediaType = 'image/png';
+
+  fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': getIaKey(),
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-opus-4-5',
+      max_tokens: 1024,
+      messages:[{
+        role:'user',
+        content:[
+          {type: mediaType==='application/pdf'?'document':'image',
+           source:{type:'base64', media_type:mediaType, data:iaFileData}},
+          {type:'text', text:prompt}
+        ]
+      }]
+    })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    document.getElementById('iaProcessing').style.display='none';
+    if(!d.content||!d.content[0]){ throw new Error('Sin respuesta'); }
+    var txt = d.content[0].text.trim();
+    txt = txt.replace(/```json/g,'').replace(/```/g,'').trim();
+    var json = JSON.parse(txt);
+    iaDetectados = json.items||[];
+    var o2 = obra();
+    var stockMap = {};
+    (o2&&o2.stock||[]).forEach(function(s){ stockMap[s.material.toLowerCase()] = s; });
+    iaDetectados.forEach(function(item, i){
+      var match = stockMap[item.nombre.toLowerCase()];
+      if(match) item._stockRef = match;
+      item._id = 'ia_'+i;
+    });
+    renderIaResult(json);
+  })
+  .catch(function(e){
+    document.getElementById('iaProcessing').style.display='none';
+    document.getElementById('iaBtnAnalizar').style.display='block';
+    console.error(e);
+    alert('Error al analizar. Verificá tu conexion o intentá con otra imagen.');
+  });
+}
+
+function renderIaResult(json){
+  var div = document.getElementById('iaResult');
+  var title = document.getElementById('iaResultTitle');
+  var items = document.getElementById('iaItems');
+  var tipo = json.tipo||iaTipo;
+  var prov = json.proveedor ? ' — '+json.proveedor : '';
+  title.textContent = (tipo==='factura'?'Compra detectada':'Remito detectado')+prov+'. Selecciona los items:';
+  if(!iaDetectados.length){ items.innerHTML='<div class="empty">No se detectaron productos</div>'; div.style.display='block'; return; }
+  items.innerHTML = iaDetectados.map(function(item){
+    var matchInfo = item._stockRef ? '<span style="color:var(--s);font-weight:700"> ✓ En stock: '+item._stockRef.cantidad+' '+item._stockRef.unidad+'</span>' : '<span style="color:var(--a)"> ★ Nuevo</span>';
+    var accion = iaTipo==='factura' ? 'Agregar' : 'Descontar';
+    return '<div class="ia-item">'+
+      '<input type="checkbox" class="ia-item-check" id="chk_'+item._id+'" checked>'+
+      '<div class="ia-item-info">'+
+        '<div class="ia-item-name">'+item.nombre+matchInfo+'</div>'+
+        '<div class="ia-item-det">'+accion+': <input type="number" id="qty_'+item._id+'" value="'+item.cantidad+'" min="0" step="0.01" style="width:65px;padding:3px 6px;border:1px solid var(--b);border-radius:5px;font-size:12px"> '+item.unidad+'</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  div.style.display = 'block';
+}
+
+function iaConfirmar(){
+  var o = obra(); if(!o){ alert('Sin obra'); return; }
+  var st = [].concat(o.stock||[]);
+  var cats = [].concat(o.categorias||[]);
+  var procesados = 0;
+
+  iaDetectados.forEach(function(item){
+    var chk = document.getElementById('chk_'+item._id);
+    if(!chk||!chk.checked) return;
+    var qtyEl = document.getElementById('qty_'+item._id);
+    var qty = parseFloat(qtyEl?qtyEl.value:item.cantidad)||0;
+    if(qty<=0) return;
+
+    if(iaTipo==='factura'){
+      var ex = null;
+      for(var i=0;i<st.length;i++){
+        if(st[i].material.toLowerCase()===item.nombre.toLowerCase()){ex=st[i];break;}
+      }
+      if(ex){ ex.cantidad = Math.round((ex.cantidad+qty)*1000)/1000; }
+      else{ st.push({id:Date.now().toString()+procesados,material:item.nombre,cantidad:qty,unidad:item.unidad||'unidad',minimo:0}); }
+      if(cats.indexOf('Materiales')<0) cats.push('Materiales');
+    } else {
+      for(var j=0;j<st.length;j++){
+        if(st[j].material.toLowerCase()===item.nombre.toLowerCase()){
+          st[j].cantidad = Math.max(0,Math.round((st[j].cantidad-qty)*1000)/1000);
+          break;
+        }
+      }
+    }
+    procesados++;
+  });
+
+  if(!procesados){ showToast('No se selecciono ningun item'); return; }
+  var up = Object.assign({},o,{stock:st,categorias:cats});
+  guardarObra(up).then(function(){
+    showToast(procesados+' material'+(procesados>1?'es':'')+' '+(iaTipo==='factura'?'agregado'+(procesados>1?'s':''):'descontado'+(procesados>1?'s':'')));
+    iaReset();
+    renderStk();
+  });
+}
+
+function iaReset(){
+  iaFileData=null; iaFileType=null; iaDetectados=[];
+  document.getElementById('iaDrop').style.display='block';
+  document.getElementById('iaPreview').style.display='none';
+  document.getElementById('iaProcessing').style.display='none';
+  document.getElementById('iaBtnAnalizar').style.display='none';
+  document.getElementById('iaResult').style.display='none';
+  document.getElementById('iaFile').value='';
 }
 
 // ═══════════════════════════════════════════
