@@ -1556,11 +1556,51 @@ function iaAnalizar(){
     document.getElementById('iaProcessing').style.display='none';
     if(!d.content||!d.content[0]) throw new Error('Respuesta vacia');
     var txt = d.content[0].text.trim();
-    var match = txt.match(/\{[\s\S]*\}/);
-    if(!match) throw new Error('Formato inesperado: '+txt.substring(0,100));
-    var json = JSON.parse(match[0]);
-    iaDetectados = json.items||[];
-    if(!iaDetectados.length) throw new Error('No se detectaron productos en la imagen');
+    console.log('IA respuesta raw:', txt);
+
+    // Intentar extraer JSON de múltiples formas
+    var json = null;
+    try {
+      // Intento 1: JSON directo
+      json = JSON.parse(txt);
+    } catch(e1) {
+      try {
+        // Intento 2: extraer bloque JSON con regex
+        var m1 = txt.match(/\{[\s\S]*"items"[\s\S]*\}/);
+        if(m1) json = JSON.parse(m1[0]);
+      } catch(e2) {
+        try {
+          // Intento 3: limpiar y reintentar
+          var clean = txt.replace(/```json/g,'').replace(/```/g,'').replace(/[\r\n]+/g,' ').trim();
+          var m2 = clean.match(/\{[\s\S]*\}/);
+          if(m2) json = JSON.parse(m2[0]);
+        } catch(e3) {
+          // Intento 4: construir JSON desde texto libre si la IA respondió en lenguaje natural
+          console.warn('No se pudo parsear JSON, intentando modo texto libre');
+          // Buscar patrones como "X kg de cemento", "Y bolsas de...", etc.
+          var items = [];
+          var lineas = txt.split(/[\n,;]/);
+          lineas.forEach(function(linea){
+            var numMatch = linea.match(/(\d+[.,]?\d*)\s*(kg|bolsa|litro|m2|m3|unidad|saco|rollo|metro)/i);
+            var nameMatch = linea.match(/(?:de\s+)?([a-záéíóúñ\s]{3,30})/i);
+            if(numMatch && nameMatch){
+              items.push({nombre:nameMatch[1].trim(), cantidad:parseFloat(numMatch[1].replace(',','.')), unidad:numMatch[2].toLowerCase()});
+            }
+          });
+          if(items.length) json = {tipo:iaTipo, proveedor:'', items:items};
+        }
+      }
+    }
+
+    if(!json||!json.items||!json.items.length){
+      // Si la IA respondió que no puede ver, dar mensaje claro
+      if(txt.toLowerCase().indexOf('no puedo')>=0||txt.toLowerCase().indexOf('no se puede')>=0||txt.toLowerCase().indexOf('oscura')>=0||txt.toLowerCase().indexOf('ilegible')>=0){
+        throw new Error('La imagen no es legible. Toma una foto con mejor iluminacion y que el texto sea visible.');
+      }
+      throw new Error('No se detectaron productos. Asegurate de que la foto muestre claramente los items de la factura.');
+    }
+
+    iaDetectados = json.items;
     var o2=obra(); var stockMap={};
     (o2&&o2.stock||[]).forEach(function(s){ stockMap[s.material.toLowerCase()]=s; });
     iaDetectados.forEach(function(item,i){
