@@ -1508,62 +1508,83 @@ function procesarArchivoIA(file){
 function iaAnalizar(){
   if(!iaFileData){ alert('Primero selecciona un archivo'); return; }
   if(!verificarIaKey()) return;
+
+  if(iaFileType === 'application/pdf'){
+    alert('Por el momento usa fotos (JPG o PNG). Podes fotografiar la factura con el celular o hacer una captura de pantalla del PDF.');
+    return;
+  }
+
   var o = obra();
-  var stockActual = (o&&o.stock||[]).map(function(s){ return s.material; }).join(', ');
-  var prompt = iaTipo === 'factura'
-    ? 'Analiza esta imagen de una factura de compra de materiales de construccion. Extrae TODOS los productos/materiales con su cantidad y unidad de medida. El stock actual de la obra es: '+stockActual+'. Responde UNICAMENTE con un JSON valido sin markdown, con este formato exacto: {"tipo":"factura","proveedor":"nombre del proveedor o vacio","items":[{"nombre":"nombre del material","cantidad":0,"unidad":"kg/bolsa/litro/m2/m3/unidad/etc","es_nuevo":true,"stock_actual_id":"id si coincide con stock existente o vacio"}]}'
-    : 'Analiza esta imagen de un remito o nota de entrega/uso de materiales de construccion. Extrae los productos entregados o usados con cantidad y unidad. El stock actual de la obra es: '+stockActual+'. Responde UNICAMENTE con un JSON valido sin markdown, con este formato exacto: {"tipo":"remito","proveedor":"nombre o vacio","items":[{"nombre":"nombre del material","cantidad":0,"unidad":"unidad","es_nuevo":false,"stock_actual_id":"vacio o nombre exacto del material si coincide con el stock"}]}';
+  var stockActual = (o&&o.stock||[]).map(function(s){ return s.material; }).join(', ')||'(sin stock cargado)';
+  var promptTxt = iaTipo === 'factura'
+    ? 'Analiza esta factura de compra de materiales de construccion. Extrae todos los productos con cantidad y unidad. Stock actual: '+stockActual+'. Responde SOLO con JSON valido sin ningun texto adicional: {"tipo":"factura","proveedor":"nombre","items":[{"nombre":"material","cantidad":1,"unidad":"unidad"}]}'
+    : 'Analiza este remito de entrega de materiales. Extrae los productos con cantidad y unidad. Stock actual: '+stockActual+'. Responde SOLO con JSON valido sin ningun texto adicional: {"tipo":"remito","proveedor":"nombre","items":[{"nombre":"material","cantidad":1,"unidad":"unidad"}]}';
+
+  var mediaType = 'image/jpeg';
+  if(iaFileType==='image/png') mediaType='image/png';
+  if(iaFileType==='image/webp') mediaType='image/webp';
+  if(iaFileType==='image/gif') mediaType='image/gif';
 
   document.getElementById('iaBtnAnalizar').style.display='none';
   document.getElementById('iaProcessing').style.display='block';
 
-  var mediaType = iaFileType === 'application/pdf' ? 'application/pdf' : 'image/jpeg';
-  if(iaFileType === 'image/png') mediaType = 'image/png';
-
-  fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': getIaKey(),
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
+  fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'x-api-key':getIaKey(),
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
     },
-    body: JSON.stringify({
-      model: 'claude-opus-4-5',
-      max_tokens: 1024,
+    body:JSON.stringify({
+      model:'claude-haiku-4-5-20251001',
+      max_tokens:1000,
       messages:[{
         role:'user',
         content:[
-          {type: mediaType==='application/pdf'?'document':'image',
-           source:{type:'base64', media_type:mediaType, data:iaFileData}},
-          {type:'text', text:prompt}
+          {type:'image',source:{type:'base64',media_type:mediaType,data:iaFileData}},
+          {type:'text',text:promptTxt}
         ]
       }]
     })
   })
-  .then(function(r){ return r.json(); })
+  .then(function(r){
+    if(!r.ok) return r.json().then(function(e){ throw new Error((e.error&&e.error.message)||'Error '+r.status); });
+    return r.json();
+  })
   .then(function(d){
     document.getElementById('iaProcessing').style.display='none';
-    if(!d.content||!d.content[0]){ throw new Error('Sin respuesta'); }
+    if(!d.content||!d.content[0]) throw new Error('Respuesta vacia');
     var txt = d.content[0].text.trim();
-    txt = txt.replace(/```json/g,'').replace(/```/g,'').trim();
-    var json = JSON.parse(txt);
+    var match = txt.match(/\{[\s\S]*\}/);
+    if(!match) throw new Error('Formato inesperado: '+txt.substring(0,100));
+    var json = JSON.parse(match[0]);
     iaDetectados = json.items||[];
-    var o2 = obra();
-    var stockMap = {};
-    (o2&&o2.stock||[]).forEach(function(s){ stockMap[s.material.toLowerCase()] = s; });
-    iaDetectados.forEach(function(item, i){
-      var match = stockMap[item.nombre.toLowerCase()];
-      if(match) item._stockRef = match;
-      item._id = 'ia_'+i;
+    if(!iaDetectados.length) throw new Error('No se detectaron productos en la imagen');
+    var o2=obra(); var stockMap={};
+    (o2&&o2.stock||[]).forEach(function(s){ stockMap[s.material.toLowerCase()]=s; });
+    iaDetectados.forEach(function(item,i){
+      var m=stockMap[item.nombre.toLowerCase()];
+      if(m) item._stockRef=m;
+      item._id='ia_'+i;
     });
     renderIaResult(json);
   })
   .catch(function(e){
     document.getElementById('iaProcessing').style.display='none';
     document.getElementById('iaBtnAnalizar').style.display='block';
-    console.error(e);
-    alert('Error al analizar. Verificá tu conexion o intentá con otra imagen.');
+    console.error('IA Error:',e);
+    var msg=e.message||'';
+    if(msg.indexOf('401')>=0||msg.indexOf('authentication')>=0||msg.indexOf('api_key')>=0){
+      localStorage.removeItem('obrick_ia_key');
+      alert('Clave API invalida o expirada.\nUsá el boton ⚙ Configurar clave para ingresar una nueva.');
+    } else if(msg.indexOf('529')>=0||msg.indexOf('overload')>=0){
+      alert('El servicio de IA esta momentaneamente ocupado. Intenta en unos segundos.');
+    } else if(msg.indexOf('No se detectaron')>=0){
+      alert('No se encontraron productos en la imagen.\nAsegurate de que la foto sea clara y muestre los items de la factura.');
+    } else {
+      alert('Error: '+msg+'\n\nConsejos:\n- Usa una foto clara y bien iluminada\n- El archivo debe ser JPG o PNG\n- Maximo 5MB');
+    }
   });
 }
 
