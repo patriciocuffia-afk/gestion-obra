@@ -2271,77 +2271,46 @@ function compAnalizar(){
   document.getElementById('compResult').style.display='none';
   proc.style.display='block';
   bar.style.width='5%';
-  txt.textContent='Preparando análisis...';
-
-  // Construir contenido con todas las páginas
-  var content = [];
-  compPaginas.forEach(function(p){
-    content.push({type:'image', source:{type:'base64', media_type:p.mediaType, data:p.base64}});
-  });
 
   var o = obra();
   var obraNombre = o ? o.nombre : 'la obra';
 
-  content.push({type:'text', text: `Sos un arquitecto especialista en cómputos de obra. Analiza estos planos de "${obraNombre}" y genera un cómputo detallado de materiales de construcción.
+  // Limitar a máximo 6 páginas por request para evitar truncamiento
+  var MAX_PAG = 6;
+  var paginas = compPaginas.slice(0, MAX_PAG);
+  if(compPaginas.length > MAX_PAG){
+    txt.textContent = 'Analizando primeras '+MAX_PAG+' páginas de '+compPaginas.length+'...';
+  } else {
+    txt.textContent = 'Enviando '+paginas.length+' plano'+(paginas.length>1?'s':'')+' a la IA...';
+  }
 
-INSTRUCCIONES:
-- Calcula cantidades basándote en las dimensiones visibles en los planos
-- Incluye un factor de desperdicio del 10-15% en materiales como ladrillos, azulejos y cerámicos
-- Agrupa los materiales por categoría
-- Sé específico: tipo de ladrillo (18cm, 12cm), tipo de hierro (diámetro), tipo de arena (fina/gruesa), etc.
-- Si no podés calcular con precisión, indicalo en observaciones
+  var content = [];
+  paginas.forEach(function(p){
+    content.push({type:'image', source:{type:'base64', media_type:p.mediaType, data:p.base64}});
+  });
 
-RESPONDE ÚNICAMENTE con este JSON válido sin markdown:
-{
-  "obra": "nombre de la obra",
-  "superficie_total": 0,
-  "nota_general": "aclaración sobre el cómputo y su precisión",
-  "categorias": [
-    {
-      "nombre": "MAMPOSTERÍA",
-      "items": [
-        {"material": "Ladrillos cerámicos 18x18x33", "cantidad": 0, "unidad": "unidades", "observacion": "incluye 10% desperdicio"},
-        {"material": "Ladrillos cerámicos 12x18x33", "cantidad": 0, "unidad": "unidades", "observacion": "muros divisorios internos"}
-      ]
-    },
-    {
-      "nombre": "ESTRUCTURA",
-      "items": []
-    },
-    {
-      "nombre": "CUBIERTA Y LOSA",
-      "items": []
-    },
-    {
-      "nombre": "REVOQUES Y CONTRAPISOS",
-      "items": []
-    },
-    {
-      "nombre": "PISOS Y REVESTIMIENTOS",
-      "items": []
-    },
-    {
-      "nombre": "CARPINTERÍA",
-      "items": []
-    },
-    {
-      "nombre": "INSTALACIONES",
-      "items": []
-    },
-    {
-      "nombre": "PINTURA Y TERMINACIONES",
-      "items": []
-    }
-  ]
-}`});
+  var promptText = 'Sos arquitecto especialista en cómputos métricas de obra. Analiza estos planos de "'+obraNombre+'" y calcula el cómputo de materiales.\n\n'+
+    'REGLAS IMPORTANTES:\n'+
+    '- Respondé SOLO con JSON puro, sin markdown, sin texto antes ni después\n'+
+    '- El JSON debe estar completo y bien cerrado\n'+
+    '- Cantidad 0 si no podés calcular con precisión\n'+
+    '- Incluí factor de desperdicio 10-15% en ladrillos, pisos y revestimientos\n\n'+
+    'FORMATO EXACTO (seguilo al pie de la letra):\n'+
+    '{"obra":"'+obraNombre+'","superficie_total":0,"nota_general":"aclaracion breve","categorias":['+
+    '{"nombre":"MAMPOSTERIA","items":[{"material":"Ladrillos 18x18x33","cantidad":0,"unidad":"unidades","observacion":"muros exteriores"},{"material":"Ladrillos 12x18x33","cantidad":0,"unidad":"unidades","observacion":"muros internos"}]},'+
+    '{"nombre":"ESTRUCTURA","items":[{"material":"Hierro 10mm","cantidad":0,"unidad":"kg","observacion":""},{"material":"Hierro 8mm","cantidad":0,"unidad":"kg","observacion":""}]},'+
+    '{"nombre":"CUBIERTA Y LOSA","items":[{"material":"Viguetas pretensadas","cantidad":0,"unidad":"ml","observacion":""},{"material":"Bovedillas","cantidad":0,"unidad":"unidades","observacion":""}]},'+
+    '{"nombre":"REVOQUES","items":[{"material":"Cemento Portland","cantidad":0,"unidad":"bolsas","observacion":""},{"material":"Arena fina","cantidad":0,"unidad":"m3","observacion":""},{"material":"Arena gruesa","cantidad":0,"unidad":"m3","observacion":""}]},'+
+    '{"nombre":"PISOS Y REVESTIMIENTOS","items":[{"material":"Ceramico piso","cantidad":0,"unidad":"m2","observacion":""},{"material":"Adhesivo ceramico","cantidad":0,"unidad":"bolsas","observacion":""}]},'+
+    '{"nombre":"CARPINTERIA","items":[{"material":"Puertas","cantidad":0,"unidad":"unidades","observacion":""},{"material":"Ventanas","cantidad":0,"unidad":"unidades","observacion":""}]},'+
+    '{"nombre":"INSTALACIONES","items":[{"material":"Cañeria agua fria PVC 25mm","cantidad":0,"unidad":"ml","observacion":""},{"material":"Cañeria cloacal PVC 110mm","cantidad":0,"unidad":"ml","observacion":""}]},'+
+    '{"nombre":"PINTURA","items":[{"material":"Pintura interior latex","cantidad":0,"unidad":"litros","observacion":""},{"material":"Pintura exterior","cantidad":0,"unidad":"litros","observacion":""}]}'+
+    ']}';
 
-  bar.style.width='20%'; txt.textContent='Enviando planos a la IA...';
+  content.push({type:'text', text: promptText});
 
-  // Si hay muchas páginas, enviar de a 2 para no superar límites
-  var pagGroups = [];
-  for(var i=0; i<compPaginas.length; i+=2){ pagGroups.push(compPaginas.slice(i,i+2)); }
+  bar.style.width='25%'; txt.textContent='Analizando planos...';
 
-  // Para simplificar, enviamos todas las páginas en un solo request
   fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
     headers:{
@@ -2352,7 +2321,7 @@ RESPONDE ÚNICAMENTE con este JSON válido sin markdown:
     },
     body: JSON.stringify({
       model: 'claude-opus-4-5',
-      max_tokens: 4000,
+      max_tokens: 8000,
       messages:[{role:'user', content: content}]
     })
   })
@@ -2362,27 +2331,83 @@ RESPONDE ÚNICAMENTE con este JSON válido sin markdown:
     return r.json();
   })
   .then(function(d){
-    bar.style.width='90%'; txt.textContent='Generando tabla...';
-    if(!d.content||!d.content[0]) throw new Error('Respuesta vacía');
-    var txt2 = d.content[0].text.trim();
-    var match = txt2.match(/\{[\s\S]*\}/);
-    if(!match) throw new Error('Formato inesperado');
-    var json = JSON.parse(match[0]);
+    bar.style.width='85%'; txt.textContent='Generando tabla...';
+    if(!d.content||!d.content[0]) throw new Error('Respuesta vacía de la IA');
+
+    var rawTxt = d.content[0].text.trim();
+    console.log('Respuesta IA (primeros 500 chars):', rawTxt.substring(0,500));
+
+    // Intentar parsear el JSON de múltiples formas
+    var json = null;
+
+    // Limpiar markdown si existe
+    rawTxt = rawTxt.replace(/^```json\s*/,'').replace(/\s*```$/,'').trim();
+
+    // Intento 1: JSON directo
+    try { json = JSON.parse(rawTxt); } catch(e1){}
+
+    // Intento 2: extraer desde primer { hasta el último }
+    if(!json){
+      try {
+        var start = rawTxt.indexOf('{');
+        var end = rawTxt.lastIndexOf('}');
+        if(start>=0 && end>start) json = JSON.parse(rawTxt.substring(start, end+1));
+      } catch(e2){}
+    }
+
+    // Intento 3: reparar JSON truncado cerrando arrays y objetos abiertos
+    if(!json){
+      try {
+        var partial = rawTxt;
+        var start2 = partial.indexOf('{');
+        if(start2>=0){
+          partial = partial.substring(start2);
+          // Contar llaves y corchetes para cerrar los que faltan
+          var opens = 0; var oarr = 0;
+          for(var ci=0;ci<partial.length;ci++){
+            if(partial[ci]==='{') opens++;
+            if(partial[ci]==='}') opens--;
+            if(partial[ci]==='[') oarr++;
+            if(partial[ci]===']') oarr--;
+          }
+          // Cerrar lo que falta
+          var closing = '';
+          for(var oi=0;oi<oarr;oi++) closing+=']';
+          for(var oc=0;oc<opens;oc++) closing+='}';
+          json = JSON.parse(partial + closing);
+        }
+      } catch(e3){ console.warn('Intento 3 fallido:', e3.message); }
+    }
+
+    if(!json){
+      throw new Error('No se pudo interpretar la respuesta. Intentá con menos planos (máximo 4-5 páginas).');
+    }
+
+    // Asegurar estructura mínima
+    if(!json.categorias) json.categorias = [];
     compResultData = json;
     bar.style.width='100%';
     setTimeout(function(){
       proc.style.display='none';
       renderCompResult(json);
-    }, 500);
+      if(compPaginas.length > MAX_PAG){
+        showToast('Se analizaron las primeras '+MAX_PAG+' páginas. Para más precisión, subí los planos más importantes.');
+      }
+    }, 400);
   })
   .catch(function(e){
     proc.style.display='none';
     document.getElementById('compBtnAnalizar').style.display='block';
     console.error('Cómputo error:', e);
     var msg = e.message||'';
-    if(msg.indexOf('401')>=0){ localStorage.removeItem('obrick_ia_key'); alert('Clave API inválida. Configurá una nueva con ⚙.'); }
-    else if(msg.indexOf('529')>=0||msg.indexOf('overload')>=0) alert('Servicio ocupado. Intentá en unos segundos.');
-    else alert('Error al calcular el cómputo:\n'+msg);
+    if(msg.indexOf('401')>=0||msg.indexOf('authentication')>=0){
+      localStorage.removeItem('obrick_ia_key');
+      alert('Clave API inválida. Configurá una nueva con ⚙.');
+    } else if(msg.indexOf('529')>=0||msg.indexOf('overload')>=0){
+      alert('Servicio de IA ocupado. Esperá unos segundos e intentá de nuevo.');
+    } else {
+      alert('Error al calcular el cómputo:\n'+msg+'\n\nConsejos:\n- Reducí la cantidad de páginas (usá los planos más importantes)\n- Asegurate de tener crédito en tu cuenta Anthropic');
+    }
   });
 }
 
