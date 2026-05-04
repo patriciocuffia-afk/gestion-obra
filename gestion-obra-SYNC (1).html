@@ -254,7 +254,65 @@ tr:hover td{background:#f8f9fa}
 .btn-excel:hover{background:#165a35}
 .comp-nota{font-size:11px;color:var(--m);font-style:italic;padding:8px 10px;background:#fffbf0;border-radius:6px;border-left:3px solid var(--a);margin-top:8px}
 
-@media(max-width:600px){.rg,.cg{grid-template-columns:1fr 1fr}.fr,.fr.t3{grid-template-columns:1fr}.bg2{grid-template-columns:1fr}.rcat-vals{gap:8px}.chart-wrap{flex-direction:column}.doc-actions{flex-direction:column}}
+/* Meta de gasto y tiempo */
+.meta-card{background:linear-gradient(135deg,var(--p),var(--pl));color:#fff;border-radius:10px;padding:16px;margin-bottom:14px}
+.meta-card .ct{color:#fff;opacity:.9;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.meta-big-bar{height:20px;background:rgba(255,255,255,.2);border-radius:10px;overflow:hidden;margin:10px 0}
+.meta-big-fill{height:100%;border-radius:10px;transition:width .6s;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:11px;font-weight:700;color:#fff}
+.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.meta-stat{background:rgba(255,255,255,.12);border-radius:8px;padding:10px;text-align:center}
+.meta-stat .val{font-size:16px;font-weight:700}
+.meta-stat .lbl{font-size:10px;opacity:.75;margin-top:2px}
+.meta-edit-form{background:rgba(255,255,255,.1);border-radius:8px;padding:12px;margin-top:10px;display:none}
+.meta-edit-form.show{display:block}
+.meta-input{width:100%;padding:8px 12px;border:none;border-radius:6px;font-size:14px;font-weight:700;margin-bottom:8px;color:var(--t)}
+.meta-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.btn-meta{background:#fff;color:var(--p);border:none;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;width:100%}
+
+/* Etapas */
+.eta-timeline{position:relative;margin:16px 0}
+.eta-progress-bar{height:8px;background:var(--b);border-radius:4px;margin-bottom:20px;overflow:hidden}
+.eta-progress-fill{height:100%;border-radius:4px;background:var(--s);transition:width .6s}
+.eta-item{border:1px solid var(--b);border-radius:10px;margin-bottom:10px;overflow:hidden;transition:box-shadow .2s}
+.eta-item:hover{box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.eta-item.pendiente{border-left:4px solid var(--m)}
+.eta-item.en_curso{border-left:4px solid var(--a)}
+.eta-item.certificada{border-left:4px solid var(--s)}
+.eta-item.observaciones{border-left:4px solid var(--d)}
+.eta-header{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;background:#fff}
+.eta-header:hover{background:#f8f9fa}
+.eta-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.eta-info{flex:1;min-width:0}
+.eta-nombre{font-size:14px;font-weight:700;color:var(--t)}
+.eta-fechas{font-size:11px;color:var(--m);margin-top:2px}
+.eta-estado-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.badge-pendiente{background:#f0f0f0;color:var(--m)}
+.badge-en_curso{background:#fff3e0;color:#e65100}
+.badge-certificada{background:#e8f5e9;color:#2e7d32}
+.badge-observaciones{background:#fde8e8;color:#c0392b}
+.eta-body{display:none;border-top:1px solid var(--b);padding:14px;background:#fafbfc}
+.eta-body.open{display:block}
+.eta-pct-bar{height:10px;background:var(--b);border-radius:5px;overflow:hidden;margin:8px 0}
+.eta-pct-fill{height:100%;border-radius:5px;transition:width .5s}
+.eta-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.btn-eta{padding:7px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;border:none}
+.btn-certif{background:var(--s);color:#fff}
+.btn-certif:hover{background:#219653}
+.btn-curso{background:var(--a);color:#fff}
+.btn-curso:hover{background:#d4890a}
+.btn-obs{background:var(--d);color:#fff}
+.btn-obs:hover{background:#a93226}
+.eta-cert-form{background:#fff;border:1px solid var(--b);border-radius:8px;padding:14px;margin-top:12px;display:none}
+.eta-cert-form.show{display:block}
+.eta-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+.eta-stat{background:var(--bg);border-radius:6px;padding:8px;text-align:center}
+.eta-stat .v{font-size:14px;font-weight:700;color:var(--p)}
+.eta-stat .l{font-size:10px;color:var(--m);margin-top:2px}
+
+/* Modal etapa */
+.modal-eta-form .fg{margin-bottom:10px}
+
+@media(max-width:600px){.meta-grid{grid-template-columns:1fr}.eta-stats{grid-template-columns:1fr 1fr}.meta-row{grid-template-columns:1fr}}
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -285,6 +343,7 @@ tr:hover td{background:#f8f9fa}
 <div class="tabs" id="main-tabs" style="display:none">
   <div class="tab active" onclick="showTab('res',this)">Resumen</div>
   <div class="tab" onclick="showTab('gas',this)">Gastos</div>
+  <div class="tab" onclick="showTab('eta',this)">🏗 Etapas</div>
   <div class="tab" onclick="showTab('doc',this)">Documentos</div>
   <div class="tab" onclick="showTab('stk',this)">Stock</div>
   <div class="tab" onclick="showTab('cat',this)">Categorias</div>
@@ -324,6 +383,32 @@ tr:hover td{background:#f8f9fa}
         Exportar PDF
       </button>
     </div>
+
+    <!-- METAS -->
+    <div class="meta-card" id="metaCard">
+      <div class="ct">
+        🎯 Metas de obra
+        <button onclick="toggleMetaEdit()" style="background:rgba(255,255,255,.2);border:none;color:#fff;padding:4px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">✎ Editar</button>
+      </div>
+      <div id="metaContent"><div style="text-align:center;opacity:.7;font-size:13px;padding:8px">Hacé clic en Editar para configurar las metas de presupuesto y tiempo</div></div>
+      <div class="meta-edit-form" id="metaEditForm">
+        <div style="font-size:12px;opacity:.8;margin-bottom:10px;font-weight:600">PRESUPUESTO TOTAL</div>
+        <input type="number" class="meta-input" id="metaPresup" placeholder="Presupuesto total en pesos" step="1000">
+        <div style="font-size:12px;opacity:.8;margin-bottom:10px;margin-top:4px;font-weight:600">PLAZO DE OBRA</div>
+        <div class="meta-row">
+          <div>
+            <div style="font-size:11px;opacity:.7;margin-bottom:4px">Fecha inicio</div>
+            <input type="date" class="meta-input" id="metaFecIni" style="margin-bottom:0">
+          </div>
+          <div>
+            <div style="font-size:11px;opacity:.7;margin-bottom:4px">Fecha fin estimada</div>
+            <input type="date" class="meta-input" id="metaFecFin" style="margin-bottom:0">
+          </div>
+        </div>
+        <button class="btn-meta" style="margin-top:10px" onclick="guardarMetas()">Guardar metas</button>
+      </div>
+    </div>
+
     <div class="card">
       <div class="ct">Total gastado</div>
       <div class="rg">
@@ -355,6 +440,29 @@ tr:hover td{background:#f8f9fa}
       <div class="ct">Ultimos gastos</div>
       <div id="rult" class="tw"></div>
     </div>
+  </div>
+
+  <!-- ETAPAS -->
+  <div id="tab-eta" style="display:none">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div class="ct" style="margin-bottom:0">🏗 Etapas de obra</div>
+        <button class="btn" style="width:auto;margin-top:0;padding:8px 16px" onclick="abrirNuevaEtapa()">+ Nueva etapa</button>
+      </div>
+      <div id="etaProgGlobal" style="display:none">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--m);margin-bottom:4px">
+          <span>Avance global de obra</span>
+          <span id="etaPctGlobal" style="font-weight:700;color:var(--p)">0%</span>
+        </div>
+        <div class="eta-progress-bar"><div class="eta-progress-fill" id="etaBarGlobal" style="width:0%"></div></div>
+      </div>
+      <div id="etaStats" class="eta-stats" style="display:none;margin-bottom:12px">
+        <div class="eta-stat"><div class="v" id="etaStatTotal">0</div><div class="l">Total etapas</div></div>
+        <div class="eta-stat"><div class="v" id="etaStatCert" style="color:var(--s)">0</div><div class="l">Certificadas</div></div>
+        <div class="eta-stat"><div class="v" id="etaStatDias" style="color:var(--a)">-</div><div class="l">Dias restantes</div></div>
+      </div>
+    </div>
+    <div id="listaEtapas"></div>
   </div>
 
   <!-- GASTOS -->
@@ -864,6 +972,54 @@ tr:hover td{background:#f8f9fa}
   </div>
 </div>
 
+<!-- MODAL NUEVA/EDITAR ETAPA -->
+<div class="mb" id="modalEtapa">
+  <div class="md" style="max-width:500px">
+    <h2 id="modalEtapaTitulo">Nueva etapa</h2>
+    <input type="hidden" id="etaId">
+    <div class="fg" style="margin-bottom:10px"><label>Nombre de la etapa</label><input type="text" id="etaNombre" placeholder="Ej: Fundaciones, Estructura, Mamposteria"></div>
+    <div class="fg" style="margin-bottom:10px"><label>Descripcion (opcional)</label><textarea id="etaDesc" placeholder="Detalle de los trabajos..." style="min-height:50px"></textarea></div>
+    <div class="fr" style="margin-bottom:10px">
+      <div class="fg"><label>Fecha inicio estimada</label><input type="date" id="etaFecIni"></div>
+      <div class="fg"><label>Fecha fin estimada</label><input type="date" id="etaFecFin"></div>
+    </div>
+    <div class="fg" style="margin-bottom:10px"><label>Presupuesto asignado (opcional, en pesos)</label><input type="number" id="etaPresup" placeholder="0" step="1000"></div>
+    <div class="fg" style="margin-bottom:10px"><label>Orden</label><input type="number" id="etaOrden" placeholder="1" min="1"></div>
+    <div class="mdb">
+      <button class="btns" onclick="cerrarModalEtapa()">Cancelar</button>
+      <button class="btn" onclick="guardarEtapa()" style="flex:1;margin-top:0">Guardar etapa</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CERTIFICAR ETAPA -->
+<div class="mb" id="modalCertif">
+  <div class="md" style="max-width:500px">
+    <h2>Certificar etapa</h2>
+    <input type="hidden" id="certifEtaId">
+    <div class="fg" style="margin-bottom:10px">
+      <label>Estado</label>
+      <select id="certifEstado">
+        <option value="en_curso">🟡 En curso</option>
+        <option value="certificada">🟢 Certificada (completa)</option>
+        <option value="observaciones">🔴 Con observaciones</option>
+        <option value="pendiente">🔵 Pendiente</option>
+      </select>
+    </div>
+    <div class="fg" style="margin-bottom:10px">
+      <label>Porcentaje completado: <span id="certifPctLabel">100%</span></label>
+      <input type="range" id="certifPct" min="0" max="100" value="100" oninput="document.getElementById('certifPctLabel').textContent=this.value+'%'" style="width:100%;margin-top:6px">
+    </div>
+    <div class="fg" style="margin-bottom:10px"><label>Fecha real de ejecucion</label><input type="date" id="certifFecha"></div>
+    <div class="fg" style="margin-bottom:10px"><label>Monto certificado (en pesos)</label><input type="number" id="certifMonto" placeholder="0" step="1000"></div>
+    <div class="fg" style="margin-bottom:10px"><label>Nota de certificacion</label><textarea id="certifNota" placeholder="Observaciones, trabajos realizados, pendientes..." style="min-height:60px"></textarea></div>
+    <div class="mdb">
+      <button class="btns" onclick="cerrarModalCertif()">Cancelar</button>
+      <button class="btn" onclick="guardarCertif()" style="flex:1;margin-top:0;background:var(--s)">Certificar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL CONFIRMACION -->
 <div class="confirm-overlay" id="confirmModal">
   <div class="confirm-box">
@@ -1118,6 +1274,7 @@ function showTab(t, el){
   if(el) el.classList.add('active');
   if(t==='res') renderRes();
   if(t==='gas') renderGas();
+  if(t==='eta') renderEta();
   if(t==='doc') renderDoc();
   if(t==='stk') renderStk();
   if(t==='cat') renderCat();
@@ -1539,7 +1696,7 @@ function renderCot(){
 function renderAll(){
   renderSel();
   var fg=document.getElementById('gfec'); if(fg&&!fg.value) fg.value=new Date().toISOString().split('T')[0];
-  renderRes(); renderGas(); renderCat(); renderSoc(); renderStk(); renderCot(); renderDoc();
+  renderRes(); renderMetas(); renderGas(); renderEta(); renderCat(); renderSoc(); renderStk(); renderCot(); renderDoc();
 }
 
 // ═══════════════════════════════════════════
@@ -1816,6 +1973,331 @@ function iaReset(){
   document.getElementById('iaBtnAnalizar').style.display='none';
   document.getElementById('iaResult').style.display='none';
   document.getElementById('iaFile').value='';
+}
+
+// ═══════════════════════════════════════════
+// METAS DE GASTO Y TIEMPO
+// ═══════════════════════════════════════════
+function toggleMetaEdit(){
+  var f = document.getElementById('metaEditForm');
+  var show = !f.classList.contains('show');
+  f.classList.toggle('show', show);
+  if(show){
+    var o = obra(); if(!o) return;
+    var m = o.metas||{};
+    document.getElementById('metaPresup').value = m.presupuesto||'';
+    document.getElementById('metaFecIni').value = m.fechaIni||'';
+    document.getElementById('metaFecFin').value = m.fechaFin||'';
+  }
+}
+
+function guardarMetas(){
+  var o = obra(); if(!o){ alert('Sin obra'); return; }
+  var presup = parseFloat(document.getElementById('metaPresup').value)||0;
+  var fecIni = document.getElementById('metaFecIni').value||'';
+  var fecFin = document.getElementById('metaFecFin').value||'';
+  var up = Object.assign({},o,{metas:{presupuesto:presup,fechaIni:fecIni,fechaFin:fecFin}});
+  guardarObra(up).then(function(){
+    document.getElementById('metaEditForm').classList.remove('show');
+    showToast('Metas guardadas');
+    renderMetas();
+  });
+}
+
+function renderMetas(){
+  var o = obra();
+  var c = document.getElementById('metaContent');
+  if(!c) return;
+  if(!o||!o.metas||(!o.metas.presupuesto&&!o.metas.fechaIni)){
+    c.innerHTML='<div style="text-align:center;opacity:.7;font-size:13px;padding:8px">Hacé clic en Editar para configurar las metas de presupuesto y tiempo</div>';
+    return;
+  }
+  var m = o.metas;
+  var tp = (o.gastos||[]).reduce(function(s,g){ return s+enP(g); },0);
+  var html = '';
+
+  // META DE PRESUPUESTO
+  if(m.presupuesto>0){
+    var pctGasto = Math.min(Math.round(tp/m.presupuesto*100),100);
+    var realPct = Math.round(tp/m.presupuesto*100);
+    var colorGasto = realPct<75?'#27ae60':realPct<100?'#e8a020':'#e74c3c';
+    var disponible = m.presupuesto - tp;
+    html += '<div style="margin-bottom:14px">'+
+      '<div style="display:flex;justify-content:space-between;font-size:12px;opacity:.8;margin-bottom:6px">'+
+        '<span>💰 Presupuesto ejecutado</span>'+
+        '<span style="font-weight:700">'+realPct+'%</span>'+
+      '</div>'+
+      '<div class="meta-big-bar">'+
+        '<div class="meta-big-fill" style="width:'+pctGasto+'%;background:'+colorGasto+'">'+
+          (pctGasto>20?realPct+'%':'')+'</div>'+
+      '</div>'+
+      '<div class="meta-grid">'+
+        '<div class="meta-stat"><div class="val">'+fmt(tp)+'</div><div class="lbl">Gastado</div></div>'+
+        '<div class="meta-stat"><div class="val">'+fmt(m.presupuesto)+'</div><div class="lbl">Presupuesto total</div></div>'+
+        '<div class="meta-stat"><div class="val" style="color:'+(disponible>=0?'#a8e6cf':'#ffb3b3')+'">'+fmt(Math.abs(disponible))+'</div><div class="lbl">'+(disponible>=0?'Disponible':'Excedido')+'</div></div>'+
+        '<div class="meta-stat"><div class="val">'+fmt(m.presupuesto*0.9)+'</div><div class="lbl">Alerta (90%)</div></div>'+
+      '</div>'+
+    '</div>';
+  }
+
+  // META DE TIEMPO
+  if(m.fechaIni&&m.fechaFin){
+    var hoy = new Date();
+    var ini = new Date(m.fechaIni);
+    var fin = new Date(m.fechaFin);
+    var totalDias = Math.round((fin-ini)/(1000*60*60*24));
+    var diasTransc = Math.max(0,Math.round((hoy-ini)/(1000*60*60*24)));
+    var diasRest = Math.max(0,Math.round((fin-hoy)/(1000*60*60*24)));
+    var pctTiempo = Math.min(Math.round(diasTransc/totalDias*100),100);
+    var realPctT = Math.round(diasTransc/totalDias*100);
+    var colorT = realPctT<75?'#27ae60':realPctT<100?'#e8a020':'#e74c3c';
+    var vencido = hoy > fin;
+
+    // Calcular ritmo: si el tiempo transcurrido es más que el % gastado, vamos bien
+    var pctGasto2 = m.presupuesto>0?Math.round(tp/m.presupuesto*100):0;
+    var estado_tiempo = '';
+    if(vencido){ estado_tiempo='⚠ Plazo vencido'; }
+    else if(realPctT > pctGasto2+10){ estado_tiempo='✓ Adelantado en gastos'; }
+    else if(pctGasto2 > realPctT+10){ estado_tiempo='⚡ Ritmo de gasto elevado'; }
+    else { estado_tiempo='~ En ritmo normal'; }
+
+    html += '<div>'+
+      '<div style="display:flex;justify-content:space-between;font-size:12px;opacity:.8;margin-bottom:6px">'+
+        '<span>⏱ Tiempo transcurrido</span>'+
+        '<span style="font-weight:700">'+realPctT+'%</span>'+
+      '</div>'+
+      '<div class="meta-big-bar">'+
+        '<div class="meta-big-fill" style="width:'+pctTiempo+'%;background:'+colorT+'">'+
+          (pctTiempo>20?realPctT+'%':'')+'</div>'+
+      '</div>'+
+      '<div class="meta-grid">'+
+        '<div class="meta-stat"><div class="val">'+diasTransc+'</div><div class="lbl">Dias transcurridos</div></div>'+
+        '<div class="meta-stat"><div class="val" style="color:'+(vencido?'#ffb3b3':'#a8e6cf')+'">'+diasRest+'</div><div class="lbl">'+(vencido?'Dias vencidos':'Dias restantes')+'</div></div>'+
+        '<div class="meta-stat"><div class="val">'+totalDias+'</div><div class="lbl">Plazo total (dias)</div></div>'+
+        '<div class="meta-stat"><div class="val" style="font-size:11px">'+estado_tiempo+'</div><div class="lbl">Estado</div></div>'+
+      '</div>'+
+    '</div>';
+  }
+
+  c.innerHTML = html || '<div style="text-align:center;opacity:.7;font-size:13px;padding:8px">Hacé clic en Editar para configurar las metas</div>';
+}
+
+// ═══════════════════════════════════════════
+// ETAPAS DE OBRA
+// ═══════════════════════════════════════════
+var etaAbierta = null;
+
+function abrirNuevaEtapa(){
+  document.getElementById('modalEtapaTitulo').textContent='Nueva etapa';
+  document.getElementById('etaId').value='';
+  document.getElementById('etaNombre').value='';
+  document.getElementById('etaDesc').value='';
+  document.getElementById('etaFecIni').value='';
+  document.getElementById('etaFecFin').value='';
+  document.getElementById('etaPresup').value='';
+  var o=obra();
+  document.getElementById('etaOrden').value=((o&&o.etapas)||[]).length+1;
+  document.getElementById('modalEtapa').className='mb show';
+}
+
+function editarEtapa(id){
+  var o=obra(); if(!o) return;
+  var et=(o.etapas||[]).find(function(e){ return e.id===id; });
+  if(!et) return;
+  document.getElementById('modalEtapaTitulo').textContent='Editar etapa';
+  document.getElementById('etaId').value=id;
+  document.getElementById('etaNombre').value=et.nombre||'';
+  document.getElementById('etaDesc').value=et.desc||'';
+  document.getElementById('etaFecIni').value=et.fechaIni||'';
+  document.getElementById('etaFecFin').value=et.fechaFin||'';
+  document.getElementById('etaPresup').value=et.presupuesto||'';
+  document.getElementById('etaOrden').value=et.orden||1;
+  document.getElementById('modalEtapa').className='mb show';
+}
+
+function cerrarModalEtapa(){ document.getElementById('modalEtapa').className='mb'; }
+
+function guardarEtapa(){
+  var o=obra(); if(!o){ alert('Sin obra'); return; }
+  var nombre=document.getElementById('etaNombre').value.trim();
+  if(!nombre){ alert('Ingresa el nombre de la etapa'); return; }
+  var id=document.getElementById('etaId').value||Date.now().toString();
+  var et={
+    id:id, nombre:nombre,
+    desc:document.getElementById('etaDesc').value.trim(),
+    fechaIni:document.getElementById('etaFecIni').value,
+    fechaFin:document.getElementById('etaFecFin').value,
+    presupuesto:parseFloat(document.getElementById('etaPresup').value)||0,
+    orden:parseInt(document.getElementById('etaOrden').value)||1,
+    estado:'pendiente', pct:0, historial:[]
+  };
+  var etapas=[].concat(o.etapas||[]);
+  var idx=etapas.findIndex(function(e){ return e.id===id; });
+  if(idx>=0){ et.estado=etapas[idx].estado; et.pct=etapas[idx].pct; et.historial=etapas[idx].historial||[]; etapas[idx]=et; }
+  else{ etapas.push(et); }
+  etapas.sort(function(a,b){ return (a.orden||0)-(b.orden||0); });
+  guardarObra(Object.assign({},o,{etapas:etapas})).then(function(){
+    cerrarModalEtapa(); showToast('Etapa guardada'); renderEta();
+  });
+}
+
+function eliminarEtapa(id){
+  confirmar('¿Eliminar esta etapa?').then(function(ok){
+    if(!ok) return;
+    var o=obra(); if(!o) return;
+    guardarObra(Object.assign({},o,{etapas:(o.etapas||[]).filter(function(e){ return e.id!==id; })}))
+      .then(function(){ showToast('Etapa eliminada'); renderEta(); });
+  });
+}
+
+function abrirCertif(id){
+  var o=obra(); if(!o) return;
+  var et=(o.etapas||[]).find(function(e){ return e.id===id; });
+  if(!et) return;
+  document.getElementById('certifEtaId').value=id;
+  document.getElementById('certifEstado').value=et.estado||'certificada';
+  document.getElementById('certifPct').value=et.pct||100;
+  document.getElementById('certifPctLabel').textContent=(et.pct||100)+'%';
+  document.getElementById('certifFecha').value=new Date().toISOString().split('T')[0];
+  document.getElementById('certifMonto').value='';
+  document.getElementById('certifNota').value='';
+  document.getElementById('modalCertif').className='mb show';
+}
+
+function cerrarModalCertif(){ document.getElementById('modalCertif').className='mb'; }
+
+function guardarCertif(){
+  var o=obra(); if(!o) return;
+  var id=document.getElementById('certifEtaId').value;
+  var estado=document.getElementById('certifEstado').value;
+  var pct=parseInt(document.getElementById('certifPct').value)||100;
+  var fecha=document.getElementById('certifFecha').value;
+  var monto=parseFloat(document.getElementById('certifMonto').value)||0;
+  var nota=document.getElementById('certifNota').value.trim();
+  var etapas=(o.etapas||[]).map(function(et){
+    if(et.id!==id) return et;
+    var hist=[].concat(et.historial||[]);
+    hist.push({fecha:fecha,estado:estado,pct:pct,monto:monto,nota:nota});
+    return Object.assign({},et,{estado:estado,pct:pct,ultimaCertif:fecha,historial:hist});
+  });
+  guardarObra(Object.assign({},o,{etapas:etapas})).then(function(){
+    cerrarModalCertif(); showToast('Etapa certificada'); renderEta();
+  });
+}
+
+function toggleEta(id){
+  etaAbierta=(etaAbierta===id)?null:id;
+  renderEta();
+}
+
+var ESTADO_CONFIG={
+  pendiente:{icon:'🔵',label:'Pendiente',badge:'badge-pendiente',cls:'pendiente'},
+  en_curso:{icon:'🟡',label:'En curso',badge:'badge-en_curso',cls:'en_curso'},
+  certificada:{icon:'🟢',label:'Certificada',badge:'badge-certificada',cls:'certificada'},
+  observaciones:{icon:'🔴',label:'Con observaciones',badge:'badge-observaciones',cls:'observaciones'}
+};
+
+function renderEta(){
+  var o=obra();
+  var c=document.getElementById('listaEtapas'); if(!c) return;
+  var etapas=o&&o.etapas||[];
+
+  // Stats globales
+  if(etapas.length){
+    var cert=etapas.filter(function(e){ return e.estado==='certificada'; }).length;
+    var pctGlobal=Math.round(etapas.reduce(function(s,e){ return s+(e.pct||0); },0)/etapas.length);
+    document.getElementById('etaProgGlobal').style.display='block';
+    document.getElementById('etaStats').style.display='grid';
+    document.getElementById('etaPctGlobal').textContent=pctGlobal+'%';
+    document.getElementById('etaBarGlobal').style.width=pctGlobal+'%';
+    document.getElementById('etaStatTotal').textContent=etapas.length;
+    document.getElementById('etaStatCert').textContent=cert;
+    // Dias restantes desde metas
+    var m=o.metas||{};
+    if(m.fechaFin){
+      var dias=Math.max(0,Math.round((new Date(m.fechaFin)-new Date())/(1000*60*60*24)));
+      document.getElementById('etaStatDias').textContent=dias;
+    } else {
+      document.getElementById('etaStatDias').textContent='-';
+    }
+  } else {
+    document.getElementById('etaProgGlobal').style.display='none';
+    document.getElementById('etaStats').style.display='none';
+  }
+
+  if(!etapas.length){
+    c.innerHTML='<div class="card"><div class="empty">Sin etapas. Hacé clic en "+ Nueva etapa" para comenzar a planificar.</div></div>';
+    return;
+  }
+
+  c.innerHTML=etapas.map(function(et){
+    var cfg=ESTADO_CONFIG[et.estado]||ESTADO_CONFIG.pendiente;
+    var isOpen=(etaAbierta===et.id);
+    var pct=et.pct||0;
+    var colorPct=pct<50?'var(--a)':pct<100?'var(--pl)':'var(--s)';
+
+    // Calcular estado de tiempo
+    var tiempoInfo='';
+    if(et.fechaIni&&et.fechaFin){
+      var hoy=new Date();
+      var fin=new Date(et.fechaFin);
+      var ini=new Date(et.fechaIni);
+      var totalD=Math.round((fin-ini)/(1000*60*60*24));
+      var transD=Math.max(0,Math.round((hoy-ini)/(1000*60*60*24)));
+      var restD=Math.max(0,Math.round((fin-hoy)/(1000*60*60*24)));
+      var pctT=Math.min(Math.round(transD/totalD*100),100);
+      if(et.estado!=='certificada'){
+        tiempoInfo='<span style="font-size:10px;color:var(--m);margin-left:8px">'+(hoy>fin?'⚠ Vencida':restD+' dias restantes')+'</span>';
+      }
+    }
+
+    var detalle='';
+    if(isOpen){
+      // Historial de certificaciones
+      var hist=[].concat(et.historial||[]).reverse();
+      var histHTML=hist.length?hist.map(function(h){
+        var cfg2=ESTADO_CONFIG[h.estado]||ESTADO_CONFIG.pendiente;
+        return '<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--b);font-size:12px">'+
+          '<span>'+cfg2.icon+'</span>'+
+          '<div><strong>'+h.fecha+'</strong> — '+cfg2.label+' · '+h.pct+'%'+
+          (h.monto?' · '+fmt(h.monto):'')+(h.nota?'<br><span style="color:var(--m)">'+h.nota+'</span>':'')+'</div>'+
+        '</div>';
+      }).join(''):'<div style="color:var(--m);font-size:12px;padding:8px 0">Sin certificaciones registradas</div>';
+
+      detalle='<div class="eta-body open">'+
+        (et.desc?'<p style="font-size:13px;color:var(--m);margin-bottom:10px">'+et.desc+'</p>':'')+
+        '<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--m);margin-bottom:4px">'+
+          '<span>Avance</span><span style="font-weight:700;color:var(--p)">'+pct+'%</span>'+
+        '</div>'+
+        '<div class="eta-pct-bar"><div class="eta-pct-fill" style="width:'+pct+'%;background:'+colorPct+'"></div></div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0;font-size:12px">'+
+          (et.fechaIni?'<div><span style="color:var(--m)">Inicio: </span><strong>'+et.fechaIni+'</strong></div>':'')+
+          (et.fechaFin?'<div><span style="color:var(--m)">Fin est.: </span><strong>'+et.fechaFin+'</strong></div>':'')+
+          (et.presupuesto?'<div><span style="color:var(--m)">Presupuesto: </span><strong>'+fmt(et.presupuesto)+'</strong></div>':'')+
+          (et.ultimaCertif?'<div><span style="color:var(--m)">Ultima certif.: </span><strong>'+et.ultimaCertif+'</strong></div>':'')+
+        '</div>'+
+        '<div class="eta-actions">'+
+          '<button class="btn-eta btn-certif" onclick="abrirCertif(\''+et.id+'\')">✓ Certificar / Actualizar</button>'+
+          '<button class="btn-eta" style="background:var(--pl);color:#fff" onclick="editarEtapa(\''+et.id+'\')">✎ Editar</button>'+
+          '<button class="btn-eta" style="background:transparent;border:1px solid var(--d);color:var(--d)" onclick="eliminarEtapa(\''+et.id+'\')">✕ Eliminar</button>'+
+        '</div>'+
+        (hist.length?'<div style="margin-top:14px"><div style="font-size:12px;font-weight:700;color:var(--p);margin-bottom:6px">Historial de certificaciones</div>'+histHTML+'</div>':'')+
+      '</div>';
+    }
+
+    return '<div class="eta-item '+cfg.cls+'">'+
+      '<div class="eta-header" onclick="toggleEta(\''+et.id+'\')">'+
+        '<div class="eta-icon" style="background:'+(et.estado==='certificada'?'#e8f5e9':et.estado==='en_curso'?'#fff3e0':et.estado==='observaciones'?'#fde8e8':'#f0f0f0')+'">'+cfg.icon+'</div>'+
+        '<div class="eta-info">'+
+          '<div class="eta-nombre">'+(et.orden?et.orden+'. ':'')+et.nombre+tiempoInfo+'</div>'+
+          '<div class="eta-fechas">'+(et.fechaIni?et.fechaIni:'-')+' → '+(et.fechaFin?et.fechaFin:'-')+(et.pct?'  ·  '+et.pct+'% completado':'')+'</div>'+
+        '</div>'+
+        '<span class="eta-estado-badge '+cfg.badge+'">'+cfg.label+'</span>'+
+        '<span style="font-size:16px;color:var(--m);margin-left:8px;transition:transform .2s;'+(isOpen?'transform:rotate(180deg)':'')+'">▼</span>'+
+      '</div>'+
+      detalle+
+    '</div>';
+  }).join('');
 }
 
 // ═══════════════════════════════════════════
