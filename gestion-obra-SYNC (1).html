@@ -393,7 +393,20 @@ tr:hover td{background:#f8f9fa}
       <div id="metaContent"><div style="text-align:center;opacity:.7;font-size:13px;padding:8px">Hacé clic en Editar para configurar las metas de presupuesto y tiempo</div></div>
       <div class="meta-edit-form" id="metaEditForm">
         <div style="font-size:12px;opacity:.8;margin-bottom:10px;font-weight:600">PRESUPUESTO TOTAL</div>
-        <input type="number" class="meta-input" id="metaPresup" placeholder="Presupuesto total en pesos" step="1000">
+        <div class="meta-row" style="margin-bottom:8px">
+          <div>
+            <div style="font-size:11px;opacity:.7;margin-bottom:4px">Monto</div>
+            <input type="number" class="meta-input" id="metaPresup" placeholder="Monto del presupuesto" step="1000" style="margin-bottom:0">
+          </div>
+          <div>
+            <div style="font-size:11px;opacity:.7;margin-bottom:4px">Moneda</div>
+            <select class="meta-input" id="metaMoneda" style="margin-bottom:0">
+              <option value="pesos">Pesos argentinos</option>
+              <option value="oficial">Dolar Oficial</option>
+              <option value="blue">Dolar Blue</option>
+            </select>
+          </div>
+        </div>
         <div style="font-size:12px;opacity:.8;margin-bottom:10px;margin-top:4px;font-weight:600">PLAZO DE OBRA</div>
         <div class="meta-row">
           <div>
@@ -667,6 +680,47 @@ tr:hover td{background:#f8f9fa}
         <div class="help-step"><div class="help-num">5</div><div><strong>Evolucion mensual:</strong> Muestra cuanto se gasto cada mes desde el inicio de la obra.</div></div>
         <div class="help-step"><div class="help-num">6</div><div><strong>Exportar PDF:</strong> El boton rojo arriba del todo genera un PDF con el resumen completo, listo para compartir con el contador o los socios.</div></div>
         <div class="help-tip"><strong>Consejo:</strong> Para asignar presupuestos, hace clic en "Editar presupuestos" dentro de la card de presupuesto. Ingresas el monto estimado en pesos para cada categoria.</div>
+      </div>
+    </div>
+
+    <!-- GASTOS -->
+    <div class="help-section">
+      <div class="help-header" onclick="toggleHelp('hm')">
+        <div style="display:flex;align-items:center">
+          <div class="help-icon" style="background:#e8eaf6">🎯</div>
+          <div><div class="help-title">Metas de obra</div><div class="help-sub">Presupuesto total y plazo de ejecucion</div></div>
+        </div>
+        <span class="help-toggle" id="hthm">▼</span>
+      </div>
+      <div class="help-body" id="hbhm">
+        <p style="margin-bottom:12px">La card de Metas (arriba del Resumen) permite definir el presupuesto total y el plazo de obra, mostrando el avance en tiempo real.</p>
+        <div class="help-step"><div class="help-num">1</div><div><strong>Configurar metas:</strong> Hace clic en "✎ Editar" en la card azul. Ingresa el presupuesto total, la moneda (Pesos, Dolar Oficial o Dolar Blue), la fecha de inicio y la fecha de fin estimada.</div></div>
+        <div class="help-step"><div class="help-num">2</div><div><strong>Meta de presupuesto:</strong> La barra muestra el porcentaje del presupuesto ejecutado. Verde = menos del 75%, Amarillo = entre 75% y 100%, Rojo = excedido. Muestra monto gastado, presupuesto total y disponible restante en la moneda elegida.</div></div>
+        <div class="help-step"><div class="help-num">3</div><div><strong>Meta de tiempo:</strong> La barra muestra el porcentaje del plazo transcurrido. Indica dias transcurridos, dias restantes y un indicador de estado que compara el ritmo de gasto con el tiempo consumido.</div></div>
+        <div class="help-step"><div class="help-num">4</div><div><strong>Estado del ritmo:</strong> "Adelantado en gastos" (gastaste menos de lo que el tiempo sugiere), "Ritmo elevado" (gastaste mas de lo esperado), "En ritmo normal" o "Plazo vencido".</div></div>
+        <div class="help-tip"><strong>Monedas:</strong> Si ingresas el presupuesto en dolares, la app lo convierte automaticamente a pesos usando la ultima cotizacion cargada para compararlo con los gastos registrados.</div>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-header" onclick="toggleHelp('he')">
+        <div style="display:flex;align-items:center">
+          <div class="help-icon" style="background:#e8f5e9">🏗</div>
+          <div><div class="help-title">Etapas y certificaciones</div><div class="help-sub">Planificar y certificar el avance de obra</div></div>
+        </div>
+        <span class="help-toggle" id="hthe">▼</span>
+      </div>
+      <div class="help-body" id="hbhe">
+        <p style="margin-bottom:12px">La pestana Etapas permite planificar el proyecto por fases, registrar el avance y certificar el trabajo de cada contratista con comprobante enviable por WhatsApp o email.</p>
+        <div class="help-step"><div class="help-num">1</div><div><strong>Crear etapa:</strong> Hace clic en "+ Nueva etapa". Completa nombre (ej: "Fundaciones"), descripcion, fechas estimadas, presupuesto asignado y datos del contratista (nombre, telefono, email, CUIT).</div></div>
+        <div class="help-step"><div class="help-num">2</div><div><strong>Estados:</strong> 🔵 Pendiente (no iniciada), 🟡 En curso (trabajo activo), 🟢 Certificada (completada y aprobada), 🔴 Con observaciones (con problemas o pendientes).</div></div>
+        <div class="help-step"><div class="help-num">3</div><div><strong>Avance global:</strong> La barra arriba de la lista promedia el % completado de todas las etapas, mostrando el avance total de la obra.</div></div>
+        <div class="help-step"><div class="help-num">4</div><div><strong>Certificar una etapa:</strong> Hace clic en "✓ Certificar / Actualizar" dentro de la etapa. Completa el nuevo estado, el porcentaje completado (slider 0-100%), fecha real, monto certificado y nota de certificacion.</div></div>
+        <div class="help-step"><div class="help-num">5</div><div><strong>Notificar al contratista:</strong> Al certificar, si la etapa tiene datos de contacto cargados, aparecen tres botones: WhatsApp (abre el chat directo), Email (abre el cliente de correo) y Copiar texto (para SMS u otro medio).</div></div>
+        <div class="help-step"><div class="help-num">6</div><div><strong>Comprobante automatico:</strong> El mensaje generado incluye: nombre de la obra, etapa, fecha, estado, % certificado, monto y CUIT del contratista. Sirve como constancia documental de la certificacion.</div></div>
+        <div class="help-step"><div class="help-num">7</div><div><strong>Historial:</strong> Cada certificacion queda registrada en el historial de la etapa con fecha, estado y nota. Permite demostrar el seguimiento del trabajo.</div></div>
+        <div class="help-tip"><strong>Consejo legal:</strong> Siempre ingresa el CUIT o DNI del contratista y envia el comprobante por escrito (WhatsApp o email). Esa comunicacion tiene valor probatorio ante cualquier reclamo posterior.</div>
+        <div class="help-warn"><strong>Atencion:</strong> El WhatsApp y el email se abren en el dispositivo. La app no envia mensajes automaticamente — sos vos quien confirma el envio desde la aplicacion de mensajeria.</div>
       </div>
     </div>
 
@@ -985,6 +1039,17 @@ tr:hover td{background:#f8f9fa}
     </div>
     <div class="fg" style="margin-bottom:10px"><label>Presupuesto asignado (opcional, en pesos)</label><input type="number" id="etaPresup" placeholder="0" step="1000"></div>
     <div class="fg" style="margin-bottom:10px"><label>Orden</label><input type="number" id="etaOrden" placeholder="1" min="1"></div>
+    <div style="border-top:1px solid var(--b);margin:12px 0;padding-top:12px">
+      <div style="font-size:12px;font-weight:700;color:var(--p);margin-bottom:10px">📞 Datos del contratista</div>
+      <div class="fr" style="margin-bottom:8px">
+        <div class="fg"><label>Nombre / Empresa</label><input type="text" id="etaContNombre" placeholder="Ej: Juan Perez Albanileria"></div>
+        <div class="fg"><label>Telefono (WhatsApp)</label><input type="tel" id="etaContTel" placeholder="Ej: 3571234567"></div>
+      </div>
+      <div class="fr" style="margin-bottom:8px">
+        <div class="fg"><label>Email</label><input type="email" id="etaContEmail" placeholder="ejemplo@mail.com"></div>
+        <div class="fg"><label>CUIT / DNI</label><input type="text" id="etaContCuit" placeholder="Ej: 20-12345678-9"></div>
+      </div>
+    </div>
     <div class="mdb">
       <button class="btns" onclick="cerrarModalEtapa()">Cancelar</button>
       <button class="btn" onclick="guardarEtapa()" style="flex:1;margin-top:0">Guardar etapa</button>
@@ -1013,6 +1078,18 @@ tr:hover td{background:#f8f9fa}
     <div class="fg" style="margin-bottom:10px"><label>Fecha real de ejecucion</label><input type="date" id="certifFecha"></div>
     <div class="fg" style="margin-bottom:10px"><label>Monto certificado (en pesos)</label><input type="number" id="certifMonto" placeholder="0" step="1000"></div>
     <div class="fg" style="margin-bottom:10px"><label>Nota de certificacion</label><textarea id="certifNota" placeholder="Observaciones, trabajos realizados, pendientes..." style="min-height:60px"></textarea></div>
+    <div id="certifContactoInfo" style="background:#f0f4f8;border-radius:8px;padding:10px;margin-bottom:10px;display:none">
+      <div style="font-size:12px;font-weight:700;color:var(--p);margin-bottom:6px">📞 Notificar al contratista</div>
+      <div id="certifContactoDetalle" style="font-size:12px;color:var(--m);margin-bottom:8px"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button onclick="enviarWA()" style="background:#25d366;color:#fff;border:none;padding:7px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>
+          WhatsApp
+        </button>
+        <button onclick="enviarEmail()" style="background:var(--p);color:#fff;border:none;padding:7px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">✉ Email</button>
+        <button onclick="copiarMensaje()" style="background:var(--m);color:#fff;border:none;padding:7px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">📋 Copiar texto</button>
+      </div>
+    </div>
     <div class="mdb">
       <button class="btns" onclick="cerrarModalCertif()">Cancelar</button>
       <button class="btn" onclick="guardarCertif()" style="flex:1;margin-top:0;background:var(--s)">Certificar</button>
@@ -1986,6 +2063,7 @@ function toggleMetaEdit(){
     var o = obra(); if(!o) return;
     var m = o.metas||{};
     document.getElementById('metaPresup').value = m.presupuesto||'';
+    document.getElementById('metaMoneda').value = m.moneda||'pesos';
     document.getElementById('metaFecIni').value = m.fechaIni||'';
     document.getElementById('metaFecFin').value = m.fechaFin||'';
   }
@@ -1994,9 +2072,10 @@ function toggleMetaEdit(){
 function guardarMetas(){
   var o = obra(); if(!o){ alert('Sin obra'); return; }
   var presup = parseFloat(document.getElementById('metaPresup').value)||0;
+  var moneda = document.getElementById('metaMoneda').value||'pesos';
   var fecIni = document.getElementById('metaFecIni').value||'';
   var fecFin = document.getElementById('metaFecFin').value||'';
-  var up = Object.assign({},o,{metas:{presupuesto:presup,fechaIni:fecIni,fechaFin:fecFin}});
+  var up = Object.assign({},o,{metas:{presupuesto:presup,moneda:moneda,fechaIni:fecIni,fechaFin:fecFin}});
   guardarObra(up).then(function(){
     document.getElementById('metaEditForm').classList.remove('show');
     showToast('Metas guardadas');
@@ -2013,15 +2092,30 @@ function renderMetas(){
     return;
   }
   var m = o.metas;
-  var tp = (o.gastos||[]).reduce(function(s,g){ return s+enP(g); },0);
+  var ct = cotizH();
+  // Total gastado en pesos
+  var tpPesos = (o.gastos||[]).reduce(function(s,g){ return s+enP(g); },0);
+
+  // Convertir presupuesto a pesos para comparar
+  var presupPesos = 0;
+  var moneda = m.moneda||'pesos';
+  if(moneda==='pesos') presupPesos = m.presupuesto;
+  else if(moneda==='oficial') presupPesos = m.presupuesto*(ct.oficial||0);
+  else if(moneda==='blue') presupPesos = m.presupuesto*(ct.blue||0);
+
+  // Formatear presupuesto en su moneda original
+  var fmtPresup = moneda==='pesos' ? fmt(m.presupuesto) : fmtU(m.presupuesto)+' ('+moneda+')';
+  var fmtGastado = moneda==='pesos' ? fmt(tpPesos) : (moneda==='oficial' ? fmtU(ct.oficial?tpPesos/ct.oficial:0)+' Oficial' : fmtU(ct.blue?tpPesos/ct.blue:0)+' Blue');
+  var fmtDisp = moneda==='pesos' ? fmt(Math.abs(presupPesos-tpPesos)) : fmtU(Math.abs(presupPesos-tpPesos)/(moneda==='oficial'?ct.oficial||1:ct.blue||1));
+
   var html = '';
 
   // META DE PRESUPUESTO
-  if(m.presupuesto>0){
-    var pctGasto = Math.min(Math.round(tp/m.presupuesto*100),100);
-    var realPct = Math.round(tp/m.presupuesto*100);
+  if(m.presupuesto>0&&presupPesos>0){
+    var pctGasto = Math.min(Math.round(tpPesos/presupPesos*100),100);
+    var realPct = Math.round(tpPesos/presupPesos*100);
     var colorGasto = realPct<75?'#27ae60':realPct<100?'#e8a020':'#e74c3c';
-    var disponible = m.presupuesto - tp;
+    var disponible = presupPesos - tpPesos;
     html += '<div style="margin-bottom:14px">'+
       '<div style="display:flex;justify-content:space-between;font-size:12px;opacity:.8;margin-bottom:6px">'+
         '<span>💰 Presupuesto ejecutado</span>'+
@@ -2032,10 +2126,10 @@ function renderMetas(){
           (pctGasto>20?realPct+'%':'')+'</div>'+
       '</div>'+
       '<div class="meta-grid">'+
-        '<div class="meta-stat"><div class="val">'+fmt(tp)+'</div><div class="lbl">Gastado</div></div>'+
-        '<div class="meta-stat"><div class="val">'+fmt(m.presupuesto)+'</div><div class="lbl">Presupuesto total</div></div>'+
-        '<div class="meta-stat"><div class="val" style="color:'+(disponible>=0?'#a8e6cf':'#ffb3b3')+'">'+fmt(Math.abs(disponible))+'</div><div class="lbl">'+(disponible>=0?'Disponible':'Excedido')+'</div></div>'+
-        '<div class="meta-stat"><div class="val">'+fmt(m.presupuesto*0.9)+'</div><div class="lbl">Alerta (90%)</div></div>'+
+        '<div class="meta-stat"><div class="val" style="font-size:13px">'+fmtGastado+'</div><div class="lbl">Gastado</div></div>'+
+        '<div class="meta-stat"><div class="val" style="font-size:13px">'+fmtPresup+'</div><div class="lbl">Presupuesto total</div></div>'+
+        '<div class="meta-stat"><div class="val" style="color:'+(disponible>=0?'#a8e6cf':'#ffb3b3');font-size:13px">'+fmtDisp+'</div><div class="lbl">'+(disponible>=0?'Disponible':'Excedido')+'</div></div>'+
+        '<div class="meta-stat"><div class="val" style="font-size:12px">'+Math.round(realPct*0.9)+'% al 90%</div><div class="lbl">Alerta</div></div>'+
       '</div>'+
     '</div>';
   }
@@ -2052,9 +2146,7 @@ function renderMetas(){
     var realPctT = Math.round(diasTransc/totalDias*100);
     var colorT = realPctT<75?'#27ae60':realPctT<100?'#e8a020':'#e74c3c';
     var vencido = hoy > fin;
-
-    // Calcular ritmo: si el tiempo transcurrido es más que el % gastado, vamos bien
-    var pctGasto2 = m.presupuesto>0?Math.round(tp/m.presupuesto*100):0;
+    var pctGasto2 = presupPesos>0?Math.round(tpPesos/presupPesos*100):0;
     var estado_tiempo = '';
     if(vencido){ estado_tiempo='⚠ Plazo vencido'; }
     else if(realPctT > pctGasto2+10){ estado_tiempo='✓ Adelantado en gastos'; }
@@ -2112,6 +2204,11 @@ function editarEtapa(id){
   document.getElementById('etaFecFin').value=et.fechaFin||'';
   document.getElementById('etaPresup').value=et.presupuesto||'';
   document.getElementById('etaOrden').value=et.orden||1;
+  var ct2=et.contacto||{};
+  document.getElementById('etaContNombre').value=ct2.nombre||'';
+  document.getElementById('etaContTel').value=ct2.tel||'';
+  document.getElementById('etaContEmail').value=ct2.email||'';
+  document.getElementById('etaContCuit').value=ct2.cuit||'';
   document.getElementById('modalEtapa').className='mb show';
 }
 
@@ -2129,7 +2226,13 @@ function guardarEtapa(){
     fechaFin:document.getElementById('etaFecFin').value,
     presupuesto:parseFloat(document.getElementById('etaPresup').value)||0,
     orden:parseInt(document.getElementById('etaOrden').value)||1,
-    estado:'pendiente', pct:0, historial:[]
+    estado:'pendiente', pct:0, historial:[],
+    contacto:{
+      nombre:document.getElementById('etaContNombre').value.trim(),
+      tel:document.getElementById('etaContTel').value.trim(),
+      email:document.getElementById('etaContEmail').value.trim(),
+      cuit:document.getElementById('etaContCuit').value.trim()
+    }
   };
   var etapas=[].concat(o.etapas||[]);
   var idx=etapas.findIndex(function(e){ return e.id===id; });
@@ -2161,6 +2264,16 @@ function abrirCertif(id){
   document.getElementById('certifFecha').value=new Date().toISOString().split('T')[0];
   document.getElementById('certifMonto').value='';
   document.getElementById('certifNota').value='';
+  // Mostrar datos de contacto si existen
+  var cont=et.contacto||{};
+  var contDiv=document.getElementById('certifContactoInfo');
+  var contDet=document.getElementById('certifContactoDetalle');
+  if(cont.nombre||cont.tel||cont.email){
+    contDiv.style.display='block';
+    contDet.innerHTML=(cont.nombre?'<strong>'+cont.nombre+'</strong>':'')+(cont.cuit?' · CUIT: '+cont.cuit:'')+'<br>'+(cont.tel?'📱 '+cont.tel+' ':' ')+(cont.email?'✉ '+cont.email:'');
+  } else {
+    contDiv.style.display='none';
+  }
   document.getElementById('modalCertif').className='mb show';
 }
 
@@ -2281,6 +2394,14 @@ function renderEta(){
           '<button class="btn-eta" style="background:var(--pl);color:#fff" onclick="editarEtapa(\''+et.id+'\')">✎ Editar</button>'+
           '<button class="btn-eta" style="background:transparent;border:1px solid var(--d);color:var(--d)" onclick="eliminarEtapa(\''+et.id+'\')">✕ Eliminar</button>'+
         '</div>'+
+        (et.contacto&&(et.contacto.nombre||et.contacto.tel||et.contacto.email)?
+          '<div style="background:#f0f4f8;border-radius:8px;padding:10px;margin-top:10px;font-size:12px">'+
+            '<div style="font-weight:700;color:var(--p);margin-bottom:4px">📞 Contratista</div>'+
+            (et.contacto.nombre?'<div><strong>'+et.contacto.nombre+'</strong>'+(et.contacto.cuit?' · '+et.contacto.cuit:'')+'</div>':'')+
+            (et.contacto.tel?'<div style="margin-top:4px"><a href="https://wa.me/54'+et.contacto.tel.replace(/\D/g,'')+'" target="_blank" style="color:#25d366;font-weight:700;text-decoration:none">📱 WhatsApp: '+et.contacto.tel+'</a></div>':'')+
+            (et.contacto.email?'<div style="margin-top:2px"><a href="mailto:'+et.contacto.email+'" style="color:var(--p);text-decoration:none">✉ '+et.contacto.email+'</a></div>':'')+
+          '</div>'
+        :'')+
         (hist.length?'<div style="margin-top:14px"><div style="font-size:12px;font-weight:700;color:var(--p);margin-bottom:6px">Historial de certificaciones</div>'+histHTML+'</div>':'')+
       '</div>';
     }
@@ -2298,6 +2419,73 @@ function renderEta(){
       detalle+
     '</div>';
   }).join('');
+}
+
+// ═══════════════════════════════════════════
+// COMUNICACION — CERTIFICACION
+// ═══════════════════════════════════════════
+function generarMensajeCertif(){
+  var o=obra(); if(!o) return '';
+  var id=document.getElementById('certifEtaId').value;
+  var et=(o.etapas||[]).find(function(e){ return e.id===id; });
+  if(!et) return '';
+  var estado=document.getElementById('certifEstado');
+  var estadoLabel=estado?estado.options[estado.selectedIndex].text:'';
+  var pct=document.getElementById('certifPct').value||'100';
+  var fecha=document.getElementById('certifFecha').value||new Date().toISOString().split('T')[0];
+  var monto=document.getElementById('certifMonto').value||'0';
+  var nota=document.getElementById('certifNota').value||'';
+  var cont=et.contacto||{};
+
+  var msg='🏗 CERTIFICACION DE OBRA\n';
+  msg+='Estudio Juridico Cuffia\n';
+  msg+='━━━━━━━━━━━━━━━━━━\n';
+  msg+='Obra: '+o.nombre+'\n';
+  msg+='Etapa: '+et.nombre+'\n';
+  msg+='Fecha: '+fecha+'\n';
+  msg+='Estado: '+estadoLabel+'\n';
+  msg+='Avance certificado: '+pct+'%\n';
+  if(parseFloat(monto)>0) msg+='Monto certificado: '+fmt(parseFloat(monto))+'\n';
+  if(nota) msg+='Observaciones: '+nota+'\n';
+  msg+='━━━━━━━━━━━━━━━━━━\n';
+  if(cont.nombre) msg+='Contratista: '+cont.nombre+'\n';
+  if(cont.cuit) msg+='CUIT/DNI: '+cont.cuit+'\n';
+  msg+='\nEste mensaje es constancia de la certificacion realizada.';
+  return msg;
+}
+
+function enviarWA(){
+  var o=obra(); if(!o) return;
+  var id=document.getElementById('certifEtaId').value;
+  var et=(o.etapas||[]).find(function(e){ return e.id===id; });
+  var tel=(et&&et.contacto&&et.contacto.tel)||'';
+  var msg=generarMensajeCertif();
+  var tel2=tel.replace(/\D/g,'');
+  if(tel2&&tel2.length<10) tel2='';
+  var url='https://wa.me/'+(tel2?'54'+tel2:'')+'?text='+encodeURIComponent(msg);
+  window.open(url,'_blank');
+}
+
+function enviarEmail(){
+  var o=obra(); if(!o) return;
+  var id=document.getElementById('certifEtaId').value;
+  var et=(o.etapas||[]).find(function(e){ return e.id===id; });
+  var email=(et&&et.contacto&&et.contacto.email)||'';
+  var msg=generarMensajeCertif();
+  var asunto='Certificacion de obra — '+o.nombre+' — '+(et?et.nombre:'');
+  window.location.href='mailto:'+email+'?subject='+encodeURIComponent(asunto)+'&body='+encodeURIComponent(msg);
+}
+
+function copiarMensaje(){
+  var msg=generarMensajeCertif();
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(msg).then(function(){ showToast('Mensaje copiado al portapapeles'); });
+  } else {
+    var ta=document.createElement('textarea');
+    ta.value=msg; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    showToast('Mensaje copiado');
+  }
 }
 
 // ═══════════════════════════════════════════
