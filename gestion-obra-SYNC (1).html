@@ -494,7 +494,15 @@ tr:hover td{background:#f8f9fa}
             <tbody id="compTbody"></tbody>
           </table>
         </div>
-        <button class="btn-comp" style="background:#2c3e50;color:#fff;margin-top:8px" onclick="compReset()">Nueva consulta</button>
+        <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
+          <button class="btn-excel" style="background:var(--p);flex:1;justify-content:center" onclick="compAgregarMas()">
+            📎 Agregar más documentación
+          </button>
+          <button class="btn-comp" style="background:#e74c3c;color:#fff;flex:1" onclick="compReset()">🗑 Nueva consulta</button>
+        </div>
+        <div class="comp-nota" style="margin-top:8px">
+          <strong>Agregar más:</strong> Subí las páginas restantes del proyecto. La IA las analizará y sumará al cómputo actual, sin repetir materiales ya calculados.
+        </div>
       </div>
     </div>
 
@@ -650,6 +658,30 @@ tr:hover td{background:#f8f9fa}
         <div class="help-step"><div class="help-num">3</div><div><strong>Balance:</strong> La app muestra cuanto pago cada socio en pesos, dolar oficial y blue. La tarjeta con la flecha ↑ indica quien pago mas.</div></div>
         <div class="help-step"><div class="help-num">4</div><div><strong>Deuda para igualar:</strong> Si hay dos o mas socios, la app calcula automaticamente cuanto le debe uno al otro para que queden a mano.</div></div>
         <div class="help-tip"><strong>Ejemplo:</strong> Si Patricio pago $100.000 y Benjamin $60.000, la app indica que Benjamin le debe $20.000 a Patricio para que cada uno haya aportado $80.000.</div>
+      </div>
+    </div>
+
+    <!-- COMPUTO -->
+    <div class="help-section">
+      <div class="help-header" onclick="toggleHelp('hc')">
+        <div style="display:flex;align-items:center">
+          <div class="help-icon" style="background:#e8eaf6">📐</div>
+          <div><div class="help-title">Computo de obra con IA</div><div class="help-sub">Calculo de materiales desde planos</div></div>
+        </div>
+        <span class="help-toggle" id="hthc">▼</span>
+      </div>
+      <div class="help-body" id="hbhc">
+        <p style="margin-bottom:12px">La pestana Computo permite subir los planos del proyecto y que la IA calcule automaticamente la lista de materiales necesarios con sus cantidades.</p>
+        <div class="help-step"><div class="help-num">1</div><div><strong>Configurar clave:</strong> Hace clic en "⚙ Configurar clave" e ingresa tu clave API de Anthropic (sk-ant-...). Se guarda en el navegador y no se sube a ningun servidor.</div></div>
+        <div class="help-step"><div class="help-num">2</div><div><strong>Subir planos:</strong> Hace clic en el area punteada o arrastras los archivos. Acepta JPG, PNG y PDF. Los PDFs se convierten automaticamente a imagenes. Podes subir varios archivos a la vez.</div></div>
+        <div class="help-step"><div class="help-num">3</div><div><strong>Limite de paginas:</strong> Se analizan hasta 6 paginas por vez. Si tu proyecto tiene mas laminas, analiza por partes (ver paso siguiente).</div></div>
+        <div class="help-step"><div class="help-num">4</div><div><strong>Calcular:</strong> Hace clic en "🔍 Calcular computo con IA". La IA lee las dimensiones de los planos y genera el computo agrupado por categorias: Mamposteria, Estructura, Cubierta, Revoques, Pisos, Carpinteria, Instalaciones y Pintura.</div></div>
+        <div class="help-step"><div class="help-num">5</div><div><strong>Agregar mas documentacion:</strong> Una vez calculada la primera seccion, aparece el boton "📎 Agregar mas documentacion". Hace clic y sube las laminas restantes del mismo proyecto. La IA las analiza y suma los materiales al computo anterior, sin repetir lo ya calculado.</div></div>
+        <div class="help-step"><div class="help-num">6</div><div><strong>Editar cantidades:</strong> Todos los valores son editables directamente en la tabla. Si queres ajustar alguna cantidad, hace clic en el campo y modifica el numero.</div></div>
+        <div class="help-step"><div class="help-num">7</div><div><strong>Exportar Excel:</strong> El boton verde "Exportar Excel" genera un archivo .xlsx con el computo completo, listo para compartir con el constructor o el contador.</div></div>
+        <div class="help-step"><div class="help-num">8</div><div><strong>Nueva consulta:</strong> El boton rojo "Nueva consulta" limpia todo y permite empezar un computo para otro proyecto.</div></div>
+        <div class="help-tip"><strong>Para mejores resultados:</strong> Usa los planos mas importantes — planta general + cortes. Las laminas con dimensiones visibles y acotadas permiten calculos mas precisos.</div>
+        <div class="help-warn"><strong>Importante:</strong> Los computos son estimaciones tecnicas basadas en lo visible en los planos. Para obras formales, siempre valida los valores con un profesional matriculado.</div>
       </div>
     </div>
 
@@ -2289,15 +2321,34 @@ function compAnalizar(){
     content.push({type:'image', source:{type:'base64', media_type:p.mediaType, data:p.base64}});
   });
 
+  var modoAcumulativo = compResultData && compResultData.categorias && compResultData.categorias.length > 0;
+
+  // Construir resumen de lo ya calculado para evitar repetición
+  var resumenPrevio = '';
+  if(modoAcumulativo){
+    var lineas = [];
+    (compResultData.categorias||[]).forEach(function(cat){
+      (cat.items||[]).forEach(function(item){
+        lineas.push(item.material+': '+item.cantidad+' '+item.unidad);
+      });
+    });
+    resumenPrevio = '\n\nMATERIALES YA CALCULADOS (no repetir, solo sumar si corresponde):\n'+lineas.join('\n');
+  }
+
   var promptText = 'Sos arquitecto especialista en cómputos métricas de obra. Analiza estos planos de "'+obraNombre+'" y calcula el cómputo de materiales.\n\n'+
-    'REGLAS IMPORTANTES:\n'+
+    (modoAcumulativo ?
+      'IMPORTANTE: Ya se analizó una parte del proyecto. Estos son planos ADICIONALES del mismo proyecto. '+
+      'Calculá SOLO los materiales que correspondan a las secciones mostradas en ESTOS planos. '+
+      'Si un material ya fue calculado, sumá la cantidad adicional (no lo dupliques).'+resumenPrevio+'\n\n'
+    : '')+
+    'REGLAS:\n'+
     '- Respondé SOLO con JSON puro, sin markdown, sin texto antes ni después\n'+
     '- El JSON debe estar completo y bien cerrado\n'+
     '- Cantidad 0 si no podés calcular con precisión\n'+
-    '- Incluí factor de desperdicio 10-15% en ladrillos, pisos y revestimientos\n\n'+
-    'FORMATO EXACTO (seguilo al pie de la letra):\n'+
-    '{"obra":"'+obraNombre+'","superficie_total":0,"nota_general":"aclaracion breve","categorias":['+
-    '{"nombre":"MAMPOSTERIA","items":[{"material":"Ladrillos 18x18x33","cantidad":0,"unidad":"unidades","observacion":"muros exteriores"},{"material":"Ladrillos 12x18x33","cantidad":0,"unidad":"unidades","observacion":"muros internos"}]},'+
+    '- Factor de desperdicio 10-15% en ladrillos, pisos y revestimientos\n\n'+
+    'FORMATO EXACTO:\n'+
+    '{"obra":"'+obraNombre+'","superficie_total":0,"nota_general":"aclaracion breve sobre esta seccion","categorias":['+
+    '{"nombre":"MAMPOSTERIA","items":[{"material":"Ladrillos 18x18x33","cantidad":0,"unidad":"unidades","observacion":""},{"material":"Ladrillos 12x18x33","cantidad":0,"unidad":"unidades","observacion":""}]},'+
     '{"nombre":"ESTRUCTURA","items":[{"material":"Hierro 10mm","cantidad":0,"unidad":"kg","observacion":""},{"material":"Hierro 8mm","cantidad":0,"unidad":"kg","observacion":""}]},'+
     '{"nombre":"CUBIERTA Y LOSA","items":[{"material":"Viguetas pretensadas","cantidad":0,"unidad":"ml","observacion":""},{"material":"Bovedillas","cantidad":0,"unidad":"unidades","observacion":""}]},'+
     '{"nombre":"REVOQUES","items":[{"material":"Cemento Portland","cantidad":0,"unidad":"bolsas","observacion":""},{"material":"Arena fina","cantidad":0,"unidad":"m3","observacion":""},{"material":"Arena gruesa","cantidad":0,"unidad":"m3","observacion":""}]},'+
@@ -2309,7 +2360,8 @@ function compAnalizar(){
 
   content.push({type:'text', text: promptText});
 
-  bar.style.width='25%'; txt.textContent='Analizando planos...';
+  bar.style.width='25%';
+  txt.textContent = modoAcumulativo ? 'Analizando seccion adicional...' : 'Analizando planos...';
 
   fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
@@ -2385,6 +2437,46 @@ function compAnalizar(){
 
     // Asegurar estructura mínima
     if(!json.categorias) json.categorias = [];
+
+    // MODO ACUMULATIVO: fusionar con resultado previo
+    if(modoAcumulativo && compResultData){
+      var prevData = compResultData;
+      json.categorias.forEach(function(catNueva){
+        // Buscar categoría existente
+        var catExist = null;
+        (prevData.categorias||[]).forEach(function(c){
+          if(c.nombre.toUpperCase()===catNueva.nombre.toUpperCase()) catExist=c;
+        });
+        if(!catExist){
+          // Categoría nueva — agregarla
+          prevData.categorias.push(catNueva);
+        } else {
+          // Fusionar items
+          (catNueva.items||[]).forEach(function(itemNuevo){
+            if(!itemNuevo.cantidad || itemNuevo.cantidad===0) return;
+            // Buscar material existente (comparación flexible)
+            var matExist = null;
+            (catExist.items||[]).forEach(function(ie){
+              var a = ie.material.toLowerCase().replace(/\s/g,'');
+              var b = itemNuevo.material.toLowerCase().replace(/\s/g,'');
+              if(a===b || a.indexOf(b)>=0 || b.indexOf(a)>=0) matExist=ie;
+            });
+            if(matExist){
+              // Sumar cantidad
+              matExist.cantidad = Math.round((matExist.cantidad + itemNuevo.cantidad)*100)/100;
+              if(itemNuevo.observacion) matExist.observacion += (matExist.observacion?' | ':'')+itemNuevo.observacion;
+            } else {
+              // Material nuevo en categoría existente
+              catExist.items.push(itemNuevo);
+            }
+          });
+        }
+      });
+      // Actualizar nota general
+      prevData.nota_general = (prevData.nota_general||'') + ' | '+json.nota_general;
+      json = prevData;
+    }
+
     compResultData = json;
     bar.style.width='100%';
     setTimeout(function(){
@@ -2480,6 +2572,21 @@ function compExportarExcel(){
   showToast('Excel exportado correctamente');
 }
 
+function compAgregarMas(){
+  // Limpiar imágenes anteriores pero mantener el resultado acumulado
+  compPaginas = [];
+  document.getElementById('compPages').style.display='none';
+  document.getElementById('compPages').innerHTML='';
+  document.getElementById('compDrop').style.display='block';
+  document.getElementById('compBtnAnalizar').style.display='none';
+  document.getElementById('compFile').value='';
+  document.getElementById('compProgBar').style.width='0%';
+  // Mantener compResultData para acumulación
+  // Scrollear al panel de carga
+  document.getElementById('compDrop').scrollIntoView({behavior:'smooth'});
+  showToast('Subí las páginas restantes para continuar el análisis');
+}
+
 function compReset(){
   compPaginas = [];
   compResultData = null;
@@ -2497,10 +2604,11 @@ function compReset(){
 // AYUDA — ACCORDION
 // ═══════════════════════════════════════════
 function toggleHelp(id){
-  var body=document.getElementById('hb'+id.substring(1));
-  var toggle=document.getElementById('ht'+id.substring(1));
+  var suffix = id.replace(/^h/,'');
+  var body = document.getElementById('hb'+id);
+  var toggle = document.getElementById('ht'+id);
   if(!body||!toggle) return;
-  var isOpen=body.classList.contains('open');
+  var isOpen = body.classList.contains('open');
   body.classList.toggle('open',!isOpen);
   toggle.classList.toggle('open',!isOpen);
 }
