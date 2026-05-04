@@ -225,10 +225,41 @@ tr:hover td{background:#f8f9fa}
 .gasto-rapido{background:#fffbf0;border:2px dashed var(--a);border-radius:10px;padding:14px;margin-bottom:14px}
 .gasto-rapido .ct{color:var(--a)}
 
+/* Computo de obra */
+.comp-panel{background:linear-gradient(135deg,#2c3e50,#34495e);border-radius:10px;padding:16px;margin-bottom:14px;color:#fff}
+.comp-drop{border:2px dashed rgba(255,255,255,.4);border-radius:8px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:10px}
+.comp-drop:hover,.comp-drop.dragover{border-color:#fff;background:rgba(255,255,255,.1)}
+.comp-pages{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.comp-page-thumb{position:relative;width:80px;height:80px;border-radius:6px;overflow:hidden;border:2px solid rgba(255,255,255,.3)}
+.comp-page-thumb img{width:100%;height:100%;object-fit:cover}
+.comp-page-rm{position:absolute;top:2px;right:2px;background:rgba(192,57,43,.9);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:10px;cursor:pointer;line-height:18px;text-align:center;padding:0}
+.comp-page-num{position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,.6);color:#fff;font-size:9px;padding:1px 4px;border-radius:3px}
+.comp-result{background:#fff;border-radius:10px;padding:16px;margin-top:12px}
+.comp-result-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.comp-result-title{font-size:15px;font-weight:700;color:var(--p)}
+.comp-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px}
+.comp-table th{background:var(--p);color:#fff;padding:8px 10px;text-align:left;font-size:12px}
+.comp-table td{padding:8px 10px;border-bottom:1px solid var(--b);vertical-align:middle}
+.comp-table tr:last-child td{border-bottom:none}
+.comp-table tr:hover td{background:#f8f9fa}
+.comp-table td input{width:80px;padding:4px 6px;border:1px solid var(--b);border-radius:4px;font-size:12px;font-weight:700}
+.comp-cat-row td{background:#e8f0fe;font-weight:700;color:var(--p);font-size:12px;text-transform:uppercase;letter-spacing:.5px}
+.comp-processing{text-align:center;padding:20px;color:rgba(255,255,255,.85);font-size:13px}
+.comp-spinner{display:inline-block;width:20px;height:20px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;margin-right:8px;vertical-align:middle}
+.comp-progress{height:4px;background:rgba(255,255,255,.2);border-radius:2px;margin-top:10px;overflow:hidden}
+.comp-progress-fill{height:100%;background:#fff;border-radius:2px;transition:width .5s}
+.btn-comp{background:#fff;color:#2c3e50;border:none;padding:10px 20px;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;width:100%}
+.btn-comp:hover{background:#f0f4f8}
+.btn-excel{background:#1d6f42;color:#fff;border:none;padding:9px 18px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px}
+.btn-excel:hover{background:#165a35}
+.comp-nota{font-size:11px;color:var(--m);font-style:italic;padding:8px 10px;background:#fffbf0;border-radius:6px;border-left:3px solid var(--a);margin-top:8px}
+
 @media(max-width:600px){.rg,.cg{grid-template-columns:1fr 1fr}.fr,.fr.t3{grid-template-columns:1fr}.bg2{grid-template-columns:1fr}.rcat-vals{gap:8px}.chart-wrap{flex-direction:column}.doc-actions{flex-direction:column}}
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -259,6 +290,7 @@ tr:hover td{background:#f8f9fa}
   <div class="tab" onclick="showTab('cat',this)">Categorias</div>
   <div class="tab" onclick="showTab('soc',this)">Socios</div>
   <div class="tab" onclick="showTab('cot',this)">Cotizacion</div>
+  <div class="tab" onclick="showTab('comp',this)">📐 Computo</div>
   <div class="tab" onclick="showTab('help',this)">? Ayuda</div>
 </div>
 
@@ -414,6 +446,58 @@ tr:hover td{background:#f8f9fa}
       </div>
       <div id="tdoc"></div>
     </div>
+  </div>
+
+  <!-- COMPUTO -->
+  <div id="tab-comp" style="display:none">
+
+    <div class="comp-panel">
+      <div class="ct" style="color:#fff;opacity:.9;margin-bottom:10px">
+        📐 Cómputo de obra con IA
+        <span style="float:right;font-size:11px;opacity:.7;cursor:pointer;font-weight:400" onclick="iaConfigurarClave()">⚙ Configurar clave</span>
+      </div>
+
+      <p style="font-size:12px;opacity:.8;margin-bottom:12px;line-height:1.6">Subí los planos de la obra (planta, cortes, vistas). La IA analiza las dimensiones y especificaciones para generar el cómputo de materiales. Podés subir varios planos a la vez — JPG, PNG o PDF.</p>
+
+      <div class="comp-drop" id="compDrop" onclick="document.getElementById('compFile').click()" ondragover="compDragOver(event)" ondragleave="compDragLeave(event)" ondrop="compDropEvt(event)">
+        <div class="ia-drop-icon">🗂</div>
+        <div class="ia-drop-txt">Toca para subir planos</div>
+        <div class="ia-drop-sub">JPG, PNG o PDF · Podés subir varios a la vez</div>
+      </div>
+      <input type="file" id="compFile" accept="image/*,.pdf" multiple style="display:none" onchange="compCargarArchivos(this)">
+
+      <div class="comp-pages" id="compPages" style="display:none"></div>
+
+      <div class="comp-processing" id="compProcessing" style="display:none">
+        <span class="comp-spinner"></span><span id="compProcTxt">Procesando planos...</span>
+        <div class="comp-progress"><div class="comp-progress-fill" id="compProgBar" style="width:0%"></div></div>
+      </div>
+
+      <button class="btn-comp" id="compBtnAnalizar" style="display:none" onclick="compAnalizar()">
+        🔍 Calcular cómputo con IA
+      </button>
+    </div>
+
+    <div id="compResult" style="display:none">
+      <div class="comp-result">
+        <div class="comp-result-header">
+          <div class="comp-result-title" id="compResultTitle">Cómputo de materiales</div>
+          <button class="btn-excel" onclick="compExportarExcel()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Exportar Excel
+          </button>
+        </div>
+        <div class="comp-nota" id="compNota"></div>
+        <div class="tw" style="margin-top:12px">
+          <table class="comp-table" id="compTable">
+            <thead><tr><th>Material</th><th>Descripción</th><th>Cantidad</th><th>Unidad</th><th>Observación</th></tr></thead>
+            <tbody id="compTbody"></tbody>
+          </table>
+        </div>
+        <button class="btn-comp" style="background:#2c3e50;color:#fff;margin-top:8px" onclick="compReset()">Nueva consulta</button>
+      </div>
+    </div>
+
   </div>
 
   <!-- AYUDA -->
@@ -1007,6 +1091,7 @@ function showTab(t, el){
   if(t==='cat') renderCat();
   if(t==='soc') renderSoc();
   if(t==='cot') renderCot();
+  if(t==='comp') {}
   if(t==='help') {} // contenido estatico
 }
 
@@ -2071,6 +2156,316 @@ function exportarPDF(){
 
   doc.save('obra-' + o.nombre.replace(/\s/g,'-') + '.pdf');
   showToast('PDF generado correctamente');
+}
+
+// ═══════════════════════════════════════════
+// COMPUTO DE OBRA — IA
+// ═══════════════════════════════════════════
+var compPaginas = []; // [{base64, mediaType, nombre}]
+var compResultData = null;
+
+// Configurar PDF.js worker
+if(typeof pdfjsLib !== 'undefined'){
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+function compDragOver(e){ e.preventDefault(); document.getElementById('compDrop').classList.add('dragover'); }
+function compDragLeave(){ document.getElementById('compDrop').classList.remove('dragover'); }
+function compDropEvt(e){ e.preventDefault(); document.getElementById('compDrop').classList.remove('dragover'); procesarArchivosComp(e.dataTransfer.files); }
+function compCargarArchivos(input){ procesarArchivosComp(input.files); }
+
+function procesarArchivosComp(files){
+  if(!files||!files.length) return;
+  var arr = Array.from(files);
+  var promises = [];
+  arr.forEach(function(file){
+    if(file.type === 'application/pdf'){
+      promises.push(pdfToImages(file));
+    } else if(file.type.indexOf('image/')>=0){
+      promises.push(imageToBase64(file));
+    }
+  });
+  Promise.all(promises).then(function(results){
+    results.forEach(function(r){
+      if(Array.isArray(r)) r.forEach(function(p){ compPaginas.push(p); });
+      else if(r) compPaginas.push(r);
+    });
+    renderCompThumbs();
+    document.getElementById('compBtnAnalizar').style.display = compPaginas.length ? 'block' : 'none';
+  }).catch(function(e){ console.error(e); alert('Error al procesar archivo: '+e.message); });
+}
+
+function imageToBase64(file){
+  return new Promise(function(resolve, reject){
+    var reader = new FileReader();
+    reader.onload = function(e){
+      resolve({base64: e.target.result.split(',')[1], mediaType: file.type==='image/png'?'image/png':'image/jpeg', nombre: file.name});
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function pdfToImages(file){
+  return new Promise(function(resolve, reject){
+    var reader = new FileReader();
+    reader.onload = function(e){
+      var typedArray = new Uint8Array(e.target.result);
+      pdfjsLib.getDocument({data: typedArray}).promise.then(function(pdf){
+        var pages = [];
+        var pagePromises = [];
+        for(var i=1; i<=pdf.numPages; i++){
+          pagePromises.push((function(pageNum){
+            return pdf.getPage(pageNum).then(function(page){
+              var viewport = page.getViewport({scale: 2.0}); // alta resolución
+              var canvas = document.createElement('canvas');
+              canvas.width = viewport.width;
+              canvas.height = viewport.height;
+              var ctx = canvas.getContext('2d');
+              return page.render({canvasContext: ctx, viewport: viewport}).promise.then(function(){
+                return {
+                  base64: canvas.toDataURL('image/jpeg', 0.92).split(',')[1],
+                  mediaType: 'image/jpeg',
+                  nombre: file.name + ' (pág. '+pageNum+')'
+                };
+              });
+            });
+          })(i));
+        }
+        Promise.all(pagePromises).then(function(imgs){ resolve(imgs); }).catch(reject);
+      }).catch(reject);
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+function renderCompThumbs(){
+  var div = document.getElementById('compPages');
+  if(!compPaginas.length){ div.style.display='none'; return; }
+  div.style.display='flex';
+  div.innerHTML = compPaginas.map(function(p,i){
+    return '<div class="comp-page-thumb">'+
+      '<img src="data:'+p.mediaType+';base64,'+p.base64+'" alt="'+p.nombre+'">'+
+      '<button class="comp-page-rm" onclick="compRemovePage('+i+')">✕</button>'+
+      '<span class="comp-page-num">'+(i+1)+'</span>'+
+    '</div>';
+  }).join('');
+  document.getElementById('compDrop').style.display = 'block';
+}
+
+function compRemovePage(i){
+  compPaginas.splice(i,1);
+  renderCompThumbs();
+  document.getElementById('compBtnAnalizar').style.display = compPaginas.length ? 'block' : 'none';
+}
+
+function compAnalizar(){
+  if(!compPaginas.length){ alert('Subí al menos un plano'); return; }
+  if(!verificarIaKey()) return;
+
+  var proc = document.getElementById('compProcessing');
+  var bar = document.getElementById('compProgBar');
+  var txt = document.getElementById('compProcTxt');
+  document.getElementById('compBtnAnalizar').style.display='none';
+  document.getElementById('compResult').style.display='none';
+  proc.style.display='block';
+  bar.style.width='5%';
+  txt.textContent='Preparando análisis...';
+
+  // Construir contenido con todas las páginas
+  var content = [];
+  compPaginas.forEach(function(p){
+    content.push({type:'image', source:{type:'base64', media_type:p.mediaType, data:p.base64}});
+  });
+
+  var o = obra();
+  var obraNombre = o ? o.nombre : 'la obra';
+
+  content.push({type:'text', text: `Sos un arquitecto especialista en cómputos de obra. Analiza estos planos de "${obraNombre}" y genera un cómputo detallado de materiales de construcción.
+
+INSTRUCCIONES:
+- Calcula cantidades basándote en las dimensiones visibles en los planos
+- Incluye un factor de desperdicio del 10-15% en materiales como ladrillos, azulejos y cerámicos
+- Agrupa los materiales por categoría
+- Sé específico: tipo de ladrillo (18cm, 12cm), tipo de hierro (diámetro), tipo de arena (fina/gruesa), etc.
+- Si no podés calcular con precisión, indicalo en observaciones
+
+RESPONDE ÚNICAMENTE con este JSON válido sin markdown:
+{
+  "obra": "nombre de la obra",
+  "superficie_total": 0,
+  "nota_general": "aclaración sobre el cómputo y su precisión",
+  "categorias": [
+    {
+      "nombre": "MAMPOSTERÍA",
+      "items": [
+        {"material": "Ladrillos cerámicos 18x18x33", "cantidad": 0, "unidad": "unidades", "observacion": "incluye 10% desperdicio"},
+        {"material": "Ladrillos cerámicos 12x18x33", "cantidad": 0, "unidad": "unidades", "observacion": "muros divisorios internos"}
+      ]
+    },
+    {
+      "nombre": "ESTRUCTURA",
+      "items": []
+    },
+    {
+      "nombre": "CUBIERTA Y LOSA",
+      "items": []
+    },
+    {
+      "nombre": "REVOQUES Y CONTRAPISOS",
+      "items": []
+    },
+    {
+      "nombre": "PISOS Y REVESTIMIENTOS",
+      "items": []
+    },
+    {
+      "nombre": "CARPINTERÍA",
+      "items": []
+    },
+    {
+      "nombre": "INSTALACIONES",
+      "items": []
+    },
+    {
+      "nombre": "PINTURA Y TERMINACIONES",
+      "items": []
+    }
+  ]
+}`});
+
+  bar.style.width='20%'; txt.textContent='Enviando planos a la IA...';
+
+  // Si hay muchas páginas, enviar de a 2 para no superar límites
+  var pagGroups = [];
+  for(var i=0; i<compPaginas.length; i+=2){ pagGroups.push(compPaginas.slice(i,i+2)); }
+
+  // Para simplificar, enviamos todas las páginas en un solo request
+  fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'x-api-key': getIaKey(),
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-opus-4-5',
+      max_tokens: 4000,
+      messages:[{role:'user', content: content}]
+    })
+  })
+  .then(function(r){
+    bar.style.width='70%'; txt.textContent='Procesando respuesta...';
+    if(!r.ok) return r.json().then(function(e){ throw new Error((e.error&&e.error.message)||'Error '+r.status); });
+    return r.json();
+  })
+  .then(function(d){
+    bar.style.width='90%'; txt.textContent='Generando tabla...';
+    if(!d.content||!d.content[0]) throw new Error('Respuesta vacía');
+    var txt2 = d.content[0].text.trim();
+    var match = txt2.match(/\{[\s\S]*\}/);
+    if(!match) throw new Error('Formato inesperado');
+    var json = JSON.parse(match[0]);
+    compResultData = json;
+    bar.style.width='100%';
+    setTimeout(function(){
+      proc.style.display='none';
+      renderCompResult(json);
+    }, 500);
+  })
+  .catch(function(e){
+    proc.style.display='none';
+    document.getElementById('compBtnAnalizar').style.display='block';
+    console.error('Cómputo error:', e);
+    var msg = e.message||'';
+    if(msg.indexOf('401')>=0){ localStorage.removeItem('obrick_ia_key'); alert('Clave API inválida. Configurá una nueva con ⚙.'); }
+    else if(msg.indexOf('529')>=0||msg.indexOf('overload')>=0) alert('Servicio ocupado. Intentá en unos segundos.');
+    else alert('Error al calcular el cómputo:\n'+msg);
+  });
+}
+
+function renderCompResult(json){
+  var result = document.getElementById('compResult');
+  var title = document.getElementById('compResultTitle');
+  var nota = document.getElementById('compNota');
+  var tbody = document.getElementById('compTbody');
+
+  title.textContent = 'Cómputo — '+(json.obra||'Obra')+(json.superficie_total?' · '+json.superficie_total+' m²':'');
+  nota.textContent = json.nota_general||'Los valores son estimaciones basadas en los planos analizados.';
+
+  var rows = '';
+  (json.categorias||[]).forEach(function(cat){
+    if(!cat.items||!cat.items.length) return;
+    rows += '<tr class="comp-cat-row"><td colspan="5">'+cat.nombre+'</td></tr>';
+    cat.items.forEach(function(item, i){
+      var id = 'cq_'+cat.nombre.replace(/\s/g,'_')+'_'+i;
+      rows += '<tr>'+
+        '<td><strong>'+item.material+'</strong></td>'+
+        '<td style="color:var(--m);font-size:12px">'+( item.descripcion||'')+'</td>'+
+        '<td><input type="number" id="'+id+'" value="'+item.cantidad+'" min="0" step="0.01" style="width:90px;padding:4px 8px;border:1px solid var(--b);border-radius:5px;font-size:13px;font-weight:700"></td>'+
+        '<td style="font-size:12px;color:var(--m)">'+item.unidad+'</td>'+
+        '<td style="font-size:11px;color:var(--m)">'+( item.observacion||'')+'</td>'+
+      '</tr>';
+    });
+  });
+
+  tbody.innerHTML = rows;
+  result.style.display = 'block';
+  result.scrollIntoView({behavior:'smooth'});
+}
+
+function compExportarExcel(){
+  if(!compResultData){ alert('No hay datos para exportar'); return; }
+  if(typeof XLSX === 'undefined'){ alert('Librería Excel no disponible. Recargá la página.'); return; }
+
+  var o = obra();
+  var wb = XLSX.utils.book_new();
+  var data = [
+    ['CÓMPUTO DE OBRA — ' + (compResultData.obra||'').toUpperCase()],
+    ['Obra: ' + (o?o.nombre:''), '', '', '', 'Superficie: ' + (compResultData.superficie_total||'-') + ' m²'],
+    ['Fecha: ' + new Date().toLocaleDateString('es-AR')],
+    ['Nota: ' + (compResultData.nota_general||'')],
+    [],
+    ['MATERIAL', 'DESCRIPCIÓN', 'CANTIDAD', 'UNIDAD', 'OBSERVACIÓN']
+  ];
+
+  (compResultData.categorias||[]).forEach(function(cat){
+    if(!cat.items||!cat.items.length) return;
+    data.push(['--- ' + cat.nombre + ' ---', '', '', '', '']);
+    cat.items.forEach(function(item){
+      // Leer cantidad editada del input si existe
+      var id = 'cq_'+cat.nombre.replace(/\s/g,'_')+'_'+cat.items.indexOf(item);
+      var inp = document.getElementById(id);
+      var qty = inp ? parseFloat(inp.value)||item.cantidad : item.cantidad;
+      data.push([item.material, item.descripcion||'', qty, item.unidad, item.observacion||'']);
+    });
+    data.push([]);
+  });
+
+  var ws = XLSX.utils.aoa_to_sheet(data);
+
+  // Estilos básicos de ancho de columna
+  ws['!cols'] = [{wch:40},{wch:25},{wch:12},{wch:15},{wch:35}];
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Cómputo');
+  var obraNombre = (compResultData.obra||'obra').replace(/\s/g,'-');
+  XLSX.writeFile(wb, 'computo-'+obraNombre+'-'+new Date().toISOString().split('T')[0]+'.xlsx');
+  showToast('Excel exportado correctamente');
+}
+
+function compReset(){
+  compPaginas = [];
+  compResultData = null;
+  document.getElementById('compPages').style.display='none';
+  document.getElementById('compPages').innerHTML='';
+  document.getElementById('compDrop').style.display='block';
+  document.getElementById('compBtnAnalizar').style.display='none';
+  document.getElementById('compResult').style.display='none';
+  document.getElementById('compProcessing').style.display='none';
+  document.getElementById('compFile').value='';
+  document.getElementById('compProgBar').style.width='0%';
 }
 
 // ═══════════════════════════════════════════
