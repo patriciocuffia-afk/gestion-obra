@@ -313,6 +313,124 @@ tr:hover td{background:#f8f9fa}
 .modal-eta-form .fg{margin-bottom:10px}
 
 @media(max-width:600px){.meta-grid{grid-template-columns:1fr}.eta-stats{grid-template-columns:1fr 1fr}.meta-row{grid-template-columns:1fr}}
+
+/* ═══════════════════════════════════════════════════════════
+   REFRESH VISUAL — se aplica sobre los estilos de arriba
+   ═══════════════════════════════════════════════════════════ */
+:root{
+  --p:#14405e; --pl:#2d6a9f; --a:#e0951a; --d:#c0392b; --s:#1e9e5a;
+  --bg:#f2f5f8; --c:#fff; --b:#e2e8f0; --t:#1f2d3d; --m:#64748b;
+  --ring:rgba(45,106,159,.28);
+  --sh-sm:0 1px 2px rgba(16,32,48,.06);
+  --sh:0 2px 8px rgba(16,32,48,.07),0 1px 2px rgba(16,32,48,.04);
+  --sh-lg:0 12px 32px rgba(16,32,48,.14);
+  --r:12px;
+}
+body{-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
+
+/* Numeros siempre alineados en columna */
+td,.mn,.rcat-val span,.cat-total-item span,.br span,.meta-stat .val,.eta-stat .v{font-variant-numeric:tabular-nums}
+
+/* Encabezado */
+.hdr{background:linear-gradient(135deg,#14405e,#1d5580);box-shadow:0 1px 3px rgba(16,32,48,.18);padding:13px 16px}
+.hdr h1{font-size:17px;letter-spacing:-.02em}
+.hdr-sub{font-size:10px;text-transform:uppercase;letter-spacing:.09em;opacity:.65;font-weight:600}
+.sdot{width:7px;height:7px;box-shadow:0 0 0 3px rgba(255,255,255,.14)}
+.sdot.ok{background:#34d399}
+
+/* Pestanas: pildoras con scroll suave en el celular */
+.tabs{background:var(--c);border-bottom:1px solid var(--b);padding:7px 8px;gap:2px;
+  box-shadow:var(--sh-sm);scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:8px 14px;border-radius:9px;border-bottom:none!important;margin-bottom:0;
+  font-size:13px;font-weight:600;color:var(--m);transition:background .15s,color .15s}
+.tab:hover{background:#eef2f7;color:var(--t)}
+.tab.active{background:var(--p);color:#fff;box-shadow:0 2px 6px rgba(20,64,94,.28)}
+
+/* Tarjetas */
+.content{padding:18px 16px 40px}
+.card{border-radius:var(--r);box-shadow:var(--sh);border-color:var(--b);padding:18px;margin-bottom:16px}
+.ct{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--m);margin-bottom:14px}
+
+/* Tarjetas de totales */
+.rb{background:linear-gradient(160deg,#f7fafc,#eef3f8);border:1px solid var(--b);border-radius:10px;padding:14px 10px}
+.rb .mn{font-size:19px;letter-spacing:-.02em;color:var(--p)}
+.rb .lb{font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+
+/* Formularios */
+.fg label{font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+.fg input,.fg select,.fg textarea,.filtros input,.filtros select,.pres-input,.ci{
+  border-radius:9px;transition:border-color .15s,box-shadow .15s}
+.fg input:focus,.fg select:focus,.fg textarea:focus,.filtros input:focus,.filtros select:focus,.pres-input:focus,.ci:focus{
+  outline:none;border-color:var(--pl);box-shadow:0 0 0 3px var(--ring)}
+button:focus-visible,.tab:focus-visible{outline:2px solid var(--pl);outline-offset:2px}
+
+/* Botones */
+.btn{border-radius:10px;padding:11px 20px;box-shadow:var(--sh-sm);transition:background .15s,transform .06s}
+.btn:active{transform:translateY(1px)}
+.btns{border-radius:10px}
+.btne,.btnd,.btnu{border-radius:8px;transition:all .15s}
+
+/* Barra de exportacion */
+.export-bar{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-bottom:14px}
+.btn-exp{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:9px;
+  font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--b);background:var(--c);
+  color:var(--t);box-shadow:var(--sh-sm);transition:all .15s}
+.btn-exp:hover{transform:translateY(-1px);box-shadow:var(--sh)}
+.btn-exp-pdf:hover{border-color:var(--d);color:var(--d)}
+.btn-exp-xls:hover{border-color:#1d6f42;color:#1d6f42}
+.btn-exp-bkp:hover{border-color:var(--pl);color:var(--pl)}
+
+/* Tablas */
+table{font-size:13px}
+th{background:#f1f5f9;color:var(--m);font-size:10px;text-transform:uppercase;letter-spacing:.06em;
+  font-weight:700;padding:10px;border-bottom:1px solid var(--b)}
+td{padding:10px;border-bottom:1px solid #eef2f6}
+tr:hover td{background:#f8fafc}
+.tw{border-radius:10px;border:1px solid var(--b);overflow:auto;-webkit-overflow-scrolling:touch}
+.tw table{border-radius:0}
+.bdg{padding:2px 9px;font-size:10px;letter-spacing:.02em}
+
+/* Tarjeta de metas */
+.meta-card{border-radius:var(--r);box-shadow:0 4px 16px rgba(20,64,94,.24);padding:18px}
+.meta-card .ct{color:#fff;opacity:.85;letter-spacing:.07em}
+.meta-big-bar{height:18px;background:rgba(255,255,255,.18);border-radius:9px}
+.meta-stat{background:rgba(255,255,255,.14);border-radius:9px;backdrop-filter:blur(2px)}
+
+/* Gasto rapido */
+.gasto-rapido{border-radius:var(--r);border-style:solid;border-width:1px;border-color:#f3d9a4;
+  background:linear-gradient(160deg,#fffdf7,#fef6e6);box-shadow:var(--sh-sm)}
+
+/* Acordeones */
+.cat-item,.help-section,.eta-item{border-radius:10px;box-shadow:var(--sh-sm)}
+.cat-item:hover,.help-section:hover,.eta-item:hover{box-shadow:var(--sh)}
+
+/* Estado vacio */
+.empty{color:var(--m);font-size:13px;padding:28px 16px;background:#fafcfd;border-radius:10px}
+
+/* Paneles de IA */
+.ia-panel,.comp-panel{border-radius:var(--r);box-shadow:var(--sh-lg)}
+.ia-panel{background:linear-gradient(135deg,#14405e,#2d6a9f)}
+
+/* Modales */
+.md{border-radius:16px;box-shadow:var(--sh-lg)}
+.mb{backdrop-filter:blur(3px);background:rgba(15,30,45,.55)}
+.confirm-box{border-radius:16px}
+.toast{border-radius:10px;padding:11px 22px;box-shadow:var(--sh-lg);background:#1f2d3d}
+
+/* Celular */
+@media(max-width:600px){
+  .content{padding:14px 12px 40px}
+  .card{padding:15px;border-radius:11px}
+  .rg{grid-template-columns:1fr;gap:8px}
+  .rb{display:flex;align-items:center;justify-content:space-between;text-align:left;padding:12px 14px}
+  .rb .lb{margin-top:0}
+  .fr,.fr.t3{grid-template-columns:1fr}
+  .bg2{grid-template-columns:1fr}
+  .export-bar{justify-content:stretch}
+  .btn-exp{flex:1;justify-content:center}
+  .tab{padding:8px 12px;font-size:12px}
+}
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -377,10 +495,18 @@ tr:hover td{background:#f8f9fa}
 
   <!-- RESUMEN -->
   <div id="tab-res">
-    <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
-      <button class="btn-pdf" onclick="exportarPDF()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-        Exportar PDF
+    <div class="export-bar">
+      <button class="btn-exp btn-exp-pdf" onclick="exportarPDF()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        PDF
+      </button>
+      <button class="btn-exp btn-exp-xls" onclick="exportarExcel()" title="Planilla de gastos para el contador">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="19"/><line x1="16" y1="13" x2="8" y2="19"/></svg>
+        Excel
+      </button>
+      <button class="btn-exp btn-exp-bkp" onclick="exportarBackup()" title="Copia de seguridad de todos tus datos">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Backup
       </button>
     </div>
 
@@ -1133,18 +1259,59 @@ var confirmResolve = function(){};
 function obra(){ return obras.find(function(o){ return o.id === obraId; }); }
 function cotizH(){ return cotiz.length ? cotiz[cotiz.length-1] : {oficial:1000, blue:1200}; }
 
+// Cotizacion vigente a una fecha: la ultima cargada en o antes de esa fecha.
+// Si el gasto es anterior a la primera cotizacion cargada, usa esa primera.
+// 'cotiz' siempre viene ordenado por fecha ascendente.
+function cotizEn(fecha){
+  if(!cotiz.length) return {oficial:1000, blue:1200};
+  if(!fecha) return cotizH();
+  var c = null;
+  for(var i=0;i<cotiz.length;i++){
+    if(cotiz[i].fecha <= fecha) c = cotiz[i]; else break;
+  }
+  return c || cotiz[0];
+}
+
+// Valor en pesos de un gasto, a la cotizacion del dia en que se hizo.
+// Un gasto cargado en dolares guarda la cantidad de dolares, asi que esto
+// reconstruye lo que realmente costo, no lo que valdria hoy.
 function enP(g){
-  var c = cotizH();
+  if(!g) return 0;
   if(g.moneda==='pesos') return g.monto;
+  var c = cotizEn(g.fecha);
   if(g.moneda==='oficial') return g.monto*(c.oficial||0);
   if(g.moneda==='blue') return g.monto*(c.blue||0);
   return 0;
 }
+function enUsdOf(g){ var c=cotizEn(g&&g.fecha); return c.oficial ? enP(g)/c.oficial : 0; }
+function enUsdBl(g){ var c=cotizEn(g&&g.fecha); return c.blue ? enP(g)/c.blue : 0; }
+
+// Suma un conjunto de gastos valuando cada uno a la cotizacion de su fecha.
+function totales(gastos){
+  var t = {pesos:0, oficial:0, blue:0};
+  (gastos||[]).forEach(function(g){
+    t.pesos   += enP(g);
+    t.oficial += enUsdOf(g);
+    t.blue    += enUsdBl(g);
+  });
+  return t;
+}
+
 function toOficial(pesos){ var c=cotizH(); return c.oficial ? pesos/c.oficial : 0; }
 function toBlue(pesos){ var c=cotizH(); return c.blue ? pesos/c.blue : 0; }
 
 function fmt(n){ return '$'+parseFloat(n).toLocaleString('es-AR',{maximumFractionDigits:2}); }
 function fmtU(n){ return 'USD '+parseFloat(n).toLocaleString('es-AR',{maximumFractionDigits:2}); }
+
+// Escapa texto para insertarlo en HTML sin romper la tabla.
+// Sin esto, una descripcion como 'Caño 3" <C>' se muestra mal o desaparece.
+function esc(s){
+  if(s === null || s === undefined) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+                  .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+// Escapa para usar dentro de onclick="funcion('...')"
+function escAttr(s){ return esc(s).replace(/\\/g,'\\\\'); }
 
 // ═══════════════════════════════════════════
 // TOAST
@@ -1482,16 +1649,15 @@ function renderGas(){
 
   if(!gs.length){ c.innerHTML='<div class="empty">Sin resultados para el filtro aplicado</div>'; return; }
 
-  var ct=cotizH();
   c.innerHTML='<table><thead><tr><th>Fecha</th><th>Descripcion</th><th>Categoria</th><th>Socio</th><th>Pesos</th><th>USD Oficial</th><th>USD Blue</th><th></th></tr></thead><tbody>'+
     gs.map(function(g){
       var p=enP(g);
-      var uOf=ct.oficial?p/ct.oficial:0;
-      var uBl=ct.blue?p/ct.blue:0;
-      return '<tr><td>'+g.fecha+'</td>'+
-        '<td>'+g.desc+(g.nota?'<br><small style="color:var(--m)">'+g.nota+'</small>':'')+'</td>'+
-        '<td>'+g.categoria+'</td>'+
-        '<td>'+g.socio+'</td>'+
+      var uOf=enUsdOf(g);
+      var uBl=enUsdBl(g);
+      return '<tr><td>'+esc(g.fecha)+'</td>'+
+        '<td>'+esc(g.desc)+(g.nota?'<br><small style="color:var(--m)">'+esc(g.nota)+'</small>':'')+'</td>'+
+        '<td>'+esc(g.categoria)+'</td>'+
+        '<td>'+esc(g.socio)+'</td>'+
         '<td style="font-weight:600">'+fmt(p)+'</td>'+
         '<td><span class="bdg bo">'+fmtU(uOf)+'</span></td>'+
         '<td><span class="bdg bb">'+fmtU(uBl)+'</span></td>'+
@@ -1512,17 +1678,22 @@ function renderRes(){
     document.getElementById('rult').innerHTML='';
     return;
   }
-  var tp=(o.gastos||[]).reduce(function(s,g){ return s+enP(g); },0);
+  // Cada gasto se valua a la cotizacion de su fecha
+  var tot=totales(o.gastos||[]);
+  var tp=tot.pesos;
   var ct=cotizH();
   document.getElementById('rp').textContent=fmt(tp);
-  document.getElementById('ro').textContent=fmtU(ct.oficial?tp/ct.oficial:0);
-  document.getElementById('rb2').textContent=fmtU(ct.blue?tp/ct.blue:0);
+  document.getElementById('ro').textContent=fmtU(tot.oficial);
+  document.getElementById('rb2').textContent=fmtU(tot.blue);
 
-  // Por categoria con desglose 3 monedas
-  var pc={};
+  // Por categoria: pc en pesos (lo usan el grafico y el presupuesto),
+  // pcU con el desglose en dolares historicos.
+  var pc={}, pcU={};
   (o.gastos||[]).forEach(function(g){
-    if(!pc[g.categoria]) pc[g.categoria]=0;
+    if(!pc[g.categoria]){ pc[g.categoria]=0; pcU[g.categoria]={oficial:0, blue:0}; }
     pc[g.categoria]+=enP(g);
+    pcU[g.categoria].oficial+=enUsdOf(g);
+    pcU[g.categoria].blue+=enUsdBl(g);
   });
 
   // Grafico
@@ -1537,9 +1708,9 @@ function renderRes(){
   var cats=Object.keys(pc).sort(function(a,b){ return pc[b]-pc[a]; });
   document.getElementById('rcat').innerHTML=cats.length ? cats.map(function(k){
     var p=pc[k];
-    var uOf=ct.oficial?p/ct.oficial:0;
-    var uBl=ct.blue?p/ct.blue:0;
-    return '<div class="rcat-row"><div class="rcat-name">'+k+'</div><div class="rcat-vals">'+
+    var uOf=pcU[k].oficial;
+    var uBl=pcU[k].blue;
+    return '<div class="rcat-row"><div class="rcat-name">'+esc(k)+'</div><div class="rcat-vals">'+
       '<div class="rcat-val">Pesos: <span>'+fmt(p)+'</span></div>'+
       '<div class="rcat-val">Oficial: <span>'+fmtU(uOf)+'</span></div>'+
       '<div class="rcat-val">Blue: <span>'+fmtU(uBl)+'</span></div>'+
@@ -1552,7 +1723,7 @@ function renderRes(){
     '<table><thead><tr><th>Fecha</th><th>Descripcion</th><th>Pesos</th><th>USD Oficial</th><th>USD Blue</th></tr></thead><tbody>'+
     ul.map(function(g){
       var p=enP(g);
-      return '<tr><td>'+g.fecha+'</td><td>'+g.desc+'</td><td>'+fmt(p)+'</td><td><span class="bdg bo">'+fmtU(ct.oficial?p/ct.oficial:0)+'</span></td><td><span class="bdg bb">'+fmtU(ct.blue?p/ct.blue:0)+'</span></td></tr>';
+      return '<tr><td>'+esc(g.fecha)+'</td><td>'+esc(g.desc)+'</td><td>'+fmt(p)+'</td><td><span class="bdg bo">'+fmtU(enUsdOf(g))+'</span></td><td><span class="bdg bb">'+fmtU(enUsdBl(g))+'</span></td></tr>';
     }).join('')+'</tbody></table>'
     : '<div class="empty">Sin gastos</div>';
 }
@@ -1610,9 +1781,9 @@ function renderStk(){
   c.innerHTML='<table><thead><tr><th>Material</th><th>Existencia</th><th>Unidad</th><th>Min</th><th>Estado</th><th>Usar</th><th></th></tr></thead><tbody>'+
     o.stock.map(function(s){
       var ok=s.cantidad>=s.minimo;
-      return '<tr><td><strong>'+s.material+'</strong></td>'+
+      return '<tr><td><strong>'+esc(s.material)+'</strong></td>'+
         '<td><input type="number" value="'+s.cantidad+'" min="0" step="0.01" style="width:80px;padding:4px 8px;border:1px solid var(--b);border-radius:5px;font-weight:700" onchange="actStock(\''+s.id+'\',this.value)"></td>'+
-        '<td>'+s.unidad+'</td><td>'+s.minimo+'</td>'+
+        '<td>'+esc(s.unidad)+'</td><td>'+esc(s.minimo)+'</td>'+
         '<td><span class="'+(ok?'sok':'slow')+'">'+(ok?'OK':'Bajo')+'</span></td>'+
         '<td><div class="cr"><input type="number" id="u'+s.id+'" class="ci" placeholder="0" min="0" step="0.01"><button class="btnu" onclick="usarStock(\''+s.id+'\')">Usar</button></div></td>'+
         '<td><button class="btnd" onclick="eliminarStock(\''+s.id+'\')">✕</button></td></tr>';
@@ -1650,12 +1821,12 @@ function eliminarCat(n){
 function renderCat(){
   var o=obra(); var c=document.getElementById('lcat'); if(!c) return;
   if(!o||!(o.categorias||[]).length){ c.innerHTML='<div class="empty">Sin categorias</div>'; return; }
-  var ct=cotizH();
   c.innerHTML=o.categorias.map(function(cat){
     var gastosCat=(o.gastos||[]).filter(function(g){ return g.categoria===cat; });
-    var p=gastosCat.reduce(function(s,g){ return s+enP(g); },0);
-    var uOf=ct.oficial?p/ct.oficial:0;
-    var uBl=ct.blue?p/ct.blue:0;
+    var tc=totales(gastosCat);
+    var p=tc.pesos;
+    var uOf=tc.oficial;
+    var uBl=tc.blue;
     var isOpen=(catAbierta===cat);
 
     // Subhistorial
@@ -1668,21 +1839,21 @@ function renderCat(){
         detalle='<div class="tw"><table><thead><tr><th>Fecha</th><th>Descripcion</th><th>Socio</th><th>Pesos</th><th>USD Oficial</th><th>USD Blue</th><th></th></tr></thead><tbody>'+
           sorted.map(function(g){
             var gp=enP(g);
-            return '<tr><td>'+g.fecha+'</td>'+
-              '<td>'+g.desc+(g.nota?'<br><small style="color:var(--m)">'+g.nota+'</small>':'')+'</td>'+
-              '<td>'+g.socio+'</td>'+
+            return '<tr><td>'+esc(g.fecha)+'</td>'+
+              '<td>'+esc(g.desc)+(g.nota?'<br><small style="color:var(--m)">'+esc(g.nota)+'</small>':'')+'</td>'+
+              '<td>'+esc(g.socio)+'</td>'+
               '<td style="font-weight:600">'+fmt(gp)+'</td>'+
-              '<td><span class="bdg bo">'+fmtU(ct.oficial?gp/ct.oficial:0)+'</span></td>'+
-              '<td><span class="bdg bb">'+fmtU(ct.blue?gp/ct.blue:0)+'</span></td>'+
+              '<td><span class="bdg bo">'+fmtU(enUsdOf(g))+'</span></td>'+
+              '<td><span class="bdg bb">'+fmtU(enUsdBl(g))+'</span></td>'+
               '<td style="white-space:nowrap"><button class="btne" onclick="abrirEdit(\''+g.id+'\')" style="margin-right:4px">✎</button><button class="btnd" onclick="eliminarGasto(\''+g.id+'\')">✕</button></td></tr>';
           }).join('')+'</tbody></table></div>';
       }
     }
 
     return '<div class="cat-item">'+
-      '<div class="cat-header" onclick="toggleCat(\''+cat.replace(/'/g,"\\'")+'\')">' +
+      '<div class="cat-header" onclick="toggleCat(\''+escAttr(cat)+'\')">' +
         '<div class="cat-header-left">'+
-          '<div class="cat-header-title">'+cat+'</div>'+
+          '<div class="cat-header-title">'+esc(cat)+'</div>'+
           '<div class="cat-totals">'+
             '<div class="cat-total-item">Pesos: <span>'+fmt(p)+'</span></div>'+
             '<div class="cat-total-item">Oficial: <span>'+fmtU(uOf)+'</span></div>'+
@@ -1691,7 +1862,7 @@ function renderCat(){
           '</div>'+
         '</div>'+
         '<div style="display:flex;align-items:center;gap:8px">'+
-          '<button class="btnd" onclick="event.stopPropagation();eliminarCat(\''+cat.replace(/'/g,"\\'")+'\')">✕</button>'+
+          '<button class="btnd" onclick="event.stopPropagation();eliminarCat(\''+escAttr(cat)+'\')">✕</button>'+
           '<span class="cat-toggle '+(isOpen?'open':'')+'">▼</span>'+
         '</div>'+
       '</div>'+
@@ -1715,24 +1886,42 @@ function renderSoc(){
   var o=obra(); var c=document.getElementById('bsoc'); var dc=document.getElementById('dsoc');
   if(!c) return; dc.innerHTML='';
   if(!o||!(o.socios||[]).length){ c.innerHTML='<div class="empty">Sin socios</div>'; return; }
-  var ct=cotizH();
   var bs=(o.socios||[]).map(function(s){
     var gs=(o.gastos||[]).filter(function(g){ return g.socio===s; });
-    var tp=gs.reduce(function(sum,g){ return sum+enP(g); },0);
-    return {nombre:s,tp:tp,to:ct.oficial?tp/ct.oficial:0,tb:ct.blue?tp/ct.blue:0};
+    var t=totales(gs);
+    return {nombre:s,tp:t.pesos,to:t.oficial,tb:t.blue};
   });
   var mx=bs.reduce(function(a,b){ return a.tp>b.tp?a:b; },{tp:-1});
   c.innerHTML=bs.map(function(b){
-    return '<div class="bs '+(b.nombre===mx.nombre&&bs.length>1?'win':'')+'"><h3>'+b.nombre+' '+(b.nombre===mx.nombre&&bs.length>1?'&#8593;':'')+'</h3>'+
+    return '<div class="bs '+(b.nombre===mx.nombre&&bs.length>1?'win':'')+'"><h3>'+esc(b.nombre)+' '+(b.nombre===mx.nombre&&bs.length>1?'&#8593;':'')+'</h3>'+
       '<div class="br"><span>En Pesos</span><span>'+fmt(b.tp)+'</span></div>'+
       '<div class="br"><span>Dolar Oficial</span><span>'+fmtU(b.to)+'</span></div>'+
       '<div class="br"><span>Dolar Blue</span><span>'+fmtU(b.tb)+'</span></div>'+
       (b.nombre===mx.nombre&&bs.length>1?'<span class="fb">Pago mas</span>':'')+'</div>';
   }).join('');
+
+  // Liquidacion: cuanto le falta aportar a cada socio para llegar al promedio.
+  // Funciona con cualquier cantidad de socios (antes solo era correcto con dos).
   if(bs.length>=2){
-    var sr=[].concat(bs).sort(function(a,b){ return b.tp-a.tp; });
-    var df=sr[0].tp-sr[1].tp;
-    if(df>0){ dc.innerHTML='<div class="card" style="text-align:center;background:#fffbf0;border-color:var(--a);margin-top:14px"><strong>'+sr[1].nombre+'</strong> le debe a <strong>'+sr[0].nombre+'</strong>: <span style="font-size:18px;font-weight:700;color:var(--p)">'+fmt(df/2)+'</span><span style="color:var(--m);font-size:12px"> (para igualar)</span></div>'; }
+    var total=bs.reduce(function(s,b){ return s+b.tp; },0);
+    var promedio=total/bs.length;
+    var deudores=bs.filter(function(b){ return promedio-b.tp > 0.01; })
+                   .sort(function(a,b){ return (promedio-b.tp)-(promedio-a.tp); });
+    var acreedores=bs.filter(function(b){ return b.tp-promedio > 0.01; })
+                     .sort(function(a,b){ return (b.tp-promedio)-(a.tp-promedio); });
+    if(deudores.length && acreedores.length){
+      var filas=deudores.map(function(d){
+        return '<div class="br"><span><strong>'+esc(d.nombre)+'</strong> debe aportar</span>'+
+               '<span style="font-weight:700;color:var(--p)">'+fmt(promedio-d.tp)+'</span></div>';
+      }).join('');
+      dc.innerHTML='<div class="card" style="background:#fffbf0;border-color:var(--a);margin-top:14px">'+
+        '<div class="ct" style="color:var(--a)">Para igualar aportes</div>'+
+        '<div style="font-size:12px;color:var(--m);margin-bottom:8px">Aporte parejo: '+fmt(promedio)+' por socio</div>'+
+        filas+
+        '<div style="font-size:11px;color:var(--m);margin-top:8px">A favor: '+
+          acreedores.map(function(a){ return esc(a.nombre)+' ('+fmt(a.tp-promedio)+')'; }).join(' · ')+
+        '</div></div>';
+    }
   }
 }
 
@@ -1783,6 +1972,17 @@ var iaTipo = 'factura';
 var iaFileData = null;
 var iaFileType = null;
 var iaDetectados = [];
+
+// Los modelos actuales devuelven bloques de razonamiento antes del texto,
+// asi que content[0] ya no es necesariamente la respuesta. Buscamos el bloque de texto.
+function textoDeRespuesta(d){
+  if(!d || !d.content || !d.content.length) return '';
+  for(var i=0;i<d.content.length;i++){
+    var b = d.content[i];
+    if(b && b.type === 'text' && b.text) return b.text.trim();
+  }
+  return '';
+}
 
 function getIaKey(){
   return localStorage.getItem('obrick_ia_key')||'';
@@ -1888,8 +2088,38 @@ function iaAnalizar(){
       'anthropic-dangerous-direct-browser-access':'true'
     },
     body:JSON.stringify({
-      model:'claude-haiku-4-5-20251001',
-      max_tokens:1000,
+      model:'claude-opus-5',
+      max_tokens:4000,
+      // output_config.format obliga a la IA a devolver JSON valido con esta forma exacta.
+      // Antes habia que adivinar el JSON con 4 intentos de parseo; ahora viene garantizado.
+      output_config:{
+        effort:'low',
+        format:{
+          type:'json_schema',
+          schema:{
+            type:'object',
+            properties:{
+              tipo:{type:'string'},
+              proveedor:{type:'string'},
+              items:{
+                type:'array',
+                items:{
+                  type:'object',
+                  properties:{
+                    nombre:{type:'string'},
+                    cantidad:{type:'number'},
+                    unidad:{type:'string'}
+                  },
+                  required:['nombre','cantidad','unidad'],
+                  additionalProperties:false
+                }
+              }
+            },
+            required:['tipo','proveedor','items'],
+            additionalProperties:false
+          }
+        }
+      },
       messages:[{
         role:'user',
         content:[
@@ -1905,42 +2135,19 @@ function iaAnalizar(){
   })
   .then(function(d){
     document.getElementById('iaProcessing').style.display='none';
-    if(!d.content||!d.content[0]) throw new Error('Respuesta vacia');
-    var txt = d.content[0].text.trim();
+    var txt = textoDeRespuesta(d);
+    if(!txt) throw new Error('Respuesta vacia');
     console.log('IA respuesta raw:', txt);
 
-    // Intentar extraer JSON de múltiples formas
+    // Con output_config.format el JSON viene garantizado y validado por la API.
+    // Solo dejamos una limpieza minima por si llega envuelto en markdown.
     var json = null;
-    try {
-      // Intento 1: JSON directo
-      json = JSON.parse(txt);
-    } catch(e1) {
+    try { json = JSON.parse(txt); }
+    catch(e1){
       try {
-        // Intento 2: extraer bloque JSON con regex
-        var m1 = txt.match(/\{[\s\S]*"items"[\s\S]*\}/);
-        if(m1) json = JSON.parse(m1[0]);
-      } catch(e2) {
-        try {
-          // Intento 3: limpiar y reintentar
-          var clean = txt.replace(/```json/g,'').replace(/```/g,'').replace(/[\r\n]+/g,' ').trim();
-          var m2 = clean.match(/\{[\s\S]*\}/);
-          if(m2) json = JSON.parse(m2[0]);
-        } catch(e3) {
-          // Intento 4: construir JSON desde texto libre si la IA respondió en lenguaje natural
-          console.warn('No se pudo parsear JSON, intentando modo texto libre');
-          // Buscar patrones como "X kg de cemento", "Y bolsas de...", etc.
-          var items = [];
-          var lineas = txt.split(/[\n,;]/);
-          lineas.forEach(function(linea){
-            var numMatch = linea.match(/(\d+[.,]?\d*)\s*(kg|bolsa|litro|m2|m3|unidad|saco|rollo|metro)/i);
-            var nameMatch = linea.match(/(?:de\s+)?([a-záéíóúñ\s]{3,30})/i);
-            if(numMatch && nameMatch){
-              items.push({nombre:nameMatch[1].trim(), cantidad:parseFloat(numMatch[1].replace(',','.')), unidad:numMatch[2].toLowerCase()});
-            }
-          });
-          if(items.length) json = {tipo:iaTipo, proveedor:'', items:items};
-        }
-      }
+        var limpio = txt.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
+        json = JSON.parse(limpio);
+      } catch(e2){ json = null; }
     }
 
     if(!json||!json.items||!json.items.length){
@@ -2093,20 +2300,19 @@ function renderMetas(){
   }
   var m = o.metas;
   var ct = cotizH();
-  // Total gastado en pesos
-  var tpPesos = (o.gastos||[]).reduce(function(s,g){ return s+enP(g); },0);
-
-  // Convertir presupuesto a pesos para comparar
-  var presupPesos = 0;
   var moneda = m.moneda||'pesos';
-  if(moneda==='pesos') presupPesos = m.presupuesto;
-  else if(moneda==='oficial') presupPesos = m.presupuesto*(ct.oficial||0);
-  else if(moneda==='blue') presupPesos = m.presupuesto*(ct.blue||0);
 
-  // Formatear presupuesto en su moneda original
-  var fmtPresup = moneda==='pesos' ? fmt(m.presupuesto) : fmtU(m.presupuesto)+' ('+moneda+')';
-  var fmtGastado = moneda==='pesos' ? fmt(tpPesos) : (moneda==='oficial' ? fmtU(ct.oficial?tpPesos/ct.oficial:0)+' Oficial' : fmtU(ct.blue?tpPesos/ct.blue:0)+' Blue');
-  var fmtDisp = moneda==='pesos' ? fmt(Math.abs(presupPesos-tpPesos)) : fmtU(Math.abs(presupPesos-tpPesos)/(moneda==='oficial'?ct.oficial||1:ct.blue||1));
+  // Comparamos gastado contra presupuesto EN LA MISMA MONEDA que elegiste para la meta.
+  // Cada gasto aporta segun la cotizacion de su fecha, asi que no hay doble conversion.
+  var tot = totales(o.gastos||[]);
+  var tpPesos = moneda==='oficial' ? tot.oficial : (moneda==='blue' ? tot.blue : tot.pesos);
+  var presupPesos = m.presupuesto || 0;
+
+  var fmtMoneda = function(v){ return moneda==='pesos' ? fmt(v) : fmtU(v); };
+  var etiqMoneda = moneda==='oficial' ? ' Oficial' : (moneda==='blue' ? ' Blue' : '');
+  var fmtPresup = fmtMoneda(presupPesos) + etiqMoneda;
+  var fmtGastado = fmtMoneda(tpPesos) + etiqMoneda;
+  var fmtDisp = fmtMoneda(Math.abs(presupPesos - tpPesos));
 
   var html = '';
 
@@ -2372,13 +2578,13 @@ function renderEta(){
         var cfg2=ESTADO_CONFIG[h.estado]||ESTADO_CONFIG.pendiente;
         return '<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--b);font-size:12px">'+
           '<span>'+cfg2.icon+'</span>'+
-          '<div><strong>'+h.fecha+'</strong> — '+cfg2.label+' · '+h.pct+'%'+
-          (h.monto?' · '+fmt(h.monto):'')+(h.nota?'<br><span style="color:var(--m)">'+h.nota+'</span>':'')+'</div>'+
+          '<div><strong>'+esc(h.fecha)+'</strong> — '+cfg2.label+' · '+esc(h.pct)+'%'+
+          (h.monto?' · '+fmt(h.monto):'')+(h.nota?'<br><span style="color:var(--m)">'+esc(h.nota)+'</span>':'')+'</div>'+
         '</div>';
       }).join(''):'<div style="color:var(--m);font-size:12px;padding:8px 0">Sin certificaciones registradas</div>';
 
       detalle='<div class="eta-body open">'+
-        (et.desc?'<p style="font-size:13px;color:var(--m);margin-bottom:10px">'+et.desc+'</p>':'')+
+        (et.desc?'<p style="font-size:13px;color:var(--m);margin-bottom:10px">'+esc(et.desc)+'</p>':'')+
         '<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--m);margin-bottom:4px">'+
           '<span>Avance</span><span style="font-weight:700;color:var(--p)">'+pct+'%</span>'+
         '</div>'+
@@ -2397,9 +2603,9 @@ function renderEta(){
         (et.contacto&&(et.contacto.nombre||et.contacto.tel||et.contacto.email)?
           '<div style="background:#f0f4f8;border-radius:8px;padding:10px;margin-top:10px;font-size:12px">'+
             '<div style="font-weight:700;color:var(--p);margin-bottom:4px">📞 Contratista</div>'+
-            (et.contacto.nombre?'<div><strong>'+et.contacto.nombre+'</strong>'+(et.contacto.cuit?' · '+et.contacto.cuit:'')+'</div>':'')+
-            (et.contacto.tel?'<div style="margin-top:4px"><a href="https://wa.me/54'+et.contacto.tel.replace(/\D/g,'')+'" target="_blank" style="color:#25d366;font-weight:700;text-decoration:none">📱 WhatsApp: '+et.contacto.tel+'</a></div>':'')+
-            (et.contacto.email?'<div style="margin-top:2px"><a href="mailto:'+et.contacto.email+'" style="color:var(--p);text-decoration:none">✉ '+et.contacto.email+'</a></div>':'')+
+            (et.contacto.nombre?'<div><strong>'+esc(et.contacto.nombre)+'</strong>'+(et.contacto.cuit?' · '+esc(et.contacto.cuit):'')+'</div>':'')+
+            (et.contacto.tel?'<div style="margin-top:4px"><a href="https://wa.me/54'+esc(et.contacto.tel.replace(/\D/g,''))+'" target="_blank" style="color:#25d366;font-weight:700;text-decoration:none">📱 WhatsApp: '+esc(et.contacto.tel)+'</a></div>':'')+
+            (et.contacto.email?'<div style="margin-top:2px"><a href="mailto:'+encodeURIComponent(et.contacto.email)+'" style="color:var(--p);text-decoration:none">✉ '+esc(et.contacto.email)+'</a></div>':'')+
           '</div>'
         :'')+
         (hist.length?'<div style="margin-top:14px"><div style="font-size:12px;font-weight:700;color:var(--p);margin-bottom:6px">Historial de certificaciones</div>'+histHTML+'</div>':'')+
@@ -2410,8 +2616,8 @@ function renderEta(){
       '<div class="eta-header" onclick="toggleEta(\''+et.id+'\')">'+
         '<div class="eta-icon" style="background:'+(et.estado==='certificada'?'#e8f5e9':et.estado==='en_curso'?'#fff3e0':et.estado==='observaciones'?'#fde8e8':'#f0f0f0')+'">'+cfg.icon+'</div>'+
         '<div class="eta-info">'+
-          '<div class="eta-nombre">'+(et.orden?et.orden+'. ':'')+et.nombre+tiempoInfo+'</div>'+
-          '<div class="eta-fechas">'+(et.fechaIni?et.fechaIni:'-')+' → '+(et.fechaFin?et.fechaFin:'-')+(et.pct?'  ·  '+et.pct+'% completado':'')+'</div>'+
+          '<div class="eta-nombre">'+(et.orden?esc(et.orden)+'. ':'')+esc(et.nombre)+tiempoInfo+'</div>'+
+          '<div class="eta-fechas">'+(et.fechaIni?esc(et.fechaIni):'-')+' → '+(et.fechaFin?esc(et.fechaFin):'-')+(et.pct?'  ·  '+esc(et.pct)+'% completado':'')+'</div>'+
         '</div>'+
         '<span class="eta-estado-badge '+cfg.badge+'">'+cfg.label+'</span>'+
         '<span style="font-size:16px;color:var(--m);margin-left:8px;transition:transform .2s;'+(isOpen?'transform:rotate(180deg)':'')+'">▼</span>'+
@@ -2647,8 +2853,8 @@ function renderDoc(){
     return '<div class="doc-item">'+
       '<div class="doc-icon '+ic.cls+'">'+ic.ico+'</div>'+
       '<div class="doc-info">'+
-        '<div class="doc-name">'+d.desc+'</div>'+
-        '<div class="doc-meta"><span class="doc-cat">'+d.cat+'</span>'+d.fecha+(d.size?' · '+fmtSize(d.size):'')+'</div>'+
+        '<div class="doc-name">'+esc(d.desc)+'</div>'+
+        '<div class="doc-meta"><span class="doc-cat">'+esc(d.cat)+'</span>'+esc(d.fecha)+(d.size?' · '+fmtSize(d.size):'')+'</div>'+
       '</div>'+
       '<div class="doc-actions">'+
         '<a href="https://drive.google.com/file/d/'+d.driveId+'/view" target="_blank" class="btne" style="text-decoration:none;padding:5px 10px">Ver</a>'+
@@ -2722,7 +2928,7 @@ function renderChart(pc){
 
   var legend = cats.map(function(cat, i){
     var pct = Math.round(pc[cat]/total*100);
-    return '<div class="legend-item"><div class="legend-dot" style="background:'+CHART_COLORS[i%CHART_COLORS.length]+'"></div><div class="legend-label">'+cat+'</div><div class="legend-val">'+pct+'%</div></div>';
+    return '<div class="legend-item"><div class="legend-dot" style="background:'+CHART_COLORS[i%CHART_COLORS.length]+'"></div><div class="legend-label">'+esc(cat)+'</div><div class="legend-val">'+pct+'%</div></div>';
   }).join('');
 
   c.innerHTML = '<div class="chart-wrap">'+
@@ -2739,7 +2945,7 @@ function abrirPres(){
   var pres = o.presupuestos || {};
   var inputs = (o.categorias||[]).map(function(cat){
     return '<div class="fg" style="margin-bottom:10px">'+
-      '<label>'+cat+'</label>'+
+      '<label>'+esc(cat)+'</label>'+
       '<input type="number" class="pres-input" id="pi_'+cat.replace(/\s/g,'_')+'" placeholder="0" value="'+(pres[cat]||0)+'">'+
     '</div>';
   }).join('');
@@ -2783,13 +2989,90 @@ function renderPres(o, pc){
     var ct = cotizH();
     return '<div class="pres-row">'+
       '<div class="pres-header">'+
-        '<div class="pres-name">'+cat+'</div>'+
+        '<div class="pres-name">'+esc(cat)+'</div>'+
         '<div class="pres-nums">Gastado: <span>'+fmt(gasto)+'</span> / Ppto: <span>'+fmt(budget)+'</span></div>'+
       '</div>'+
       '<div class="pres-bar"><div class="pres-fill '+cls+'" style="width:'+pct+'%"></div></div>'+
       '<div class="pres-pct" style="color:'+(real<75?'var(--s)':real<100?'var(--a)':'var(--d)')+'">'+real+'% ejecutado'+(real>100?' — Excedido en '+fmt(gasto-budget):'')+'</div>'+
     '</div>';
   }).join('');
+}
+
+// ═══════════════════════════════════════════
+// EXPORTAR BACKUP Y EXCEL
+// ═══════════════════════════════════════════
+function descargarArchivo(nombre, contenido, tipo){
+  var blob = new Blob([contenido], {type: tipo});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = nombre;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+}
+
+// Copia de seguridad completa: todas las obras y cotizaciones tal como estan en la nube.
+function exportarBackup(){
+  if(!obras.length){ alert('No hay datos para respaldar'); return; }
+  var data = {
+    exportado: new Date().toISOString(),
+    version: 1,
+    obras: obras,
+    cotizaciones: cotiz
+  };
+  var fecha = new Date().toISOString().split('T')[0];
+  descargarArchivo('obrick-backup-'+fecha+'.json', JSON.stringify(data, null, 2), 'application/json');
+  showToast('Backup descargado');
+}
+
+// Planilla de gastos lista para el contador.
+function exportarExcel(){
+  var o = obra();
+  if(!o){ alert('No hay obra seleccionada'); return; }
+  if(typeof XLSX === 'undefined'){ alert('Libreria Excel no disponible. Recarga la pagina.'); return; }
+  var gs = [].concat(o.gastos||[]).sort(function(a,b){ return (a.fecha||'').localeCompare(b.fecha||''); });
+  if(!gs.length){ alert('Esta obra no tiene gastos cargados'); return; }
+
+  var filas = [['Fecha','Descripcion','Categoria','Pagado por','Moneda','Monto original','Cotiz. oficial del dia','Cotiz. blue del dia','Costo en pesos','USD Oficial','USD Blue','Nota']];
+  gs.forEach(function(g){
+    var c = cotizEn(g.fecha);
+    filas.push([
+      g.fecha||'', g.desc||'', g.categoria||'', g.socio||'', g.moneda||'',
+      g.monto||0,
+      c.oficial||0, c.blue||0,
+      Math.round(enP(g)*100)/100,
+      Math.round(enUsdOf(g)*100)/100,
+      Math.round(enUsdBl(g)*100)/100,
+      g.nota||''
+    ]);
+  });
+
+  var tot = totales(gs);
+  filas.push([]);
+  filas.push(['TOTAL','','','','','','','',
+    Math.round(tot.pesos*100)/100,
+    Math.round(tot.oficial*100)/100,
+    Math.round(tot.blue*100)/100, '']);
+  filas.push([]);
+  filas.push(['Cada gasto se valua a la cotizacion vigente el dia en que se hizo.']);
+
+  var wb = XLSX.utils.book_new();
+  var ws = XLSX.utils.aoa_to_sheet(filas);
+  ws['!cols'] = [{wch:12},{wch:38},{wch:18},{wch:14},{wch:10},{wch:16},{wch:16},{wch:16},{wch:18},{wch:14},{wch:14},{wch:30}];
+  XLSX.utils.book_append_sheet(wb, ws, 'Gastos');
+
+  // Segunda hoja: resumen por categoria
+  var pc = {};
+  gs.forEach(function(g){ if(!pc[g.categoria]) pc[g.categoria]=0; pc[g.categoria]+=enP(g); });
+  var res = [['Categoria','Total en pesos','% del total']];
+  Object.keys(pc).sort(function(a,b){ return pc[b]-pc[a]; }).forEach(function(k){
+    res.push([k, Math.round(pc[k]*100)/100, tot.pesos?Math.round(pc[k]/tot.pesos*1000)/10+'%':'0%']);
+  });
+  var ws2 = XLSX.utils.aoa_to_sheet(res);
+  ws2['!cols'] = [{wch:24},{wch:18},{wch:12}];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Por categoria');
+
+  XLSX.writeFile(wb, 'gastos-'+(o.nombre||'obra').replace(/[^\w\s-]/g,'').replace(/\s+/g,'-')+'-'+new Date().toISOString().split('T')[0]+'.xlsx');
+  showToast('Excel exportado');
 }
 
 // ═══════════════════════════════════════════
@@ -2802,7 +3085,8 @@ function exportarPDF(){
 
   var doc = new window.jspdf.jsPDF();
   var ct = cotizH();
-  var tp = (o.gastos||[]).reduce(function(s,g){ return s+enP(g); }, 0);
+  var totObra = totales(o.gastos||[]);
+  var tp = totObra.pesos;
   var y = 20;
 
   // Titulo
@@ -2820,8 +3104,10 @@ function exportarPDF(){
   doc.text('Total gastado', 14, y); y+=7;
   doc.setFontSize(11); doc.setTextColor(50,50,50);
   doc.text('Pesos: ' + fmt(tp), 14, y); y+=5;
-  doc.text('Dolar Oficial: ' + fmtU(ct.oficial?tp/ct.oficial:0), 14, y); y+=5;
-  doc.text('Dolar Blue: ' + fmtU(ct.blue?tp/ct.blue:0), 14, y); y+=10;
+  doc.text('Dolar Oficial: ' + fmtU(totObra.oficial), 14, y); y+=5;
+  doc.text('Dolar Blue: ' + fmtU(totObra.blue), 14, y); y+=5;
+  doc.setFontSize(8); doc.setTextColor(120,120,120);
+  doc.text('Cada gasto valuado a la cotizacion vigente el dia en que se hizo.', 14, y); y+=8;
 
   // Por categoria
   doc.setDrawColor(200,200,200); doc.line(14, y, 196, y); y+=8;
@@ -3042,8 +3328,10 @@ function compAnalizar(){
       'anthropic-dangerous-direct-browser-access':'true'
     },
     body: JSON.stringify({
-      model: 'claude-opus-4-5',
-      max_tokens: 8000,
+      model: 'claude-opus-5',
+      max_tokens: 16000,
+      // effort medium: buen equilibrio entre precision del computo y tiempo de espera.
+      output_config: { effort: 'medium' },
       messages:[{role:'user', content: content}]
     })
   })
@@ -3054,9 +3342,8 @@ function compAnalizar(){
   })
   .then(function(d){
     bar.style.width='85%'; txt.textContent='Generando tabla...';
-    if(!d.content||!d.content[0]) throw new Error('Respuesta vacía de la IA');
-
-    var rawTxt = d.content[0].text.trim();
+    var rawTxt = textoDeRespuesta(d);
+    if(!rawTxt) throw new Error('Respuesta vacía de la IA');
     console.log('Respuesta IA (primeros 500 chars):', rawTxt.substring(0,500));
 
     // Intentar parsear el JSON de múltiples formas
@@ -3274,9 +3561,11 @@ function compReset(){
 // AYUDA — ACCORDION
 // ═══════════════════════════════════════════
 function toggleHelp(id){
+  // Los ids del HTML son de dos formas: hb0/ht0 (para 'h0') y hbhm/hthm (para 'hm').
+  // Probamos primero sin la 'h' inicial y si no existe usamos el id completo.
   var suffix = id.replace(/^h/,'');
-  var body = document.getElementById('hb'+id);
-  var toggle = document.getElementById('ht'+id);
+  var body = document.getElementById('hb'+suffix) || document.getElementById('hb'+id);
+  var toggle = document.getElementById('ht'+suffix) || document.getElementById('ht'+id);
   if(!body||!toggle) return;
   var isOpen = body.classList.contains('open');
   body.classList.toggle('open',!isOpen);
