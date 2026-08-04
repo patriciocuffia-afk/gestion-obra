@@ -550,10 +550,11 @@ tr:hover td{background:#f8fafc}
 
     <div class="card">
       <div class="ct">Total gastado</div>
-      <div class="rg">
+      <div class="rg" id="rgTotales">
         <div class="rb"><div class="mn" id="rp">$0</div><div class="lb">Pesos</div></div>
         <div class="rb"><div class="mn" id="ro">USD 0</div><div class="lb">Dolar Oficial</div></div>
         <div class="rb"><div class="mn" id="rb2">USD 0</div><div class="lb">Dolar Blue</div></div>
+        <div class="rb" id="rbM2" style="display:none"><div class="mn" id="rm2">0 m²</div><div class="lb">Metros de construccion</div></div>
       </div>
     </div>
     <div class="card">
@@ -613,6 +614,7 @@ tr:hover td{background:#f8fafc}
         <div class="fg"><label>Monto</label><input type="number" id="qm" placeholder="0" step="0.01"></div>
         <div class="fg"><label>Moneda</label><select id="qmon"><option value="pesos">Pesos</option><option value="oficial">Dolar Oficial</option><option value="blue">Dolar Blue</option></select></div>
       </div>
+      <div class="fg" style="margin-bottom:10px"><label>Proveedor (opcional)</label><input type="text" id="qprov" list="listaProv" placeholder="Ej: Zuppa" autocomplete="off"></div>
       <button class="btn" style="background:var(--a)" onclick="gastoRapido()">Registrar rapido</button>
     </div>
     <div class="card">
@@ -626,7 +628,11 @@ tr:hover td{background:#f8fafc}
         <div class="fg"><label>Categoria</label><select id="gcat"></select></div>
         <div class="fg"><label>Pagado por</label><select id="gsoc"></select></div>
       </div>
-      <div class="fg" style="margin-bottom:10px"><label>Fecha</label><input type="date" id="gfec"></div>
+      <div class="fr">
+        <div class="fg"><label>Proveedor</label><input type="text" id="gprov" list="listaProv" placeholder="Ej: Zuppa, Sileoni, Cesar" autocomplete="off"></div>
+        <div class="fg"><label>Fecha</label><input type="date" id="gfec"></div>
+      </div>
+      <datalist id="listaProv"></datalist>
       <div class="fg" style="margin-bottom:10px"><label>Nota</label><textarea id="gnot" placeholder="Observaciones..."></textarea></div>
       <button class="btn" onclick="agregarGasto()">Registrar gasto</button>
     </div>
@@ -1096,7 +1102,16 @@ tr:hover td{background:#f8fafc}
         <div><label>Dolar Blue ($)</label><input type="number" id="cb" placeholder="0"></div>
         <div><label>Fecha</label><input type="date" id="cf"></div>
       </div>
-      <button class="btn" style="margin-top:12px" onclick="guardarCotiz()">Guardar cotizacion</button>
+      <div style="border-top:1px solid var(--b);margin-top:14px;padding-top:14px">
+        <label style="display:block;font-size:11px;font-weight:600;color:var(--m);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Costo del m² de construccion ($) — opcional</label>
+        <input type="number" id="cm2" placeholder="Ej: 1450000" step="1000" style="width:100%;padding:9px 11px;border:1px solid var(--b);border-radius:9px;font-size:14px;font-weight:600">
+        <div style="font-size:12px;color:var(--m);margin-top:6px;line-height:1.5">
+          Indice del Colegio de Arquitectos de Cordoba. Se actualiza una vez por mes:
+          cargalo cuando salga y todos los gastos hasta el proximo valor usan ese indice.
+          Dejalo vacio si solo estas guardando la cotizacion del dolar.
+        </div>
+      </div>
+      <button class="btn" style="margin-top:14px" onclick="guardarCotiz()">Guardar cotizacion</button>
     </div>
     <div class="card"><div class="ct">Historial</div><div id="hcot" class="tw"></div></div>
   </div>
@@ -1130,7 +1145,10 @@ tr:hover td{background:#f8fafc}
       <div class="fg"><label>Categoria</label><select id="ecat"></select></div>
       <div class="fg"><label>Pagado por</label><select id="esoc"></select></div>
     </div>
-    <div class="fg" style="margin-bottom:10px"><label>Fecha</label><input type="date" id="efec"></div>
+    <div class="fr" style="margin-bottom:10px">
+      <div class="fg"><label>Proveedor</label><input type="text" id="eprov" list="listaProv" placeholder="Ej: Zuppa" autocomplete="off"></div>
+      <div class="fg"><label>Fecha</label><input type="date" id="efec"></div>
+    </div>
     <div class="fg" style="margin-bottom:10px"><label>Nota</label><textarea id="enot" placeholder="Observaciones..."></textarea></div>
     <div class="mdb">
       <button class="btns" onclick="cerrarEdit()">Cancelar</button>
@@ -1286,13 +1304,35 @@ function enP(g){
 function enUsdOf(g){ var c=cotizEn(g&&g.fecha); return c.oficial ? enP(g)/c.oficial : 0; }
 function enUsdBl(g){ var c=cotizEn(g&&g.fecha); return c.blue ? enP(g)/c.blue : 0; }
 
+// Costo del m2 de construccion vigente a una fecha.
+// Es un indice mensual, asi que se busca el ultimo registro con m2 cargado
+// en o antes de esa fecha (los registros de cotizacion sin m2 se saltean).
+function m2En(fecha){
+  if(!cotiz.length) return 0;
+  var v = 0;
+  for(var i=0;i<cotiz.length;i++){
+    if(fecha && cotiz[i].fecha > fecha) break;
+    if(cotiz[i].m2 > 0) v = cotiz[i].m2;
+  }
+  // Si el gasto es anterior al primer m2 cargado, usamos ese primero
+  if(!v){
+    for(var j=0;j<cotiz.length;j++){ if(cotiz[j].m2 > 0){ v = cotiz[j].m2; break; } }
+  }
+  return v;
+}
+function hayM2(){ return cotiz.some(function(c){ return c.m2 > 0; }); }
+// Cuantos m2 de construccion equivale un gasto, al indice vigente su fecha.
+function enM2(g){ var v = m2En(g&&g.fecha); return v ? enP(g)/v : 0; }
+function fmtM2(n){ return parseFloat(n||0).toLocaleString('es-AR',{maximumFractionDigits:2})+' m²'; }
+
 // Suma un conjunto de gastos valuando cada uno a la cotizacion de su fecha.
 function totales(gastos){
-  var t = {pesos:0, oficial:0, blue:0};
+  var t = {pesos:0, oficial:0, blue:0, m2:0};
   (gastos||[]).forEach(function(g){
     t.pesos   += enP(g);
     t.oficial += enUsdOf(g);
     t.blue    += enUsdBl(g);
+    t.m2      += enM2(g);
   });
   return t;
 }
@@ -1541,6 +1581,7 @@ function agregarGasto(){
     moneda:document.getElementById('gmon').value,
     categoria:document.getElementById('gcat').value,
     socio:document.getElementById('gsoc').value,
+    prov:document.getElementById('gprov').value.trim(),
     fecha:document.getElementById('gfec').value||new Date().toISOString().split('T')[0],
     nota:document.getElementById('gnot').value.trim()
   };
@@ -1549,6 +1590,7 @@ function agregarGasto(){
     document.getElementById('gd').value='';
     document.getElementById('gm').value='';
     document.getElementById('gnot').value='';
+    document.getElementById('gprov').value='';
     showToast('Gasto registrado correctamente');
     renderGas(); renderRes();
   });
@@ -1573,6 +1615,7 @@ function abrirEdit(id){
   document.getElementById('em').value=g.monto||0;
   document.getElementById('emon').value=g.moneda||'pesos';
   document.getElementById('efec').value=g.fecha||'';
+  document.getElementById('eprov').value=g.prov||'';
   document.getElementById('enot').value=g.nota||'';
   var ec=document.getElementById('ecat'); ec.innerHTML='';
   (o.categorias||[]).forEach(function(c){ var op=document.createElement('option');op.value=c;op.textContent=c;if(c===g.categoria)op.selected=true;ec.appendChild(op); });
@@ -1595,6 +1638,7 @@ function guardarEdit(){
       moneda:document.getElementById('emon').value,
       categoria:document.getElementById('ecat').value,
       socio:document.getElementById('esoc').value,
+      prov:document.getElementById('eprov').value.trim(),
       fecha:document.getElementById('efec').value||g.fecha,
       nota:document.getElementById('enot').value.trim()
     });
@@ -1607,6 +1651,50 @@ function guardarEdit(){
   });
 }
 
+// ═══════════════════════════════════════════
+// MEMORIA DE PROVEEDORES
+// ═══════════════════════════════════════════
+// Notas que no son nombres de proveedor y no deben sugerirse.
+var NO_PROVEEDOR = ['copia','gasto rapido','',' '];
+
+// Arma la lista de sugerencias a partir de los proveedores ya usados y,
+// como los gastos viejos guardaban el proveedor en la nota, tambien desde ahi.
+// Es solo autocompletado: no modifica ningun gasto.
+function proveedoresConocidos(){
+  var o = obra(); if(!o) return [];
+  var frec = {};
+  (o.gastos||[]).forEach(function(g){
+    [g.prov, g.nota].forEach(function(v, idx){
+      if(!v) return;
+      var n = String(v).trim();
+      if(!n || n.length > 30) return;
+      if(NO_PROVEEDOR.indexOf(n.toLowerCase()) >= 0) return;
+      if(n.indexOf('(') >= 0) return;           // notas explicativas
+      if(n.split(/\s+/).length > 3) return;      // frases, no nombres
+      // Agrupamos ignorando mayusculas: SILEONI y Sileoni son el mismo proveedor
+      var clave = n.toLowerCase();
+      if(!frec[clave]) frec[clave] = {nombre:n, n:0, esProv:false};
+      frec[clave].n += 1;
+      if(idx === 0) frec[clave].esProv = true;   // los del campo Proveedor pesan mas
+    });
+  });
+  return Object.keys(frec)
+    .map(function(k){ return frec[k]; })
+    .sort(function(a,b){
+      if(a.esProv !== b.esProv) return a.esProv ? -1 : 1;
+      if(b.n !== a.n) return b.n - a.n;
+      return a.nombre.localeCompare(b.nombre);
+    })
+    .map(function(x){ return x.nombre; });
+}
+
+function renderProveedores(){
+  var dl = document.getElementById('listaProv'); if(!dl) return;
+  dl.innerHTML = proveedoresConocidos().map(function(p){
+    return '<option value="'+esc(p)+'"></option>';
+  }).join('');
+}
+
 function limpiarFiltros(){
   document.getElementById('fBusq').value='';
   document.getElementById('fCat').value='';
@@ -1617,6 +1705,7 @@ function limpiarFiltros(){
 
 function renderGas(){
   var o=obra();
+  renderProveedores();
   // Selectores nuevo gasto
   var cs=document.getElementById('gcat'); var ss=document.getElementById('gsoc');
   if(cs){ cs.innerHTML=''; if(o)(o.categorias||[]).forEach(function(c){ var op=document.createElement('option');op.value=c;op.textContent=c;cs.appendChild(op); }); }
@@ -1640,7 +1729,11 @@ function renderGas(){
   var hasta=document.getElementById('fHasta').value||'';
 
   var gs=[].concat(o.gastos).filter(function(g){
-    if(busq&&g.desc.toLowerCase().indexOf(busq)<0) return false;
+    // La busqueda mira descripcion, proveedor y nota
+    if(busq){
+      var heno=((g.desc||'')+' '+(g.prov||'')+' '+(g.nota||'')).toLowerCase();
+      if(heno.indexOf(busq)<0) return false;
+    }
     if(catF&&g.categoria!==catF) return false;
     if(desde&&g.fecha<desde) return false;
     if(hasta&&g.fecha>hasta) return false;
@@ -1649,13 +1742,14 @@ function renderGas(){
 
   if(!gs.length){ c.innerHTML='<div class="empty">Sin resultados para el filtro aplicado</div>'; return; }
 
-  c.innerHTML='<table><thead><tr><th>Fecha</th><th>Descripcion</th><th>Categoria</th><th>Socio</th><th>Pesos</th><th>USD Oficial</th><th>USD Blue</th><th></th></tr></thead><tbody>'+
+  c.innerHTML='<table><thead><tr><th>Fecha</th><th>Descripcion</th><th>Proveedor</th><th>Categoria</th><th>Socio</th><th>Pesos</th><th>USD Oficial</th><th>USD Blue</th><th></th></tr></thead><tbody>'+
     gs.map(function(g){
       var p=enP(g);
       var uOf=enUsdOf(g);
       var uBl=enUsdBl(g);
       return '<tr><td>'+esc(g.fecha)+'</td>'+
         '<td>'+esc(g.desc)+(g.nota?'<br><small style="color:var(--m)">'+esc(g.nota)+'</small>':'')+'</td>'+
+        '<td>'+(g.prov?esc(g.prov):'<span style="color:var(--b)">—</span>')+'</td>'+
         '<td>'+esc(g.categoria)+'</td>'+
         '<td>'+esc(g.socio)+'</td>'+
         '<td style="font-weight:600">'+fmt(p)+'</td>'+
@@ -1686,14 +1780,25 @@ function renderRes(){
   document.getElementById('ro').textContent=fmtU(tot.oficial);
   document.getElementById('rb2').textContent=fmtU(tot.blue);
 
+  // La tarjeta de m2 solo aparece si cargaste al menos un costo del m2
+  var conM2 = hayM2();
+  var cardM2 = document.getElementById('rbM2');
+  if(cardM2){
+    cardM2.style.display = conM2 ? '' : 'none';
+    if(conM2) document.getElementById('rm2').textContent = fmtM2(tot.m2);
+    var grid = document.getElementById('rgTotales');
+    if(grid) grid.style.gridTemplateColumns = conM2 ? '1fr 1fr 1fr 1fr' : '1fr 1fr 1fr';
+  }
+
   // Por categoria: pc en pesos (lo usan el grafico y el presupuesto),
-  // pcU con el desglose en dolares historicos.
+  // pcU con el desglose en dolares historicos y m2.
   var pc={}, pcU={};
   (o.gastos||[]).forEach(function(g){
-    if(!pc[g.categoria]){ pc[g.categoria]=0; pcU[g.categoria]={oficial:0, blue:0}; }
+    if(!pc[g.categoria]){ pc[g.categoria]=0; pcU[g.categoria]={oficial:0, blue:0, m2:0}; }
     pc[g.categoria]+=enP(g);
     pcU[g.categoria].oficial+=enUsdOf(g);
     pcU[g.categoria].blue+=enUsdBl(g);
+    pcU[g.categoria].m2+=enM2(g);
   });
 
   // Grafico
@@ -1714,6 +1819,7 @@ function renderRes(){
       '<div class="rcat-val">Pesos: <span>'+fmt(p)+'</span></div>'+
       '<div class="rcat-val">Oficial: <span>'+fmtU(uOf)+'</span></div>'+
       '<div class="rcat-val">Blue: <span>'+fmtU(uBl)+'</span></div>'+
+      (conM2 ? '<div class="rcat-val">Equivale a: <span style="color:var(--a)">'+fmtM2(pcU[k].m2)+'</span></div>' : '')+
       '</div></div>';
   }).join('') : '<div class="empty">Sin gastos</div>';
 
@@ -1932,14 +2038,17 @@ function guardarCotiz(){
   var of=parseFloat(document.getElementById('co').value);
   var bl=parseFloat(document.getElementById('cb').value);
   var fe=document.getElementById('cf').value;
-  if(!of||!bl||!fe){ alert('Completa todos los campos'); return; }
+  var m2=parseFloat(document.getElementById('cm2').value);
+  if(!of||!bl||!fe){ alert('Completa dolar oficial, blue y fecha'); return; }
+  var reg={fecha:fe,oficial:of,blue:bl};
+  if(m2>0) reg.m2=m2;   // el m2 es opcional: si no se carga, no se guarda el campo
   setStatus('sync','Guardando...');
-  fsPut('cotizaciones/'+fe,{fecha:fe,oficial:of,blue:bl}).then(function(){
+  fsPut('cotizaciones/'+fe,reg).then(function(){
     var i=cotiz.findIndex?cotiz.findIndex(function(c){ return c.fecha===fe; }):-1;
-    if(i>=0) cotiz[i]={fecha:fe,oficial:of,blue:bl}; else cotiz.push({fecha:fe,oficial:of,blue:bl});
+    if(i>=0) cotiz[i]=reg; else cotiz.push(reg);
     cotiz.sort(function(a,b){ return a.fecha.localeCompare(b.fecha); });
     setStatus('ok','Guardado');
-    showToast('Cotizacion guardada');
+    showToast(m2>0 ? 'Cotizacion y costo del m² guardados' : 'Cotizacion guardada');
     renderCot(); renderRes();
   }).catch(function(){ setStatus('','Error al guardar'); });
 }
@@ -1948,11 +2057,18 @@ function renderCot(){
   var fi=document.getElementById('cf'); if(!fi) return;
   if(!fi.value) fi.value=new Date().toISOString().split('T')[0];
   var ch=cotiz.find?cotiz.find(function(x){ return x.fecha===fi.value; }):null;
-  if(ch){ document.getElementById('co').value=ch.oficial; document.getElementById('cb').value=ch.blue; }
+  if(ch){
+    document.getElementById('co').value=ch.oficial;
+    document.getElementById('cb').value=ch.blue;
+    document.getElementById('cm2').value=ch.m2||'';
+  }
   var c=document.getElementById('hcot'); if(!c) return;
   c.innerHTML=cotiz.length ?
-    '<table><thead><tr><th>Fecha</th><th>Oficial</th><th>Blue</th></tr></thead><tbody>'+
-    [].concat(cotiz).reverse().map(function(ct){ return '<tr><td>'+ct.fecha+'</td><td>'+fmt(ct.oficial)+'</td><td>'+fmt(ct.blue)+'</td></tr>'; }).join('')+'</tbody></table>'
+    '<table><thead><tr><th>Fecha</th><th>Oficial</th><th>Blue</th><th>Costo m²</th></tr></thead><tbody>'+
+    [].concat(cotiz).reverse().map(function(ct){
+      return '<tr><td>'+esc(ct.fecha)+'</td><td>'+fmt(ct.oficial)+'</td><td>'+fmt(ct.blue)+'</td>'+
+             '<td>'+(ct.m2>0?'<strong>'+fmt(ct.m2)+'</strong>':'<span style="color:var(--m)">—</span>')+'</td></tr>';
+    }).join('')+'</tbody></table>'
     : '<div class="empty">Sin cotizaciones</div>';
 }
 
@@ -2707,6 +2823,7 @@ function gastoRapido(){
     moneda:document.getElementById('qmon').value,
     categoria:(o.categorias||['Gastos Generales'])[0],
     socio:(o.socios||['Patricio'])[0],
+    prov:document.getElementById('qprov').value.trim(),
     fecha:new Date().toISOString().split('T')[0],
     nota:'Gasto rapido'
   };
@@ -2714,6 +2831,7 @@ function gastoRapido(){
   guardarObra(up).then(function(){
     document.getElementById('qd').value='';
     document.getElementById('qm').value='';
+    document.getElementById('qprov').value='';
     showToast('Gasto rapido registrado');
     renderGas(); renderRes();
   });
@@ -3032,32 +3150,34 @@ function exportarExcel(){
   var gs = [].concat(o.gastos||[]).sort(function(a,b){ return (a.fecha||'').localeCompare(b.fecha||''); });
   if(!gs.length){ alert('Esta obra no tiene gastos cargados'); return; }
 
-  var filas = [['Fecha','Descripcion','Categoria','Pagado por','Moneda','Monto original','Cotiz. oficial del dia','Cotiz. blue del dia','Costo en pesos','USD Oficial','USD Blue','Nota']];
+  var filas = [['Fecha','Descripcion','Proveedor','Categoria','Pagado por','Moneda','Monto original','Cotiz. oficial del dia','Cotiz. blue del dia','Costo m2 del dia','Costo en pesos','USD Oficial','USD Blue','Equivale en m2','Nota']];
   gs.forEach(function(g){
     var c = cotizEn(g.fecha);
     filas.push([
-      g.fecha||'', g.desc||'', g.categoria||'', g.socio||'', g.moneda||'',
+      g.fecha||'', g.desc||'', g.prov||'', g.categoria||'', g.socio||'', g.moneda||'',
       g.monto||0,
-      c.oficial||0, c.blue||0,
+      c.oficial||0, c.blue||0, m2En(g.fecha)||0,
       Math.round(enP(g)*100)/100,
       Math.round(enUsdOf(g)*100)/100,
       Math.round(enUsdBl(g)*100)/100,
+      Math.round(enM2(g)*100)/100,
       g.nota||''
     ]);
   });
 
   var tot = totales(gs);
   filas.push([]);
-  filas.push(['TOTAL','','','','','','','',
+  filas.push(['TOTAL','','','','','','','','','',
     Math.round(tot.pesos*100)/100,
     Math.round(tot.oficial*100)/100,
-    Math.round(tot.blue*100)/100, '']);
+    Math.round(tot.blue*100)/100,
+    Math.round(tot.m2*100)/100, '']);
   filas.push([]);
   filas.push(['Cada gasto se valua a la cotizacion vigente el dia en que se hizo.']);
 
   var wb = XLSX.utils.book_new();
   var ws = XLSX.utils.aoa_to_sheet(filas);
-  ws['!cols'] = [{wch:12},{wch:38},{wch:18},{wch:14},{wch:10},{wch:16},{wch:16},{wch:16},{wch:18},{wch:14},{wch:14},{wch:30}];
+  ws['!cols'] = [{wch:12},{wch:34},{wch:16},{wch:18},{wch:12},{wch:10},{wch:15},{wch:16},{wch:16},{wch:16},{wch:17},{wch:13},{wch:13},{wch:14},{wch:28}];
   XLSX.utils.book_append_sheet(wb, ws, 'Gastos');
 
   // Segunda hoja: resumen por categoria
