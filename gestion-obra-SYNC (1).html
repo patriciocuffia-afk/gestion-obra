@@ -1263,6 +1263,33 @@ tr:hover td{background:#f8fafc}
   </div>
 </div>
 
+<!-- MODAL CLAVE DE IA -->
+<div class="mb" id="modalIaKey">
+  <div class="md" style="max-width:460px">
+    <h2>Clave de la API de Anthropic</h2>
+    <p style="font-size:13px;color:var(--m);margin-bottom:14px;line-height:1.6">
+      La carga con IA usa tu propia cuenta de Anthropic. La clave se guarda solo en
+      este dispositivo, asi que hay que cargarla una vez en el celular y otra en la PC.
+    </p>
+    <div id="iaKeyEstado" style="font-size:12px;padding:9px 11px;border-radius:8px;margin-bottom:12px"></div>
+    <div class="fg" style="margin-bottom:6px">
+      <label>Pegá tu clave (empieza con sk-ant-)</label>
+      <input type="text" id="iaKeyInput" placeholder="sk-ant-..."
+             autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"
+             style="font-family:monospace;font-size:13px">
+    </div>
+    <div style="font-size:12px;color:var(--m);line-height:1.6;margin-bottom:6px">
+      La sacás de <strong>platform.claude.com</strong> → Settings → API keys.
+      Necesitas tener credito cargado en la cuenta.
+    </div>
+    <div class="mdb">
+      <button class="btns" onclick="cerrarModalIaKey()">Cancelar</button>
+      <button class="btns" onclick="borrarIaKey()" style="color:var(--d);border-color:var(--d);flex:0 0 auto">Borrar</button>
+      <button class="btn" onclick="guardarIaKey()" style="flex:1;margin-top:0">Guardar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL CONFIRMACION -->
 <div class="confirm-overlay" id="confirmModal">
   <div class="confirm-box">
@@ -2132,24 +2159,56 @@ function setIaKey(k){
   localStorage.setItem('obrick_ia_key', k);
 }
 
-function verificarIaKey(){
-  var k = getIaKey();
-  if(k && k.startsWith('sk-ant-')) return true;
-  var nueva = prompt('Para usar la carga inteligente con IA, ingresa tu clave API de Anthropic (empieza con sk-ant-):');
-  if(!nueva||!nueva.startsWith('sk-ant-')){ alert('Clave invalida. Obtene tu clave en console.anthropic.com'); return false; }
-  setIaKey(nueva.trim());
-  return true;
+// Limpia lo que suele agregar el teclado del celular al pegar: espacios,
+// saltos de linea, comillas y la mayuscula inicial del autocorrector.
+function normalizarIaKey(v){
+  if(!v) return '';
+  var s = String(v).replace(/\s+/g,'').replace(/^["'<]+|["'>]+$/g,'');
+  if(/^SK-ANT-/i.test(s) && !/^sk-ant-/.test(s)) s = 'sk-ant-' + s.slice(7);
+  return s;
+}
+function claveValida(k){ return !!k && k.indexOf('sk-ant-') === 0 && k.length > 20; }
+
+function abrirModalIaKey(){
+  var actual = getIaKey();
+  var est = document.getElementById('iaKeyEstado');
+  if(claveValida(actual)){
+    est.style.background = '#e8f5e9'; est.style.color = '#2e7d32';
+    est.textContent = 'Hay una clave guardada en este dispositivo (termina en …' + actual.slice(-6) + ').';
+  } else {
+    est.style.background = '#fff3e0'; est.style.color = '#e65100';
+    est.textContent = 'Todavia no hay una clave guardada en este dispositivo.';
+  }
+  document.getElementById('iaKeyInput').value = '';
+  document.getElementById('modalIaKey').className = 'mb show';
+  setTimeout(function(){ document.getElementById('iaKeyInput').focus(); }, 120);
+}
+function cerrarModalIaKey(){ document.getElementById('modalIaKey').className = 'mb'; }
+
+function guardarIaKey(){
+  var k = normalizarIaKey(document.getElementById('iaKeyInput').value);
+  if(!claveValida(k)){
+    alert('Esa clave no parece valida.\n\nTiene que empezar con sk-ant- y ser la clave completa.\nLa sacas de platform.claude.com, en Settings y despues API keys.');
+    return;
+  }
+  setIaKey(k);
+  cerrarModalIaKey();
+  showToast('Clave guardada. Ya podes analizar');
 }
 
-function iaConfigurarClave(){
-  var actual = getIaKey();
-  var msg = actual ? 'Clave actual: ...'+actual.slice(-6)+'\n\nIngresa una nueva clave (o cancelar para mantener la actual):' : 'Ingresa tu clave API de Anthropic (empieza con sk-ant-):';
-  var nueva = prompt(msg);
-  if(!nueva) return;
-  if(!nueva.startsWith('sk-ant-')){ alert('Clave invalida'); return; }
-  setIaKey(nueva.trim());
-  showToast('Clave guardada correctamente');
+function borrarIaKey(){
+  localStorage.removeItem('obrick_ia_key');
+  cerrarModalIaKey();
+  showToast('Clave borrada de este dispositivo');
 }
+
+function verificarIaKey(){
+  if(claveValida(getIaKey())) return true;
+  abrirModalIaKey();
+  return false;
+}
+
+function iaConfigurarClave(){ abrirModalIaKey(); }
 
 function setIaTipo(tipo){
   iaTipo = tipo;
@@ -2350,7 +2409,8 @@ function iaAnalizar(){
     var msg=e.message||'';
     if(msg.indexOf('401')>=0||msg.indexOf('authentication')>=0||msg.indexOf('api_key')>=0){
       localStorage.removeItem('obrick_ia_key');
-      alert('Clave API invalida o expirada.\nUsá el boton ⚙ Configurar clave para ingresar una nueva.');
+      alert('La clave de la API no fue aceptada.\nRevisa que sea correcta y que la cuenta tenga credito.');
+      abrirModalIaKey();
     } else if(msg.indexOf('529')>=0||msg.indexOf('overload')>=0){
       alert('El servicio de IA esta momentaneamente ocupado. Intenta en unos segundos.');
     } else if(msg.indexOf('No se detectaron')>=0){
@@ -3700,7 +3760,8 @@ function compAnalizar(){
     var msg = e.message||'';
     if(msg.indexOf('401')>=0||msg.indexOf('authentication')>=0){
       localStorage.removeItem('obrick_ia_key');
-      alert('Clave API inválida. Configurá una nueva con ⚙.');
+      alert('La clave de la API no fue aceptada.\nRevisa que sea correcta y que la cuenta tenga credito.');
+      abrirModalIaKey();
     } else if(msg.indexOf('529')>=0||msg.indexOf('overload')>=0){
       alert('Servicio de IA ocupado. Esperá unos segundos e intentá de nuevo.');
     } else {
