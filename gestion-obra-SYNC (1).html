@@ -1039,7 +1039,7 @@ tr:hover td{background:#f8fafc}
       <div class="ia-drop" id="iaDrop" onclick="document.getElementById('iaFile').click()" ondragover="iaDragOver(event)" ondragleave="iaDragLeave(event)" ondrop="iaDrop(event)">
         <div class="ia-drop-icon">📸</div>
         <div class="ia-drop-txt">Toca para subir foto o PDF</div>
-        <div class="ia-drop-sub">JPG, PNG o PDF · Max 5MB</div>
+        <div class="ia-drop-sub">JPG, PNG o PDF · hasta 10MB · lee las primeras 3 paginas</div>
       </div>
       <input type="file" id="iaFile" accept="image/*,.pdf" style="display:none" onchange="iaCargarArchivo(this)">
       <div class="ia-preview" id="iaPreview" style="display:none">
@@ -1052,8 +1052,30 @@ tr:hover td{background:#f8fafc}
       <button class="btn-ia" id="iaBtnAnalizar" style="display:none" onclick="iaAnalizar()">🔍 Analizar con IA</button>
       <div class="ia-result" id="iaResult" style="display:none">
         <div class="ia-result-title" id="iaResultTitle">Productos detectados — selecciona los que queres agregar:</div>
+
+        <!-- Gasto detectado en la factura -->
+        <div id="iaGastoBox" style="display:none;background:#fffbf0;border:1px solid #f3d9a4;border-radius:9px;padding:12px;margin-bottom:12px">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:10px">
+            <input type="checkbox" id="iaGastoChk" checked style="width:16px;height:16px;accent-color:var(--p)">
+            <span style="font-size:13px;font-weight:700;color:var(--t)">Registrar tambien el gasto</span>
+          </label>
+          <div class="fr t3" style="margin-bottom:8px">
+            <div class="fg"><label>Descripcion</label><input type="text" id="iaGDesc"></div>
+            <div class="fg"><label>Monto</label><input type="number" id="iaGMonto" step="0.01"></div>
+            <div class="fg"><label>Moneda</label><select id="iaGMon"><option value="pesos">Pesos</option><option value="oficial">Dolar Oficial</option><option value="blue">Dolar Blue</option></select></div>
+          </div>
+          <div class="fr" style="margin-bottom:8px">
+            <div class="fg"><label>Categoria</label><select id="iaGCat"></select></div>
+            <div class="fg"><label>Pagado por</label><select id="iaGSoc"></select></div>
+          </div>
+          <div class="fr">
+            <div class="fg"><label>Proveedor</label><input type="text" id="iaGProv" list="listaProv" autocomplete="off"></div>
+            <div class="fg"><label>Fecha</label><input type="date" id="iaGFec"></div>
+          </div>
+        </div>
+
         <div id="iaItems"></div>
-        <button class="btn-ia-ok" id="iaBtnConfirmar" onclick="iaConfirmar()">✓ Confirmar y actualizar stock</button>
+        <button class="btn-ia-ok" id="iaBtnConfirmar" onclick="iaConfirmar()">✓ Confirmar</button>
         <button class="btn-ia" style="margin-top:6px;background:#f5f5f5;color:var(--m)" onclick="iaReset()">Cancelar</button>
       </div>
     </div>
@@ -2087,6 +2109,8 @@ function renderAll(){
 var iaTipo = 'factura';
 var iaFileData = null;
 var iaFileType = null;
+var iaPaginas = [];      // [{base64, mediaType}] — una entrada por pagina
+var iaDatosGasto = null; // datos del gasto detectado en la factura
 var iaDetectados = [];
 
 // Los modelos actuales devuelven bloques de razonamiento antes del texto,
@@ -2148,49 +2172,79 @@ function iaCargarArchivo(input){
   if(file) procesarArchivoIA(file);
 }
 
+function iaListo(nombre, dataUrlPreview, paginas){
+  iaPaginas = paginas;
+  var prev = document.getElementById('iaPreview');
+  var img = document.getElementById('iaImg');
+  var fname = document.getElementById('iaFileName');
+  prev.style.display = 'block';
+  img.style.display = 'block';
+  img.src = dataUrlPreview;
+  fname.textContent = nombre + (paginas.length>1 ? ' · '+paginas.length+' paginas' : '');
+  document.getElementById('iaDrop').style.display='none';
+  document.getElementById('iaBtnAnalizar').style.display='block';
+  document.getElementById('iaResult').style.display='none';
+  document.getElementById('iaProcessing').style.display='none';
+}
+
 function procesarArchivoIA(file){
-  if(file.size > 5*1024*1024){ alert('El archivo es muy grande. Maximo 5MB.'); return; }
+  if(file.size > 10*1024*1024){ alert('El archivo es muy grande. Maximo 10MB.'); return; }
   iaFileType = file.type;
+  iaDatosGasto = null;
+
+  // PDF: lo convertimos a imagenes con pdf.js (la misma via que usa Computo).
+  // Antes se rechazaba y habia que sacarle una foto a la pantalla.
+  if(file.type === 'application/pdf'){
+    var proc = document.getElementById('iaProcessing');
+    proc.style.display = 'block';
+    proc.innerHTML = '<span class="ia-spinner"></span>Leyendo el PDF...';
+    pdfToImages(file).then(function(imgs){
+      proc.innerHTML = '<span class="ia-spinner"></span>Analizando con IA...';
+      if(!imgs.length){ proc.style.display='none'; alert('No se pudo leer el PDF.'); return; }
+      var pags = imgs.slice(0,3).map(function(p){ return {base64:p.base64, mediaType:p.mediaType}; });
+      iaListo(file.name, 'data:'+pags[0].mediaType+';base64,'+pags[0].base64, pags);
+    }).catch(function(e){
+      proc.style.display='none';
+      alert('No se pudo leer el PDF: '+(e.message||e));
+    });
+    return;
+  }
+
   var reader = new FileReader();
   reader.onload = function(e){
-    iaFileData = e.target.result.split(',')[1];
-    var prev = document.getElementById('iaPreview');
-    var img = document.getElementById('iaImg');
-    var fname = document.getElementById('iaFileName');
-    prev.style.display = 'block';
-    fname.textContent = file.name;
-    if(file.type.indexOf('image') >= 0){
-      img.src = e.target.result; img.style.display='block';
-    } else {
-      img.style.display='none';
-      prev.innerHTML='<div style="text-align:center;padding:10px;font-size:13px;opacity:.8">📄 '+file.name+'</div>';
-    }
-    document.getElementById('iaDrop').style.display='none';
-    document.getElementById('iaBtnAnalizar').style.display='block';
-    document.getElementById('iaResult').style.display='none';
+    var mt = file.type === 'image/png' ? 'image/png'
+           : file.type === 'image/webp' ? 'image/webp'
+           : file.type === 'image/gif' ? 'image/gif' : 'image/jpeg';
+    var b64 = e.target.result.split(',')[1];
+    iaFileData = b64;
+    iaListo(file.name, e.target.result, [{base64:b64, mediaType:mt}]);
   };
   reader.readAsDataURL(file);
 }
 
 function iaAnalizar(){
-  if(!iaFileData){ alert('Primero selecciona un archivo'); return; }
+  if(!iaPaginas.length){ alert('Primero selecciona un archivo'); return; }
   if(!verificarIaKey()) return;
-
-  if(iaFileType === 'application/pdf'){
-    alert('Por el momento usa fotos (JPG o PNG). Podes fotografiar la factura con el celular o hacer una captura de pantalla del PDF.');
-    return;
-  }
 
   var o = obra();
   var stockActual = (o&&o.stock||[]).map(function(s){ return s.material; }).join(', ')||'(sin stock cargado)';
-  var promptTxt = iaTipo === 'factura'
-    ? 'Analiza esta factura de compra de materiales de construccion. Extrae todos los productos con cantidad y unidad. Stock actual: '+stockActual+'. Responde SOLO con JSON valido sin ningun texto adicional: {"tipo":"factura","proveedor":"nombre","items":[{"nombre":"material","cantidad":1,"unidad":"unidad"}]}'
-    : 'Analiza este remito de entrega de materiales. Extrae los productos con cantidad y unidad. Stock actual: '+stockActual+'. Responde SOLO con JSON valido sin ningun texto adicional: {"tipo":"remito","proveedor":"nombre","items":[{"nombre":"material","cantidad":1,"unidad":"unidad"}]}';
+  var cats = (o&&o.categorias||[]).join(', ')||'Materiales';
+  var provs = proveedoresConocidos().slice(0,20).join(', ');
 
-  var mediaType = 'image/jpeg';
-  if(iaFileType==='image/png') mediaType='image/png';
-  if(iaFileType==='image/webp') mediaType='image/webp';
-  if(iaFileType==='image/gif') mediaType='image/gif';
+  var comun = ' Stock actual de la obra: '+stockActual+'.'+
+    ' Categorias disponibles: '+cats+'.'+
+    (provs ? ' Proveedores habituales (usa exactamente uno de estos si coincide): '+provs+'.' : '')+
+    ' Para "fecha" usa el formato AAAA-MM-DD; si no la ves, deja "".'+
+    ' Para "categoria" elegi la mas adecuada de la lista.'+
+    ' Los importes van sin simbolos ni separadores de miles, con punto decimal.';
+
+  var promptTxt = iaTipo === 'factura'
+    ? 'Analiza esta factura de compra de materiales de construccion en Argentina.'+
+      ' Extrae el proveedor, la fecha, el TOTAL final de la factura (con IVA incluido)'+
+      ' y todos los productos con su cantidad y unidad.'+comun
+    : 'Analiza este remito de entrega de materiales en Argentina.'+
+      ' Extrae el proveedor, la fecha y los productos con cantidad y unidad.'+
+      ' Un remito normalmente NO tiene importes: en ese caso pone total 0.'+comun;
 
   document.getElementById('iaBtnAnalizar').style.display='none';
   document.getElementById('iaProcessing').style.display='block';
@@ -2217,6 +2271,9 @@ function iaAnalizar(){
             properties:{
               tipo:{type:'string'},
               proveedor:{type:'string'},
+              fecha:{type:'string'},
+              total:{type:'number'},
+              categoria:{type:'string'},
               items:{
                 type:'array',
                 items:{
@@ -2231,17 +2288,16 @@ function iaAnalizar(){
                 }
               }
             },
-            required:['tipo','proveedor','items'],
+            required:['tipo','proveedor','fecha','total','categoria','items'],
             additionalProperties:false
           }
         }
       },
       messages:[{
         role:'user',
-        content:[
-          {type:'image',source:{type:'base64',media_type:mediaType,data:iaFileData}},
-          {type:'text',text:promptTxt}
-        ]
+        content: iaPaginas.map(function(p){
+          return {type:'image', source:{type:'base64', media_type:p.mediaType, data:p.base64}};
+        }).concat([{type:'text', text:promptTxt}])
       }]
     })
   })
@@ -2266,7 +2322,10 @@ function iaAnalizar(){
       } catch(e2){ json = null; }
     }
 
-    if(!json||!json.items||!json.items.length){
+    // Sirve tambien si detecto el importe pero no los items: igual podemos
+    // registrar el gasto, que es lo que mas cuesta cargar a mano.
+    if(json && json.total > 0 && (!json.items || !json.items.length)) json.items = [];
+    else if(!json||!json.items||!json.items.length){
       // Si la IA respondió que no puede ver, dar mensaje claro
       if(txt.toLowerCase().indexOf('no puedo')>=0||txt.toLowerCase().indexOf('no se puede')>=0||txt.toLowerCase().indexOf('oscura')>=0||txt.toLowerCase().indexOf('ilegible')>=0){
         throw new Error('La imagen no es legible. Toma una foto con mejor iluminacion y que el texto sea visible.');
@@ -2308,8 +2367,46 @@ function renderIaResult(json){
   var items = document.getElementById('iaItems');
   var tipo = json.tipo||iaTipo;
   var prov = json.proveedor ? ' — '+json.proveedor : '';
-  title.textContent = (tipo==='factura'?'Compra detectada':'Remito detectado')+prov+'. Selecciona los items:';
-  if(!iaDetectados.length){ items.innerHTML='<div class="empty">No se detectaron productos</div>'; div.style.display='block'; return; }
+  title.textContent = (tipo==='factura'?'Compra detectada':'Remito detectado')+prov+'. Revisa y confirma:';
+
+  // Bloque del gasto: se completa con lo que detecto la IA y queda editable.
+  // Solo se ofrece si hay un importe (un remito normalmente no lo tiene).
+  var o = obra();
+  var box = document.getElementById('iaGastoBox');
+  iaDatosGasto = null;
+  if(o && json.total > 0){
+    iaDatosGasto = json;
+    box.style.display = 'block';
+    document.getElementById('iaGastoChk').checked = true;
+    document.getElementById('iaGDesc').value = json.proveedor
+      ? 'Compra '+json.proveedor
+      : (json.items && json.items.length ? json.items[0].nombre : 'Compra de materiales');
+    document.getElementById('iaGMonto').value = json.total;
+    document.getElementById('iaGMon').value = 'pesos';
+    document.getElementById('iaGProv').value = json.proveedor||'';
+    var hoy = new Date().toISOString().split('T')[0];
+    document.getElementById('iaGFec').value = /^\d{4}-\d{2}-\d{2}$/.test(json.fecha||'') ? json.fecha : hoy;
+
+    var sc = document.getElementById('iaGCat'); sc.innerHTML='';
+    (o.categorias||[]).forEach(function(c){
+      var op=document.createElement('option'); op.value=c; op.textContent=c;
+      if(json.categoria && c.toLowerCase()===String(json.categoria).toLowerCase()) op.selected=true;
+      sc.appendChild(op);
+    });
+    var ss = document.getElementById('iaGSoc'); ss.innerHTML='';
+    (o.socios||[]).forEach(function(s){
+      var op=document.createElement('option'); op.value=s; op.textContent=s; ss.appendChild(op);
+    });
+  } else {
+    box.style.display = 'none';
+  }
+  if(!iaDetectados.length){
+    items.innerHTML = '<div class="empty" style="padding:14px">'+
+      (iaDatosGasto ? 'No se detectaron materiales para el stock, pero si el importe del gasto.'
+                    : 'No se detectaron productos')+'</div>';
+    div.style.display='block';
+    return;
+  }
   items.innerHTML = iaDetectados.map(function(item){
     var matchInfo = item._stockRef ? '<span style="color:var(--s);font-weight:700"> ✓ En stock: '+item._stockRef.cantidad+' '+item._stockRef.unidad+'</span>' : '<span style="color:var(--a)"> ★ Nuevo</span>';
     var accion = iaTipo==='factura' ? 'Agregar' : 'Descontar';
@@ -2356,22 +2453,54 @@ function iaConfirmar(){
     procesados++;
   });
 
-  if(!procesados){ showToast('No se selecciono ningun item'); return; }
-  var up = Object.assign({},o,{stock:st,categorias:cats});
+  // Gasto detectado en la factura
+  var gastos = [].concat(o.gastos||[]);
+  var chkG = document.getElementById('iaGastoChk');
+  var creaGasto = iaDatosGasto && chkG && chkG.checked;
+  var montoG = 0;
+  if(creaGasto){
+    montoG = parseFloat(document.getElementById('iaGMonto').value)||0;
+    var descG = document.getElementById('iaGDesc').value.trim();
+    if(montoG<=0 || !descG){
+      alert('Para registrar el gasto completa la descripcion y un monto mayor a cero.');
+      return;
+    }
+    gastos.push({
+      id: Date.now().toString(),
+      desc: descG,
+      monto: montoG,
+      moneda: document.getElementById('iaGMon').value,
+      categoria: document.getElementById('iaGCat').value,
+      socio: document.getElementById('iaGSoc').value,
+      prov: document.getElementById('iaGProv').value.trim(),
+      fecha: document.getElementById('iaGFec').value || new Date().toISOString().split('T')[0],
+      nota: 'Cargado desde ' + (iaTipo==='factura'?'factura':'remito') + ' con IA'
+    });
+  }
+
+  if(!procesados && !creaGasto){ showToast('No seleccionaste nada para guardar'); return; }
+
+  var up = Object.assign({},o,{stock:st,categorias:cats,gastos:gastos});
   guardarObra(up).then(function(){
-    showToast(procesados+' material'+(procesados>1?'es':'')+' '+(iaTipo==='factura'?'agregado'+(procesados>1?'s':''):'descontado'+(procesados>1?'s':'')));
+    var partes = [];
+    if(creaGasto) partes.push('gasto de '+fmt(montoG));
+    if(procesados) partes.push(procesados+' material'+(procesados>1?'es':''));
+    showToast('Registrado: '+partes.join(' y '));
     iaReset();
-    renderStk();
+    renderStk(); renderGas(); renderRes();
   });
 }
 
 function iaReset(){
-  iaFileData=null; iaFileType=null; iaDetectados=[];
+  iaFileData=null; iaFileType=null; iaDetectados=[]; iaPaginas=[]; iaDatosGasto=null;
   document.getElementById('iaDrop').style.display='block';
   document.getElementById('iaPreview').style.display='none';
-  document.getElementById('iaProcessing').style.display='none';
+  var proc=document.getElementById('iaProcessing');
+  proc.style.display='none';
+  proc.innerHTML='<span class="ia-spinner"></span>Analizando con IA...';
   document.getElementById('iaBtnAnalizar').style.display='none';
   document.getElementById('iaResult').style.display='none';
+  document.getElementById('iaGastoBox').style.display='none';
   document.getElementById('iaFile').value='';
 }
 
