@@ -554,7 +554,7 @@ tr:hover td{background:#f8fafc}
         <div class="rb"><div class="mn" id="rp">$0</div><div class="lb">Pesos</div></div>
         <div class="rb"><div class="mn" id="ro">USD 0</div><div class="lb">Dolar Oficial</div></div>
         <div class="rb"><div class="mn" id="rb2">USD 0</div><div class="lb">Dolar Blue</div></div>
-        <div class="rb" id="rbM2" style="display:none"><div class="mn" id="rm2">0 m²</div><div class="lb">Metros de construccion</div></div>
+        <div class="rb" id="rbM2"><div class="mn" id="rm2">— m²</div><div class="lb" id="lm2">Metros de construccion</div></div>
       </div>
     </div>
     <div class="card">
@@ -1829,14 +1829,26 @@ function renderRes(){
   document.getElementById('ro').textContent=fmtU(tot.oficial);
   document.getElementById('rb2').textContent=fmtU(tot.blue);
 
-  // La tarjeta de m2 solo aparece si cargaste al menos un costo del m2
+  // La tarjeta de m2 siempre se ve. Si todavia no cargaste el indice,
+  // muestra como activarlo en vez de esconderse (antes no se descubria).
   var conM2 = hayM2();
   var cardM2 = document.getElementById('rbM2');
   if(cardM2){
-    cardM2.style.display = conM2 ? '' : 'none';
-    if(conM2) document.getElementById('rm2').textContent = fmtM2(tot.m2);
+    cardM2.style.display = '';
     var grid = document.getElementById('rgTotales');
-    if(grid) grid.style.gridTemplateColumns = conM2 ? '1fr 1fr 1fr 1fr' : '1fr 1fr 1fr';
+    if(grid) grid.style.gridTemplateColumns = '1fr 1fr 1fr 1fr';
+    var valM2 = document.getElementById('rm2');
+    var lblM2 = document.getElementById('lm2');
+    if(conM2){
+      cardM2.style.cursor = ''; cardM2.onclick = null; cardM2.style.opacity = '';
+      valM2.textContent = fmtM2(tot.m2);
+      lblM2.textContent = 'Metros de construccion';
+    } else {
+      cardM2.style.cursor = 'pointer'; cardM2.style.opacity = '.75';
+      cardM2.onclick = function(){ showTab('cot', document.querySelectorAll('.tab')[7]); };
+      valM2.textContent = '— m²';
+      lblM2.innerHTML = 'Carga el costo del m² en <u>Cotizacion</u>';
+    }
   }
 
   // Por categoria: pc en pesos (lo usan el grafico y el presupuesto),
