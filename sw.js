@@ -1,4 +1,4 @@
-// sw.js v4 — limpieza total de cache
+// sw.js v5 — limpieza total de cache + HTML siempre fresco
 self.addEventListener('install', function(event) {
   self.skipWaiting();
 });
@@ -23,7 +23,19 @@ self.addEventListener('activate', function(event) {
   );
 });
 
-// Sin cache — siempre red
+// Sin cache propio — siempre red.
+// Ademas, para el HTML de la app pedimos con cache:'no-store' para saltear
+// tambien el cache HTTP del navegador. GitHub Pages envia Cache-Control:
+// max-age=600, asi que sin esto una version recien publicada puede tardar
+// hasta 10 minutos en verse.
 self.addEventListener('fetch', function(event) {
-  event.respondWith(fetch(event.request));
+  var req = event.request;
+  var esDocumento = req.mode === 'navigate' || req.destination === 'document';
+  if (esDocumento) {
+    event.respondWith(
+      fetch(req, {cache: 'no-store'}).catch(function(){ return fetch(req); })
+    );
+    return;
+  }
+  event.respondWith(fetch(req));
 });
