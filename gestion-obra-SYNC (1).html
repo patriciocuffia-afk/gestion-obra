@@ -352,8 +352,11 @@ td,.mn,.rcat-val span,.cat-total-item span,.br span,.meta-stat .val,.eta-stat .v
 .card{border-radius:var(--r);box-shadow:var(--sh);border-color:var(--b);padding:18px;margin-bottom:16px}
 .ct{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--m);margin-bottom:14px}
 
-/* Tarjetas de totales */
-.rb{background:linear-gradient(160deg,#f7fafc,#eef3f8);border:1px solid var(--b);border-radius:10px;padding:14px 10px}
+/* Tarjetas de totales — 4 columnas en pantalla grande, se apilan en el celular.
+   El ancho se define aca y NO por JS, para que la regla de celular lo pueda pisar. */
+.rg{grid-template-columns:repeat(4,minmax(0,1fr))}
+.rb{background:linear-gradient(160deg,#f7fafc,#eef3f8);border:1px solid var(--b);border-radius:10px;padding:14px 10px;min-width:0}
+.rb .mn{overflow-wrap:anywhere}
 .rb .mn{font-size:19px;letter-spacing:-.02em;color:var(--p)}
 .rb .lb{font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
 
@@ -419,17 +422,27 @@ tr:hover td{background:#f8fafc}
 .toast{border-radius:10px;padding:11px 22px;box-shadow:var(--sh-lg);background:#1f2d3d}
 
 /* Celular */
-@media(max-width:600px){
-  .content{padding:14px 12px 40px}
+@media(max-width:820px){
+  /* Nada puede ser mas ancho que la pantalla */
+  html,body{max-width:100%;overflow-x:hidden}
+  .content{padding:14px 12px 40px;max-width:100%}
   .card{padding:15px;border-radius:11px}
-  .rg{grid-template-columns:1fr;gap:8px}
-  .rb{display:flex;align-items:center;justify-content:space-between;text-align:left;padding:12px 14px}
-  .rb .lb{margin-top:0}
-  .fr,.fr.t3{grid-template-columns:1fr}
-  .bg2{grid-template-columns:1fr}
+  .rg{grid-template-columns:1fr!important;gap:8px}
+  .rb{display:flex;align-items:center;justify-content:space-between;text-align:left;padding:12px 14px;gap:10px}
+  .rb .mn{font-size:17px}
+  .rb .lb{margin-top:0;text-align:right;max-width:45%}
+  .fr,.fr.t3,.cg,.bg2,.meta-grid,.meta-row{grid-template-columns:1fr}
+  .eta-stats{grid-template-columns:1fr 1fr}
   .export-bar{justify-content:stretch}
-  .btn-exp{flex:1;justify-content:center}
+  .btn-exp{flex:1;justify-content:center;padding:10px 8px}
   .tab{padding:8px 12px;font-size:12px}
+  .hdr{padding:11px 12px}
+  .hdr h1{font-size:15px}
+  .osel{max-width:120px}
+  .chart-wrap{gap:14px}
+  .rcat-vals{gap:10px}
+  .md{padding:18px;border-radius:14px}
+  .mdb{flex-wrap:wrap}
 }
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -1101,7 +1114,13 @@ tr:hover td{background:#f8fafc}
         <div class="fg" style="display:flex;align-items:flex-end"><button class="btn" onclick="agregarCat()">Agregar</button></div>
       </div>
     </div>
-    <div class="card"><div class="ct">Categorias</div><div id="lcat"></div></div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap">
+        <div class="ct" style="margin-bottom:0">Categorias</div>
+        <button class="btne" onclick="abrirPres()" style="font-size:12px;padding:6px 12px">Presupuesto por categoria</button>
+      </div>
+      <div id="lcat"></div>
+    </div>
   </div>
 
   <!-- SOCIOS -->
@@ -1373,6 +1392,31 @@ function hayM2(){ return cotiz.some(function(c){ return c.m2 > 0; }); }
 // Cuantos m2 de construccion equivale un gasto, al indice vigente su fecha.
 function enM2(g){ var v = m2En(g&&g.fecha); return v ? enP(g)/v : 0; }
 function fmtM2(n){ return parseFloat(n||0).toLocaleString('es-AR',{maximumFractionDigits:2})+' m²'; }
+
+// ── PRESUPUESTO POR CATEGORIA ──
+// Se guarda como {monto, moneda}. Tambien acepta el formato viejo (un numero
+// suelto, que significaba pesos) para no romper obras cargadas antes.
+function presupCat(o, cat){
+  var p = (o && o.presupuestos) ? o.presupuestos[cat] : null;
+  if(p === null || p === undefined) return null;
+  if(typeof p === 'number') return p > 0 ? {monto:p, moneda:'pesos'} : null;
+  return p.monto > 0 ? {monto:p.monto, moneda:p.moneda||'pesos'} : null;
+}
+// Total de un conjunto de gastos expresado en la moneda pedida
+function totalEnMoneda(gastos, moneda){
+  var t = totales(gastos);
+  if(moneda==='oficial') return t.oficial;
+  if(moneda==='blue') return t.blue;
+  if(moneda==='m2') return t.m2;
+  return t.pesos;
+}
+function fmtMoneda(v, moneda){
+  if(moneda==='oficial') return fmtU(v)+' Of.';
+  if(moneda==='blue') return fmtU(v)+' Blue';
+  if(moneda==='m2') return fmtM2(v);
+  return fmt(v);
+}
+var MONEDAS = [['pesos','Pesos'],['oficial','Dolar Oficial'],['blue','Dolar Blue'],['m2','m² de construccion']];
 
 // Suma un conjunto de gastos valuando cada uno a la cotizacion de su fecha.
 function totales(gastos){
@@ -1835,8 +1879,6 @@ function renderRes(){
   var cardM2 = document.getElementById('rbM2');
   if(cardM2){
     cardM2.style.display = '';
-    var grid = document.getElementById('rgTotales');
-    if(grid) grid.style.gridTemplateColumns = '1fr 1fr 1fr 1fr';
     var valM2 = document.getElementById('rm2');
     var lblM2 = document.getElementById('lm2');
     if(conM2){
@@ -2017,6 +2059,25 @@ function renderCat(){
       }
     }
 
+    // Barra de presupuesto de la categoria, si tiene tope cargado
+    var pr = presupCat(o, cat);
+    var barra = '';
+    if(pr){
+      var gastadoP = totalEnMoneda(gastosCat, pr.moneda);
+      var realP = pr.monto > 0 ? Math.round(gastadoP/pr.monto*100) : 0;
+      var restaP = pr.monto - gastadoP;
+      var clsP = realP < 75 ? 'pres-ok' : realP < 100 ? 'pres-warn' : 'pres-over';
+      var colP = realP < 75 ? 'var(--s)' : realP < 100 ? 'var(--a)' : 'var(--d)';
+      barra = '<div style="margin-top:8px">'+
+        '<div class="pres-bar"><div class="pres-fill '+clsP+'" style="width:'+Math.min(realP,100)+'%"></div></div>'+
+        '<div style="display:flex;justify-content:space-between;gap:8px;margin-top:4px;font-size:11px;flex-wrap:wrap">'+
+          '<span style="color:var(--m)">Tope '+fmtMoneda(pr.monto, pr.moneda)+' · '+realP+'% usado</span>'+
+          '<span style="font-weight:700;color:'+colP+'">'+
+            (restaP >= 0 ? 'Queda '+fmtMoneda(restaP, pr.moneda) : 'Excedido '+fmtMoneda(-restaP, pr.moneda))+
+          '</span>'+
+        '</div></div>';
+    }
+
     return '<div class="cat-item">'+
       '<div class="cat-header" onclick="toggleCat(\''+escAttr(cat)+'\')">' +
         '<div class="cat-header-left">'+
@@ -2027,6 +2088,7 @@ function renderCat(){
             '<div class="cat-total-item">Blue: <span>'+fmtU(uBl)+'</span></div>'+
             '<div class="cat-total-item" style="color:var(--m)">'+gastosCat.length+' movimiento'+(gastosCat.length!==1?'s':'')+'</div>'+
           '</div>'+
+          barra+
         '</div>'+
         '<div style="display:flex;align-items:center;gap:8px">'+
           '<button class="btnd" onclick="event.stopPropagation();eliminarCat(\''+escAttr(cat)+'\')">✕</button>'+
@@ -3261,11 +3323,24 @@ function renderChart(pc){
 // ═══════════════════════════════════════════
 function abrirPres(){
   var o = obra(); if(!o) return;
-  var pres = o.presupuestos || {};
-  var inputs = (o.categorias||[]).map(function(cat){
-    return '<div class="fg" style="margin-bottom:10px">'+
-      '<label>'+esc(cat)+'</label>'+
-      '<input type="number" class="pres-input" id="pi_'+cat.replace(/\s/g,'_')+'" placeholder="0" value="'+(pres[cat]||0)+'">'+
+  // Usamos el indice como id para que no dependa del nombre de la categoria
+  var inputs = (o.categorias||[]).map(function(cat, i){
+    var p = presupCat(o, cat) || {monto:'', moneda:'pesos'};
+    var gastado = totalEnMoneda((o.gastos||[]).filter(function(g){ return g.categoria===cat; }), p.moneda);
+    var opciones = MONEDAS.map(function(m){
+      return '<option value="'+m[0]+'"'+(m[0]===p.moneda?' selected':'')+'>'+m[1]+'</option>';
+    }).join('');
+    return '<div style="border-bottom:1px solid var(--b);padding:11px 0">'+
+      '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px">'+
+        '<span style="font-size:13px;font-weight:700">'+esc(cat)+'</span>'+
+        '<span style="font-size:11px;color:var(--m)">Ya lleva '+fmtMoneda(gastado, p.moneda)+'</span>'+
+      '</div>'+
+      '<div class="fr">'+
+        '<div class="fg"><label>Presupuesto (0 = sin tope)</label>'+
+          '<input type="number" class="pres-input" id="pi_'+i+'" placeholder="0" step="0.01" value="'+(p.monto||'')+'"></div>'+
+        '<div class="fg"><label>Moneda</label>'+
+          '<select class="pres-input" id="pi_'+i+'_m">'+opciones+'</select></div>'+
+      '</div>'+
     '</div>';
   }).join('');
   document.getElementById('presInputs').innerHTML = inputs;
@@ -3277,42 +3352,47 @@ function cerrarPres(){ document.getElementById('modalPres').className = 'mb'; }
 function guardarPres(){
   var o = obra(); if(!o) return;
   var pres = {};
-  (o.categorias||[]).forEach(function(cat){
-    var id = 'pi_'+cat.replace(/\s/g,'_');
-    var inp = document.getElementById(id);
-    if(inp) pres[cat] = parseFloat(inp.value)||0;
+  (o.categorias||[]).forEach(function(cat, i){
+    var inp = document.getElementById('pi_'+i);
+    var sel = document.getElementById('pi_'+i+'_m');
+    var m = inp ? parseFloat(inp.value)||0 : 0;
+    // Solo guardamos las categorias que tienen tope, para no ensuciar el documento
+    if(m > 0) pres[cat] = {monto:m, moneda: sel ? sel.value : 'pesos'};
   });
   var up = Object.assign({}, o, {presupuestos: pres});
   guardarObra(up).then(function(){
     cerrarPres();
     showToast('Presupuestos guardados');
-    renderRes();
+    renderRes(); renderCat();
   });
 }
 
 function renderPres(o, pc){
   var c = document.getElementById('rpres'); if(!c) return;
-  var pres = o.presupuestos || {};
-  var cats = o.categorias || [];
-  var conPres = cats.filter(function(cat){ return pres[cat] > 0; });
-  if(!conPres.length){
-    c.innerHTML = '<div class="empty" style="padding:16px">Sin presupuestos asignados. Hacé clic en "Editar presupuestos" para comenzar.</div>';
+  var cats = (o.categorias || []).filter(function(cat){ return presupCat(o, cat); });
+  if(!cats.length){
+    c.innerHTML = '<div class="empty" style="padding:16px">Sin presupuestos asignados. Hacé clic en "Editar presupuestos" para poner un tope por categoria.</div>';
     return;
   }
-  c.innerHTML = conPres.map(function(cat){
-    var gasto = pc[cat] || 0;
-    var budget = pres[cat] || 0;
-    var pct = budget > 0 ? Math.min(Math.round(gasto/budget*100), 100) : 0;
-    var real = budget > 0 ? Math.round(gasto/budget*100) : 0;
+  c.innerHTML = cats.map(function(cat){
+    var p = presupCat(o, cat);
+    // Gastado y presupuesto se comparan en la misma moneda, sin conversiones cruzadas
+    var gasto = totalEnMoneda((o.gastos||[]).filter(function(g){ return g.categoria===cat; }), p.moneda);
+    var real = p.monto > 0 ? Math.round(gasto/p.monto*100) : 0;
+    var pct = Math.min(real, 100);
     var cls = real < 75 ? 'pres-ok' : real < 100 ? 'pres-warn' : 'pres-over';
-    var ct = cotizH();
+    var resta = p.monto - gasto;
     return '<div class="pres-row">'+
       '<div class="pres-header">'+
         '<div class="pres-name">'+esc(cat)+'</div>'+
-        '<div class="pres-nums">Gastado: <span>'+fmt(gasto)+'</span> / Ppto: <span>'+fmt(budget)+'</span></div>'+
+        '<div class="pres-nums">'+fmtMoneda(gasto, p.moneda)+' de '+fmtMoneda(p.monto, p.moneda)+'</div>'+
       '</div>'+
       '<div class="pres-bar"><div class="pres-fill '+cls+'" style="width:'+pct+'%"></div></div>'+
-      '<div class="pres-pct" style="color:'+(real<75?'var(--s)':real<100?'var(--a)':'var(--d)')+'">'+real+'% ejecutado'+(real>100?' — Excedido en '+fmt(gasto-budget):'')+'</div>'+
+      '<div class="pres-pct" style="color:'+(real<75?'var(--s)':real<100?'var(--a)':'var(--d)')+'">'+
+        real+'% ejecutado · '+
+        (resta >= 0 ? 'Queda por pagar '+fmtMoneda(resta, p.moneda)
+                    : 'Excedido en '+fmtMoneda(-resta, p.moneda))+
+      '</div>'+
     '</div>';
   }).join('');
 }
