@@ -3977,7 +3977,43 @@ function toggleHelp(id){
 // ═══════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════
-window.addEventListener('load', function(){ setTimeout(checkSavedToken,300); });
+// ═══════════════════════════════════════════
+// AVISO DE VERSION NUEVA
+// ═══════════════════════════════════════════
+// Debe coincidir con version.json. Hay que subir los dos juntos en cada cambio.
+var APP_VERSION = '2026-08-11-1';
+
+function bannerActualizar(nueva){
+  if(document.getElementById('updBanner')) return;
+  var d = document.createElement('div');
+  d.id = 'updBanner';
+  d.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:1000;background:var(--a);'+
+    'color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:center;'+
+    'gap:12px;font-size:13px;font-weight:600;box-shadow:0 -2px 14px rgba(0,0,0,.25);flex-wrap:wrap';
+  d.appendChild(document.createTextNode('Hay una version nueva de OBRICK'));
+  var b = document.createElement('button');
+  b.textContent = 'Actualizar ahora';
+  b.style.cssText = 'background:#fff;color:#b8760f;border:none;padding:8px 18px;border-radius:7px;'+
+    'font-size:13px;font-weight:700;cursor:pointer';
+  b.onclick = function(){
+    // Cambiar la URL obliga al navegador a traer el archivo de nuevo,
+    // sin depender de que respete el cache-control ni el service worker.
+    location.replace(location.pathname + '?v=' + encodeURIComponent(nueva));
+  };
+  d.appendChild(b);
+  document.body.appendChild(d);
+}
+
+function chequearVersion(){
+  fetch('version.json?_=' + Date.now(), {cache:'no-store'})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){ if(j && j.v && j.v !== APP_VERSION) bannerActualizar(j.v); })
+    .catch(function(){});
+}
+
+window.addEventListener('load', function(){ setTimeout(checkSavedToken,300); chequearVersion(); });
+// Tambien al volver a la app despues de tenerla en segundo plano
+document.addEventListener('visibilitychange', function(){ if(!document.hidden) chequearVersion(); });
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('/gestion-obra/sw.js'); }
 </script>
 </body>

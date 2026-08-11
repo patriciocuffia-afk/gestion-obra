@@ -1,4 +1,4 @@
-// sw.js v5 — limpieza total de cache + HTML siempre fresco
+// sw.js v6 — limpieza total de cache + HTML siempre fresco
 self.addEventListener('install', function(event) {
   self.skipWaiting();
 });
@@ -32,8 +32,13 @@ self.addEventListener('fetch', function(event) {
   var req = event.request;
   var esDocumento = req.mode === 'navigate' || req.destination === 'document';
   if (esDocumento) {
+    // OJO: hay que pedir por URL, no reusando el Request.
+    // fetch(req, {...}) construye un Request nuevo a partir de uno con modo
+    // 'navigate', y eso lanza TypeError. La v5 hacia eso y el catch lo tapaba,
+    // cayendo al fetch con cache: por eso las versiones nuevas no llegaban.
     event.respondWith(
-      fetch(req, {cache: 'no-store'}).catch(function(){ return fetch(req); })
+      fetch(req.url, {cache: 'no-store', credentials: 'same-origin'})
+        .catch(function(){ return fetch(req); })
     );
     return;
   }
